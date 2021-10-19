@@ -1,0 +1,80 @@
+package io.github.taboodev.taboo
+
+import com.jagrosh.jdautilities.command.CommandClientBuilder
+import com.jagrosh.jdautilities.commons.waiter.EventWaiter
+import io.github.taboodev.taboo.commands.Ping
+import io.github.taboodev.taboo.commands.Stats
+import io.github.taboodev.taboo.commands.owner.Shutdown
+import io.github.taboodev.taboo.database.DatabaseManager
+import io.github.taboodev.taboo.util.Constants
+import io.github.taboodev.taboo.util.Events
+import net.dv8tion.jda.api.OnlineStatus
+import net.dv8tion.jda.api.requests.GatewayIntent
+import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
+import net.dv8tion.jda.api.sharding.ShardManager
+import net.dv8tion.jda.api.utils.ChunkingFilter
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import java.sql.SQLException
+import javax.security.auth.login.LoginException
+import kotlin.system.exitProcess
+
+class Taboo {
+
+    private val jda: ShardManager
+    @JvmField
+    val waiter: EventWaiter
+
+    companion object {
+        @JvmField
+        var INSTANCE: Taboo? = null
+        @JvmField
+        val LOG_TABOO: Logger = LoggerFactory.getLogger(Taboo::class.java)
+        @Throws(LoginException::class)
+        @JvmStatic
+        fun main(args: Array<String>) {
+            INSTANCE = Taboo()
+        }
+    }
+
+    init {
+        val jda = DefaultShardManagerBuilder.createLight(Constants.TOKEN)
+            .setEnabledIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
+            .setChunkingFilter(ChunkingFilter.ALL)
+            .setRawEventsEnabled(true)
+            .setAutoReconnect(true)
+            .addEventListeners(Events())
+            .setShardsTotal(-1)
+            .build()
+        val waiter = EventWaiter()
+        val prefix = String.format("<@!%s> ", Constants.BOT_ID)
+        val commands = CommandClientBuilder()
+            .setHelpConsumer(null)
+            .setPrefix(prefix)
+            // .setAlternativePrefix() get from db
+            .setStatus(OnlineStatus.ONLINE)
+            .setActivity(null)
+            .setOwnerId(Constants.OWNER_ID)
+            .forceGuildOnly(Constants.GUILD_ID)
+            .addSlashCommands(
+                Ping(),
+                Shutdown(),
+                Stats()
+            ).addCommands(
+                Ping(),
+                Shutdown(),
+                Stats()
+            )
+            .build()
+        jda.addEventListener(waiter)
+        jda.addEventListener(commands)
+        try {
+            DatabaseManager.getConnection()
+        } catch (e: SQLException) {
+            e.printStackTrace()
+            exitProcess(0)
+        }
+        this.jda = jda
+        this.waiter = waiter
+    }
+}
