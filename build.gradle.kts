@@ -24,6 +24,7 @@ dependencies {
     implementation("io.github.cdimascio:dotenv-java:2.2.0")
     implementation("com.zaxxer:HikariCP:5.0.0")
     implementation("org.postgresql:postgresql:42.2.24")
+    implementation("com.github.oshi:oshi-core:5.8.2")
     implementation(kotlin("stdlib-jdk8"))
 }
 
