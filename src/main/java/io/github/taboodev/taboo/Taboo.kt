@@ -44,7 +44,7 @@ class Taboo {
         val properties = Properties()
         properties.load(FileInputStream("config.properties"))
         PropertiesManager.loadProperties(properties)
-        val jda = DefaultShardManagerBuilder.createLight(PropertiesManager.getToken())
+        val jda = DefaultShardManagerBuilder.createLight(PropertiesManager.token)
             .setEnabledIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
             .setChunkingFilter(ChunkingFilter.ALL)
             .setRawEventsEnabled(true)
@@ -53,15 +53,15 @@ class Taboo {
             .setShardsTotal(-1)
             .build()
         val waiter = EventWaiter()
-        val prefix = String.format("<@!%s> ", PropertiesManager.getBotId())
+        val prefix = String.format("<@!%s> ", PropertiesManager.botId)
         val commands = CommandClientBuilder()
             .setHelpConsumer(null)
             .setPrefix(prefix)
             // .setAlternativePrefix() get from db
             .setStatus(OnlineStatus.ONLINE)
             .setActivity(null)
-            .setOwnerId(PropertiesManager.getOwnerId())
-            .forceGuildOnly(PropertiesManager.getGuildId())
+            .setOwnerId(PropertiesManager.ownerId)
+            .forceGuildOnly(PropertiesManager.guildId)
             .addSlashCommands(
                 Ping(),
                 Shutdown(),

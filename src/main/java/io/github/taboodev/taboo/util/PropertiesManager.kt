@@ -1,45 +1,38 @@
-package io.github.taboodev.taboo.util;
+package io.github.taboodev.taboo.util
 
-import java.util.Properties;
+import java.util.*
 
-public class PropertiesManager {
+object PropertiesManager {
 
-    public static Properties properties;
+    private var properties: Properties? = null
 
-    public static void loadProperties(Properties config) {
-        properties = config;
+    fun loadProperties(config: Properties?) {
+        properties = config
     }
 
-    public static String getToken() {
-        return properties.getProperty("token");
-    }
-
-    public static String getOwnerId() {
-        return properties.getProperty("owner");
-    }
-
-    public static String getBotId() {
-        return properties.getProperty("bot");
-    }
-
-    public static String getGuildId() {
-        return properties.getProperty("guild");
-    }
-
-    public static String getActionLog() {
-        return properties.getProperty("actionLog");
-    }
-
-    public static String getJdbcUrl() {
-        return properties.getProperty("jdbc");
-    }
-
-    public static String getSQLUser() {
-        return properties.getProperty("sqluser");
-    }
-
-    public static String getSQLPassword() {
-        return properties.getProperty("sqlpass");
-    }
+    @JvmStatic
+    val token: String
+        get() = properties!!.getProperty("token")
+    @JvmStatic
+    val ownerId: String
+        get() = properties!!.getProperty("owner")
+    @JvmStatic
+    val botId: String
+        get() = properties!!.getProperty("bot")
+    @JvmStatic
+    val guildId: String
+        get() = properties!!.getProperty("guild")
+    @JvmStatic
+    val actionLog: String
+        get() = properties!!.getProperty("actionLog")
+    @JvmStatic
+    val jdbcUrl: String
+        get() = properties!!.getProperty("jdbc")
+    @JvmStatic
+    val SQLUser: String
+        get() = properties!!.getProperty("sqluser")
+    @JvmStatic
+    val SQLPassword: String
+        get() = properties!!.getProperty("sqlpass")
 
 }
