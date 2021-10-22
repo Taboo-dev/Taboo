@@ -21,7 +21,6 @@ dependencies {
     implementation("net.dv8tion:JDA:4.3.0_334")
     implementation("com.github.chalkyjeans:JDA-Chewtils:8b203c50c2")
     implementation("ch.qos.logback:logback-classic:1.2.6")
-    implementation("io.github.cdimascio:dotenv-java:2.2.0")
     implementation("com.zaxxer:HikariCP:5.0.0")
     implementation("org.postgresql:postgresql:42.2.24")
     implementation("com.github.oshi:oshi-core:5.8.2")
@@ -29,7 +28,7 @@ dependencies {
 }
 
 
-tasks.withType<JavaCompile>() {
+tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
     options.isIncremental = true
 }
