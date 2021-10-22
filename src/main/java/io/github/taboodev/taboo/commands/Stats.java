@@ -2,7 +2,7 @@ package io.github.taboodev.taboo.commands;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
-import io.github.taboodev.taboo.util.Constants;
+import io.github.taboodev.taboo.util.PropertiesManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDAInfo;
@@ -15,6 +15,7 @@ import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.software.os.OperatingSystem;
+import oshi.util.Constants;
 
 import java.time.Instant;
 
@@ -48,7 +49,7 @@ public class Stats extends SlashCommand {
     }
 
     private MessageEmbed statsEmbed(JDA jda, User user) {
-        User owner = jda.getUserById(Constants.OWNER_ID);
+        User owner = jda.getUserById(PropertiesManager.getOwnerId());
         SystemInfo systemInfo = new SystemInfo();
         HardwareAbstractionLayer hardware = systemInfo.getHardware();
         CentralProcessor processor = hardware.getProcessor();

@@ -3,9 +3,10 @@ package io.github.taboodev.taboo.commands.owner;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import io.github.taboodev.taboo.Taboo;
-import io.github.taboodev.taboo.util.Constants;
+import io.github.taboodev.taboo.util.PropertiesManager;
 import io.github.taboodev.taboo.util.ResponseHelper;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -34,7 +35,7 @@ public class Shutdown extends SlashCommand {
     protected void execute(SlashCommandEvent event) {
         User user = event.getUser();
         JDA jda = event.getJDA();
-        TextChannel actionLog = jda.getTextChannelById(Constants.ACTION_LOG);
+        TextChannel actionLog = jda.getTextChannelById(PropertiesManager.getActionLog());
         event.replyEmbeds(initialShutdownEmbed(user)).addActionRow(
                 Button.of(ButtonStyle.SECONDARY, "shutdown:yes", "Yes"),
                 Button.of(ButtonStyle.SECONDARY, "shutdown:no", "No")
@@ -46,7 +47,7 @@ public class Shutdown extends SlashCommand {
         Message message = event.getMessage();
         User author = message.getAuthor();
         JDA jda = event.getJDA();
-        TextChannel actionLog = jda.getTextChannelById(Constants.ACTION_LOG);
+        TextChannel actionLog = jda.getTextChannelById(PropertiesManager.getActionLog());
         message.replyEmbeds(initialShutdownEmbed(author)).setActionRow(
                 Button.of(ButtonStyle.SECONDARY, "shutdown:yes", "Yes"),
                 Button.of(ButtonStyle.SECONDARY, "shutdown:no", "No")
@@ -68,6 +69,7 @@ public class Shutdown extends SlashCommand {
                     hook.editOriginalEmbeds(finalShutdownEmbed(buttonClickEventUser)).setActionRows(Collections.emptyList()).queue(message -> {
                         actionLog.sendMessageEmbeds(finalShutdownEmbed(buttonClickEventUser)).queue();
                         try { TimeUnit.SECONDS.sleep(10); } catch (InterruptedException e) { e.printStackTrace(); }
+                        Taboo.INSTANCE.jda.setStatus(OnlineStatus.INVISIBLE);
                         jda.shutdownNow();
                         try { TimeUnit.SECONDS.sleep(3); } catch (InterruptedException e) { e.printStackTrace(); }
                         System.exit(0);

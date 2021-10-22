@@ -6,8 +6,8 @@ import io.github.taboodev.taboo.commands.Ping
 import io.github.taboodev.taboo.commands.Stats
 import io.github.taboodev.taboo.commands.owner.Shutdown
 import io.github.taboodev.taboo.database.DatabaseManager
-import io.github.taboodev.taboo.util.Constants
 import io.github.taboodev.taboo.util.Events
+import io.github.taboodev.taboo.util.PropertiesManager
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
@@ -15,13 +15,16 @@ import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.api.utils.ChunkingFilter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.FileInputStream
 import java.sql.SQLException
+import java.util.*
 import javax.security.auth.login.LoginException
 import kotlin.system.exitProcess
 
 class Taboo {
 
-    private val jda: ShardManager
+    @JvmField
+    val jda: ShardManager
     @JvmField
     val waiter: EventWaiter
 
@@ -38,7 +41,10 @@ class Taboo {
     }
 
     init {
-        val jda = DefaultShardManagerBuilder.createLight(Constants.TOKEN)
+        val properties = Properties()
+        properties.load(FileInputStream("config.properties"))
+        PropertiesManager.loadProperties(properties)
+        val jda = DefaultShardManagerBuilder.createLight(PropertiesManager.getToken())
             .setEnabledIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
             .setChunkingFilter(ChunkingFilter.ALL)
             .setRawEventsEnabled(true)
@@ -47,15 +53,15 @@ class Taboo {
             .setShardsTotal(-1)
             .build()
         val waiter = EventWaiter()
-        val prefix = String.format("<@!%s> ", Constants.BOT_ID)
+        val prefix = String.format("<@!%s> ", PropertiesManager.getBotId())
         val commands = CommandClientBuilder()
             .setHelpConsumer(null)
             .setPrefix(prefix)
             // .setAlternativePrefix() get from db
             .setStatus(OnlineStatus.ONLINE)
             .setActivity(null)
-            .setOwnerId(Constants.OWNER_ID)
-            .forceGuildOnly(Constants.GUILD_ID)
+            .setOwnerId(PropertiesManager.getOwnerId())
+            .forceGuildOnly(PropertiesManager.getGuildId())
             .addSlashCommands(
                 Ping(),
                 Shutdown(),
