@@ -16,6 +16,9 @@ import net.dv8tion.jda.api.utils.ChunkingFilter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.nio.file.Files
+import java.nio.file.Path
 import java.sql.SQLException
 import java.util.*
 import javax.security.auth.login.LoginException
@@ -42,8 +45,22 @@ class Taboo {
 
     init {
         val properties = Properties()
-        properties.load(FileInputStream("config.properties"))
-        PropertiesManager.loadProperties(properties)
+        try {
+            properties.load(FileInputStream("config.properties"))
+            PropertiesManager.loadProperties(properties)
+        } catch (e: FileNotFoundException) {
+            val config = Path.of("config.properties")
+            try {
+                if (Files.notExists(config)) {
+                    Files.createFile(config)
+                    LOG_TABOO.info("Config file doesn't exist! Creating one now!")
+                    exitProcess(0)
+                }
+            } catch (e: Exception) {
+                LOG_TABOO.error("Could not create config file!")
+                exitProcess(0)
+            }
+        }
         val jda = DefaultShardManagerBuilder.createLight(PropertiesManager.token)
             .setEnabledIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
             .setChunkingFilter(ChunkingFilter.ALL)
