@@ -75,4 +75,4 @@ run/
 target/
 
 # Project
-.env
+config.properties
