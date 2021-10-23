@@ -34,5 +34,8 @@ object PropertiesManager {
     @JvmStatic
     val SQLPassword: String
         get() = properties!!.getProperty("sqlpass")
+    @JvmStatic
+    val driverClassName: String
+        get() = properties!!.getProperty("driverClassName")
 
 }

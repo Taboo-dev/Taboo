@@ -22,8 +22,10 @@ dependencies {
     implementation("com.github.chalkyjeans:JDA-Chewtils:8b203c50c2")
     implementation("ch.qos.logback:logback-classic:1.2.6")
     implementation("com.zaxxer:HikariCP:5.0.0")
-    implementation("org.postgresql:postgresql:42.2.24")
     implementation("com.github.oshi:oshi-core:5.8.2")
+    implementation("org.jetbrains.exposed:exposed-core:0.35.3")
+    implementation("org.jetbrains.exposed:exposed-dao:0.35.3")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.35.3")
     implementation(kotlin("stdlib-jdk8"))
 }
 
