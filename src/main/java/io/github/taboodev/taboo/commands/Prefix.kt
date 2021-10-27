@@ -14,7 +14,7 @@ import org.jetbrains.exposed.sql.replace
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.awt.Color
 
-class Prefix : SlashCommand() {
+class Prefix: SlashCommand() {
 
     init {
         name = "prefix"
