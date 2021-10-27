@@ -15,7 +15,6 @@ import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.software.os.OperatingSystem;
-import oshi.util.Constants;
 
 import java.time.Instant;
 

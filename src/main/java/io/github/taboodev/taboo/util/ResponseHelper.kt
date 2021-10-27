@@ -1,7 +1,7 @@
 package io.github.taboodev.taboo.util
 
-import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
 import java.awt.Color
 import java.time.Instant
@@ -15,6 +15,7 @@ object ResponseHelper {
      * @param description The description of the embed.
      * @return the built embed
      */
+    @JvmStatic
     fun generateFailureEmbed(user: User, title: String?, description: String?): MessageEmbed {
         val embed = EmbedBuilder()
             .setTitle("Something went wrong!")
