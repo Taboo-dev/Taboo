@@ -1,7 +1,8 @@
-package io.github.taboodev.taboo.events
+package dev.taboo.taboo.events
 
-import io.github.taboodev.taboo.commands.Prefix
-import io.github.taboodev.taboo.util.PropertiesManager
+import dev.taboo.taboo.commands.Prefix
+import dev.taboo.taboo.commands.Prefix.Prefix.prefix
+import dev.taboo.taboo.util.PropertiesManager
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
@@ -14,16 +15,21 @@ class GuildJoinHandler: ListenerAdapter() {
     override fun onGuildJoin(event: GuildJoinEvent) {
         val guild = event.guild
         val id = guild.id
+        val roles = guild.roles
         val defaultChannel = guild.defaultChannel
         val owner = guild.owner
         val jda = event.jda
         val botOwner = jda.getUserById(PropertiesManager.ownerId)
-        if (guild.roles.stream().noneMatch { it.name == "Taboo Manager" }) {
+        if (roles.stream().noneMatch {
+            it.name == "Taboo Manager"
+        }) {
             guild.createRole()
                 .setName("Taboo Manager")
                 .setHoisted(false)
                 .setMentionable(false)
-                .flatMap { guild.addRoleToMember(owner!!, it) }
+                .flatMap {
+                    guild.addRoleToMember(owner!!, it)
+                }
                 .queue()
         }
         val joinEmbed = EmbedBuilder()
@@ -46,7 +52,6 @@ class GuildJoinHandler: ListenerAdapter() {
                 it[prefix] = "t!"
             }
         }
-
     }
 
 }

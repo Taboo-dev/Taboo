@@ -1,8 +1,8 @@
-package io.github.taboodev.taboo.commands;
+package dev.taboo.taboo.commands;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
-import io.github.taboodev.taboo.util.PropertiesManager;
+import dev.taboo.taboo.util.PropertiesManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDAInfo;
@@ -18,8 +18,8 @@ import oshi.software.os.OperatingSystem;
 
 import java.time.Instant;
 
-import static io.github.taboodev.taboo.util.DateDifference.timeSince;
-import static io.github.taboodev.taboo.util.ParseBytes.parseBytes;
+import static dev.taboo.taboo.util.DateDifference.timeSince;
+import static dev.taboo.taboo.util.ParseBytes.parseBytes;
 
 public class Stats extends SlashCommand {
 

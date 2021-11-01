@@ -1,6 +1,6 @@
-package io.github.taboodev.taboo.util
+package dev.taboo.taboo.database
 
-import io.github.taboodev.taboo.commands.Prefix
+import dev.taboo.taboo.commands.Prefix
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -13,5 +13,4 @@ object PrefixManager {
             }
         }.single()[Prefix.Prefix.prefix]
     }
-
 }

@@ -1,9 +1,9 @@
-package io.github.taboodev.taboo.commands
+package dev.taboo.taboo.commands
 
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.command.SlashCommand
-import io.github.taboodev.taboo.util.PropertiesManager
-import io.github.taboodev.taboo.util.ResponseHelper
+import dev.taboo.taboo.util.PropertiesManager
+import dev.taboo.taboo.util.ResponseHelper
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent
@@ -29,6 +29,23 @@ class Prefix: SlashCommand() {
         override val primaryKey = PrimaryKey(guildId)
     }
 
+    override fun execute(event: SlashCommandEvent) {
+        val user = event.user
+        val guild = event.guild
+        val id = guild!!.id
+        val newPrefix = event.getOption("prefix")!!.asString
+        val selfMember = guild.getMemberById(PropertiesManager.botId)
+        transaction {
+            Prefix.replace {
+                it[guildId] = id
+                it[prefix] = newPrefix
+            }
+        }
+        event.replyEmbeds(prefixEmbed(user, newPrefix)).mentionRepliedUser(false).setEphemeral(false).queue {
+            selfMember!!.modifyNickname("[$newPrefix] Taboo").queue()
+        }
+    }
+
     override fun execute(event: CommandEvent) {
         val user = event.author
         val guild = event.guild
@@ -51,27 +68,10 @@ class Prefix: SlashCommand() {
         }
     }
 
-    override fun execute(event: SlashCommandEvent) {
-        val user = event.user
-        val guild = event.guild
-        val id = guild!!.id
-        val newPrefix = event.getOption("prefix")!!.asString
-        val selfMember = guild.getMemberById(PropertiesManager.botId)
-        transaction {
-            Prefix.replace {
-                it[guildId] = id
-                it[prefix] = newPrefix
-            }
-        }
-        event.replyEmbeds(prefixEmbed(user, newPrefix)).mentionRepliedUser(false).setEphemeral(false).queue {
-            selfMember!!.modifyNickname("[$newPrefix] Taboo").queue()
-        }
-    }
-
     private fun prefixEmbed(user: User, newPrefix: String): MessageEmbed {
         return ResponseHelper.generateSuccessEmbed(
-                user, "Prefix changed to `$newPrefix`",
-                "", Color.GREEN
+            user, "Prefix changed to `$newPrefix`",
+            null, Color.GREEN
         )
     }
 

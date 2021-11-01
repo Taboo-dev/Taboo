@@ -1,4 +1,4 @@
-package io.github.taboodev.taboo.commands;
+package dev.taboo.taboo.commands;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
@@ -16,19 +16,21 @@ public class Ping extends SlashCommand {
 
     public Ping() {
         this.name = "ping";
-        this.help = "Pings the bot to see if it's alive.";
+        this.help = "Pings the bot to se if it's alive.";
         this.defaultEnabled = true;
         this.guildOnly = true;
     }
 
     @Override
-    protected void execute(SlashCommandEvent event) {
+    public void execute(SlashCommandEvent event) {
         User user = event.getUser();
         JDA jda = event.getJDA();
-        event.replyEmbeds(initialPingEmbed(user)).mentionRepliedUser(false).setEphemeral(false).queue(interactionHook -> jda.getRestPing().queue(restPing -> {
-            long gatewayPing = event.getJDA().getGatewayPing();
-            interactionHook.editOriginalEmbeds(finalPingEmbed(user, restPing, gatewayPing)).queue();
-        }));
+        event.replyEmbeds(initialPingEmbed(user)).mentionRepliedUser(false).setEphemeral(false).queue(hook -> {
+            jda.getRestPing().queue(restPing -> {
+                long gatewayPing = jda.getGatewayPing();
+                hook.editOriginalEmbeds(finalPingEmbed(user, restPing, gatewayPing)).queue();
+            });
+        });
     }
 
     @Override
@@ -36,10 +38,12 @@ public class Ping extends SlashCommand {
         User user = event.getMember().getUser();
         JDA jda = event.getJDA();
         Message message = event.getMessage();
-        message.replyEmbeds(initialPingEmbed(user)).mentionRepliedUser(false).queue(botResponse -> jda.getRestPing().queue(restPing -> {
-            long gatewayPing = event.getJDA().getGatewayPing();
-            botResponse.editMessageEmbeds(finalPingEmbed(user, restPing, gatewayPing)).queue();
-        }));
+        message.replyEmbeds(initialPingEmbed(user)).mentionRepliedUser(false).queue(response -> {
+            jda.getRestPing().queue(restPing -> {
+                long gatewayPing = event.getJDA().getGatewayPing();
+                response.editMessageEmbeds(finalPingEmbed(user, restPing, gatewayPing)).queue();
+            });
+        });
     }
 
     private MessageEmbed initialPingEmbed(User user) {
