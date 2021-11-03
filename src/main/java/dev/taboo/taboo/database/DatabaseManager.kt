@@ -35,7 +35,6 @@ object DatabaseManager {
 
     fun startDb() {
         transaction {
-            SchemaUtils.createDatabase("taboo")
             SchemaUtils.create(Prefix.Prefix)
         }
     }
