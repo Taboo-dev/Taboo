@@ -2,10 +2,7 @@ package dev.taboo.taboo
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
-import dev.taboo.taboo.commands.Help
-import dev.taboo.taboo.commands.Ping
-import dev.taboo.taboo.commands.Prefix
-import dev.taboo.taboo.commands.Stats
+import dev.taboo.taboo.commands.*
 import dev.taboo.taboo.commands.owner.Shutdown
 import dev.taboo.taboo.database.DatabaseManager
 import dev.taboo.taboo.database.PrefixManager
@@ -92,13 +89,17 @@ class Taboo {
                 Shutdown(),
                 Stats(),
                 Prefix(),
-                Help()
+                Help(),
+                Invite(),
+                Support()
             ).addCommands(
                 Ping(),
                 Shutdown(),
                 Stats(),
                 Prefix(),
-                Help()
+                Help(),
+                Invite(),
+                Support()
             ).build()
         jda.addEventListener(waiter, commands)
         DatabaseManager.startDb()
