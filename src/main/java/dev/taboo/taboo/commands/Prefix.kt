@@ -19,6 +19,7 @@ class Prefix: SlashCommand() {
     init {
         name = "prefix"
         help = "Sets the bot's prefix."
+        aliases = arrayOf("pre", "p")
         options = mutableListOf(OptionData(OptionType.STRING, "prefix", "The new prefix.").setRequired(true))
         guildOnly = true
     }
