@@ -2,6 +2,7 @@ package dev.taboo.taboo
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
+import dev.taboo.taboo.commands.Help
 import dev.taboo.taboo.commands.Ping
 import dev.taboo.taboo.commands.Prefix
 import dev.taboo.taboo.commands.Stats
@@ -90,12 +91,14 @@ class Taboo {
                 Ping(),
                 Shutdown(),
                 Stats(),
-                Prefix()
+                Prefix(),
+                Help()
             ).addCommands(
                 Ping(),
                 Shutdown(),
                 Stats(),
-                Prefix()
+                Prefix(),
+                Help()
             ).build()
         jda.addEventListener(waiter, commands)
         DatabaseManager.startDb()
