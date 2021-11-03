@@ -10,18 +10,12 @@ import dev.taboo.taboo.util.PropertiesManager.driverClassName
 import dev.taboo.taboo.util.PropertiesManager.jdbcUrl
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object DatabaseManager {
 
     private val config = HikariConfig()
     private var dataSource: HikariDataSource
-
-    object Owner: Table("Owner") {
-        val guildId = text("guildId").uniqueIndex()
-        val ownerId = text("ownerId")
-    }
 
     init {
         config.jdbcUrl = jdbcUrl
