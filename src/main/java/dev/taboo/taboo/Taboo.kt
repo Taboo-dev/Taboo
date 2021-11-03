@@ -62,19 +62,10 @@ class Taboo {
                 exitProcess(0)
             }
         }
-        val jda = DefaultShardManagerBuilder.createLight(PropertiesManager.token)
-            .setEnabledIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
-            .setChunkingFilter(ChunkingFilter.ALL)
-            .setRawEventsEnabled(true)
-            .setAutoReconnect(true)
-            .addEventListeners(GuildJoinHandler(), MessageLog())
-            .setShardsTotal(-1)
-            .build()
         val waiter = EventWaiter()
-        val prefix = String.format("<@!%s> ", PropertiesManager.botId)
         val commands = CommandClientBuilder()
             .setHelpConsumer(null)
-            .setPrefix(prefix)
+            .setPrefix(String.format("<@!%s> ", PropertiesManager.botId))
             .setPrefixFunction {
                 transaction {
                     PrefixManager.getPrefixFromGuild(it.guild.id)
@@ -101,7 +92,14 @@ class Taboo {
                 Invite(),
                 Support()
             ).build()
-        jda.addEventListener(waiter, commands)
+        val jda = DefaultShardManagerBuilder.createLight(PropertiesManager.token)
+            .setEnabledIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
+            .setChunkingFilter(ChunkingFilter.ALL)
+            .setRawEventsEnabled(true)
+            .setAutoReconnect(true)
+            .addEventListeners(waiter, commands, GuildJoinHandler(), MessageLog())
+            .setShardsTotal(-1)
+            .build()
         DatabaseManager.startDb()
         this.jda = jda
         this.waiter = waiter
