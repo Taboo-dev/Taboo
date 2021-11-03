@@ -28,6 +28,7 @@ public class Stats extends SlashCommand {
     public Stats() {
         this.name = "stats";
         this.help = "Shows some bot statistics.";
+        this.aliases = new String[] { "botstats", "statistics" };
         this.defaultEnabled = true;
         this.guildOnly = true;
     }

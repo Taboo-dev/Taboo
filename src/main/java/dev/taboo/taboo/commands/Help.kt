@@ -14,8 +14,8 @@ class Help: SlashCommand() {
 
     init {
         name = "help"
-        aliases = arrayOf("h", "?")
         help = "Displays all commands."
+        aliases = arrayOf("h", "?")
         guildOnly = true
     }
 
@@ -56,7 +56,7 @@ class Help: SlashCommand() {
             .addField(prefix + "support", "Displays a link to my support server.", false)
             .addField(prefix + "suggest", "Suggest a feature for me.", false)
             .addField(prefix + "report", "Report a bug or a feature.", false)
-            .setFooter("Requested by ${user.name}", user.effectiveAvatarUrl)
+            .setFooter("Requested by ${user.asTag}", user.effectiveAvatarUrl)
             .setTimestamp(Instant.now())
             .build()
     }
