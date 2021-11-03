@@ -11,7 +11,7 @@
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <kotlin.version>1.6.0-RC</kotlin.version>
+        <kotlin.version>1.6.0-RC2</kotlin.version>
         <jda.version>4.3.0_339</jda.version>
         <chewtils.version>83c57749bd</chewtils.version>
         <exposed.version>0.35.3</exposed.version>
