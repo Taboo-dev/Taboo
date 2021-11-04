@@ -79,18 +79,18 @@ class Taboo {
                 Ping(),
                 Shutdown(),
                 Stats(),
-                Prefix(),
                 Help(),
                 Invite(),
-                Support()
+                Support(),
+                Settings()
             ).addCommands(
                 Ping(),
                 Shutdown(),
                 Stats(),
-                Prefix(),
                 Help(),
                 Invite(),
-                Support()
+                Support(),
+                Settings()
             ).build()
         val jda = DefaultShardManagerBuilder.createLight(PropertiesManager.token)
             .setEnabledIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)

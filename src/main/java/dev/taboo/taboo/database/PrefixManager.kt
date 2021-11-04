@@ -1,6 +1,6 @@
 package dev.taboo.taboo.database
 
-import dev.taboo.taboo.commands.Prefix
+import dev.taboo.taboo.commands.Settings
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -8,9 +8,9 @@ object PrefixManager {
 
     fun getPrefixFromGuild(id: String): String {
         return transaction {
-            Prefix.Prefix.select {
-                Prefix.Prefix.guildId eq id
+            Settings.SetPrefix.Prefix.select {
+                Settings.SetPrefix.Prefix.guildId eq id
             }
-        }.single()[Prefix.Prefix.prefix]
+        }.single()[Settings.SetPrefix.Prefix.prefix]
     }
 }

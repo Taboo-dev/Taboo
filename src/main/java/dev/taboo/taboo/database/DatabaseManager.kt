@@ -3,7 +3,7 @@ package dev.taboo.taboo.database
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.taboo.taboo.Taboo
-import dev.taboo.taboo.commands.Prefix
+import dev.taboo.taboo.commands.Settings
 import dev.taboo.taboo.util.PropertiesManager.SQLPassword
 import dev.taboo.taboo.util.PropertiesManager.SQLUser
 import dev.taboo.taboo.util.PropertiesManager.driverClassName
@@ -29,7 +29,7 @@ object DatabaseManager {
 
     fun startDb() {
         transaction {
-            SchemaUtils.create(Prefix.Prefix)
+            SchemaUtils.create(Settings.SetPrefix.Prefix, Settings.SetChannel.Channel)
         }
     }
 

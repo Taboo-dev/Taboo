@@ -1,7 +1,6 @@
 package dev.taboo.taboo.events
 
-import dev.taboo.taboo.commands.Prefix
-import dev.taboo.taboo.commands.Prefix.Prefix.prefix
+import dev.taboo.taboo.commands.Settings
 import dev.taboo.taboo.util.PropertiesManager
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent
@@ -47,7 +46,7 @@ class GuildJoinHandler: ListenerAdapter() {
             .build()
         defaultChannel!!.sendMessageEmbeds(joinEmbed).queue()
         transaction {
-            Prefix.Prefix.insertIgnore {
+            Settings.SetPrefix.Prefix.insertIgnore {
                 it[guildId] = id
                 it[prefix] = "t!"
             }
