@@ -21,7 +21,6 @@ class Settings: SlashCommand() {
         aliases = arrayOf("set")
         help = "Change settings for Taboo."
         guildOnly = false
-        // this.children = new SlashCommand[]{ new SetPrefix(), new SetLanguage(), new SetChannel(), new SetRole() };
         children = arrayOf(SetChannel(), SetPrefix())
     }
 
