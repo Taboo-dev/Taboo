@@ -8,6 +8,7 @@ import dev.taboo.taboo.database.DatabaseManager
 import dev.taboo.taboo.database.PrefixManager
 import dev.taboo.taboo.events.GuildJoinHandler
 import dev.taboo.taboo.events.MessageLog
+import dev.taboo.taboo.events.ReadyHandler
 import dev.taboo.taboo.util.PropertiesManager
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.requests.GatewayIntent
@@ -97,7 +98,7 @@ class Taboo {
             .setChunkingFilter(ChunkingFilter.ALL)
             .setRawEventsEnabled(true)
             .setAutoReconnect(true)
-            .addEventListeners(waiter, commands, GuildJoinHandler(), MessageLog())
+            .addEventListeners(waiter, commands, GuildJoinHandler(), MessageLog(), ReadyHandler())
             .setShardsTotal(-1)
             .build()
         DatabaseManager.startDb()
