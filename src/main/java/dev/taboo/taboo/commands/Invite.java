@@ -39,7 +39,7 @@ public class Invite extends SlashCommand {
                         "[Click here to invite the bot to your server!]" +
                         "(https://discord.com/api/oauth2/authorize?client_id=892077333878566962&permissions=8&scope=bot%20applications.commands)"
                 ).setColor(0x9F90CF)
-                .setFooter("Requested by " + user.getAsTag(), user.getAvatarUrl())
+                .setFooter("Requested by " + user.getAsTag(), user.getEffectiveAvatarUrl())
                 .setTimestamp(Instant.now())
                 .build();
     }
