@@ -6,7 +6,7 @@ import dev.taboo.taboo.util.PropertiesManager
 import dev.taboo.taboo.util.ResponseHelper
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent
+import net.dv8tion.jda.api.events.interaction.commands.SlashCommandEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import org.jetbrains.exposed.sql.Table
@@ -20,8 +20,8 @@ class Settings: SlashCommand() {
         name = "settings"
         aliases = arrayOf("set")
         help = "Change settings for Taboo."
-        guildOnly = false
-        children = arrayOf(SetChannel(), SetPrefix())
+        guildOnly = true
+        children = arrayOf(SetChannel(), SetPrefix(), SetExtensions())
     }
 
     override fun execute(event: SlashCommandEvent) {
@@ -209,6 +209,32 @@ class Settings: SlashCommand() {
                 user, "You do not have the required role to use this command!",
                 ""
             )
+        }
+
+    }
+
+    class SetExtensions: SlashCommand() {
+
+        init {
+            name = "extensions"
+            aliases = arrayOf("ext", "setextensions", "fileextensions", "fileext", "setfileextensions")
+            help = "Sets the file extensions that I should upload to Hastebin."
+            options = mutableListOf(OptionData(OptionType.STRING, "extensions", "The new extensions.").setRequired(true))
+            guildOnly = true
+        }
+
+        object Extensions: Table("Extensions") {
+            val guildId = text("guildId").uniqueIndex()
+            val extensions = text("extensions")
+            override val primaryKey = PrimaryKey(guildId)
+        }
+
+        override fun execute(event: SlashCommandEvent) {
+            val user = event.user
+            val guild = event.guild
+            val id = guild!!.id
+            val newExtensions = event.getOption("extensions")!!.asString
+            val pattern = Regex("[^a-zA-Z0-9\\-\\.]")
         }
 
     }

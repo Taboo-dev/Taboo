@@ -12,8 +12,8 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <kotlin.version>1.6.0-RC2</kotlin.version>
-        <jda.version>4.3.0_339</jda.version>
-        <chewtils.version>83c57749bd</chewtils.version>
+        <jda.version>dbce81721f</jda.version>
+        <chewtils.version>154b756eaf</chewtils.version>
         <exposed.version>0.35.3</exposed.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -32,7 +32,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.dv8tion</groupId>
+            <groupId>com.github.aasmart</groupId>
             <artifactId>JDA</artifactId>
             <version>${jda.version}</version>
         </dependency>

@@ -6,7 +6,7 @@ import dev.taboo.taboo.database.PrefixManager.getPrefixFromGuild
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent
+import net.dv8tion.jda.api.events.interaction.commands.SlashCommandEvent
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 

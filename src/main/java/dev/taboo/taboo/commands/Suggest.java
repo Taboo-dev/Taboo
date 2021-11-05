@@ -2,7 +2,7 @@ package dev.taboo.taboo.commands;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.commands.SlashCommandEvent;
 
 public class Suggest extends SlashCommand {
 
