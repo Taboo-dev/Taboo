@@ -8,8 +8,8 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.commands.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 
-import java.awt.*;
 import java.time.Instant;
 
 public class Ping extends SlashCommand {
@@ -25,7 +25,9 @@ public class Ping extends SlashCommand {
     public void execute(SlashCommandEvent event) {
         User user = event.getUser();
         JDA jda = event.getJDA();
-        event.replyEmbeds(initialPingEmbed(user)).mentionRepliedUser(false).setEphemeral(false).queue(hook -> {
+        InteractionHook hook = event.getHook();
+        event.deferReply(true).queue();
+        hook.sendMessageEmbeds(initialPingEmbed(user)).mentionRepliedUser(false).queue(h -> {
             jda.getRestPing().queue(restPing -> {
                 long gatewayPing = jda.getGatewayPing();
                 hook.editOriginalEmbeds(finalPingEmbed(user, restPing, gatewayPing)).queue();
@@ -50,7 +52,7 @@ public class Ping extends SlashCommand {
         return new EmbedBuilder()
                 .setTitle("Ping!")
                 .setDescription("`Pong!` Shows the bot's ping!")
-                .setColor(Color.ORANGE)
+                .setColor(0x9F90CF)
                 .setFooter("Requested by " + user.getAsTag(), user.getEffectiveAvatarUrl())
                 .setTimestamp(Instant.now())
                 .build();
@@ -65,7 +67,7 @@ public class Ping extends SlashCommand {
                         Gateway Ping: `%s ms`
                         Rest Ping: `%s ms`
                         """, gatewayPing, restPing))
-                .setColor(Color.ORANGE)
+                .setColor(0x9F90CF)
                 .setFooter("Requested by " + user.getAsTag(), user.getEffectiveAvatarUrl())
                 .setTimestamp(Instant.now())
                 .build();
