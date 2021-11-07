@@ -28,6 +28,10 @@ class Settings: SlashCommand() {
         // Ignored because all commands are subcommands.
     }
 
+    override fun execute(event: CommandEvent) {
+        TODO("Add embed listing commands")
+    }
+
     class SetChannel: SlashCommand() {
 
         init {
@@ -52,12 +56,14 @@ class Settings: SlashCommand() {
             val channel = event.getOption("channel")!!.asGuildChannel
             val channelId = channel.id
             val isAudio = channel.type.isAudio
+            val hook = event.hook
+            event.deferReply(true).queue()
             if (channel == null) {
-                event.replyEmbeds(noChannelEmbed(user)).mentionRepliedUser(false).setEphemeral(true).queue()
+                hook.sendMessageEmbeds(noChannelEmbed(user)).mentionRepliedUser(false).queue()
                 return
             }
             if (isAudio) {
-                event.replyEmbeds(noChannelEmbed(user)).mentionRepliedUser(false).setEphemeral(true).queue()
+                hook.sendMessageEmbeds(noChannelEmbed(user)).mentionRepliedUser(false).queue()
                 return
             }
             transaction {
@@ -65,7 +71,7 @@ class Settings: SlashCommand() {
                     it[Channel.guildId] = guildId
                     it[Channel.channelId] = channelId
                 }
-                event.replyEmbeds(successEmbed(user, channel.asMention)).mentionRepliedUser(false).setEphemeral(false).queue()
+                hook.sendMessageEmbeds(successEmbed(user, channel.asMention)).mentionRepliedUser(false).queue()
             }
         }
 
@@ -150,6 +156,8 @@ class Settings: SlashCommand() {
             val selfMember = guild.getMemberById(PropertiesManager.botId)
             val manager = guild.getRolesByName("Taboo Manager", true)
             val isManager = member!!.roles.stream().anyMatch { manager.contains(it) }
+            val hook = event.hook
+            event.deferReply(true).queue()
             if (isManager) {
                 transaction {
                     Prefix.replace {
@@ -157,10 +165,11 @@ class Settings: SlashCommand() {
                         it[prefix] = newPrefix
                     }
                 }
-                event.replyEmbeds(prefixEmbed(user, newPrefix)).mentionRepliedUser(false).setEphemeral(false).queue {
+                hook.sendMessageEmbeds(prefixEmbed(user, newPrefix)).mentionRepliedUser(false).queue {
                     selfMember!!.modifyNickname("[$newPrefix] Taboo").queue()
                 }
-            } else event.replyEmbeds(noRoleEmbed(user)).mentionRepliedUser(false).setEphemeral(true).queue()
+                TODO("Add logs")
+            } else event.replyEmbeds(noRoleEmbed(user)).mentionRepliedUser(false).queue()
         }
 
         override fun execute(event: CommandEvent) {
@@ -235,6 +244,8 @@ class Settings: SlashCommand() {
             val id = guild!!.id
             val newExtensions = event.getOption("extensions")!!.asString
             val pattern = Regex("[^a-zA-Z0-9\\-\\.]")
+            val hook = event.hook
+            event.deferReply(true).queue()
         }
 
     }
