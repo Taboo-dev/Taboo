@@ -37,12 +37,14 @@ public class Shutdown extends SlashCommand {
     protected void execute(SlashCommandEvent event) {
         User user = event.getUser();
         JDA jda = event.getJDA();
+        InteractionHook hook = event.getHook();
         TextChannel actionLog = jda.getTextChannelById(PropertiesManager.getActionLog());
-        event.replyEmbeds(initialShutdownEmbed(user))
+        event.deferReply(true).queue();
+        hook.sendMessageEmbeds(initialShutdownEmbed(user))
                 .addActionRows(getButtons())
                 .mentionRepliedUser(false)
                 .setEphemeral(false)
-                .queue(hook -> waitForEvent(user, actionLog));
+                .queue(h -> waitForEvent(user, actionLog));
     }
 
     @Override
@@ -106,7 +108,7 @@ public class Shutdown extends SlashCommand {
     private MessageEmbed noShutdownEmbed(User user) {
         return ResponseHelper.generateSuccessEmbed(
                 user, "Shutdown cancelled",
-                null, Color.RED
+                "", Color.RED
         );
     }
 
