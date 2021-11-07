@@ -37,5 +37,8 @@ object PropertiesManager {
     @JvmStatic
     val driverClassName: String
         get() = properties!!.getProperty("driverClassName")
+    @JvmStatic
+    val sentryDsn: String
+        get() = properties!!.getProperty("sentryDsn")
 
 }

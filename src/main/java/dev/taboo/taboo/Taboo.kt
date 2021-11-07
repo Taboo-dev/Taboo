@@ -11,6 +11,8 @@ import dev.taboo.taboo.events.MessageLog
 import dev.taboo.taboo.events.ReadyHandler
 import dev.taboo.taboo.interactions.Bookmark
 import dev.taboo.taboo.util.PropertiesManager
+import dev.taboo.taboo.util.PropertiesManager.sentryDsn
+import io.sentry.Sentry
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
@@ -63,6 +65,11 @@ class Taboo {
                 TABOO_LOG.error("Could not create config file!")
                 exitProcess(0)
             }
+        }
+        Sentry.init {
+            it.dsn = sentryDsn
+            it.tracesSampleRate = 1.0
+            it.setDebug(true)
         }
         val waiter = EventWaiter()
         val commands = CommandClientBuilder()
