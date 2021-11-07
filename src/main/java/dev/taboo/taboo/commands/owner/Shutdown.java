@@ -43,7 +43,6 @@ public class Shutdown extends SlashCommand {
         hook.sendMessageEmbeds(initialShutdownEmbed(user))
                 .addActionRows(getButtons())
                 .mentionRepliedUser(false)
-                .setEphemeral(false)
                 .queue(h -> waitForEvent(user, actionLog));
     }
 
