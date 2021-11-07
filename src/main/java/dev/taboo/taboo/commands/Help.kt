@@ -23,10 +23,11 @@ class Help: SlashCommand() {
         val user = event.user
         val guild = event.guild!!
         val guildId = guild.id
+        val hook = event.hook
+        event.deferReply(true).queue()
         transaction {
-            event.replyEmbeds(helpEmbed(user, getPrefixFromGuild(guildId)))
+            hook.sendMessageEmbeds(helpEmbed(user, getPrefixFromGuild(guildId)))
                 .mentionRepliedUser(false)
-                .setEphemeral(false)
                 .queue()
         }
     }
