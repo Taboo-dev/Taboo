@@ -1,4 +1,4 @@
-package io.github.taboodev.taboo.util;
+package dev.taboo.taboo.util;
 
 import java.util.ArrayList;
 

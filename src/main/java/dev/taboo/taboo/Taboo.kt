@@ -1,16 +1,16 @@
-package io.github.taboodev.taboo
+package dev.taboo.taboo
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
-import io.github.taboodev.taboo.commands.Ping
-import io.github.taboodev.taboo.commands.Prefix
-import io.github.taboodev.taboo.commands.Stats
-import io.github.taboodev.taboo.commands.owner.Shutdown
-import io.github.taboodev.taboo.database.DatabaseManager
-import io.github.taboodev.taboo.events.GuildJoinHandler
-import io.github.taboodev.taboo.events.MessageLog
-import io.github.taboodev.taboo.util.PrefixManager
-import io.github.taboodev.taboo.util.PropertiesManager
+import dev.taboo.taboo.commands.*
+import dev.taboo.taboo.commands.owner.Shutdown
+import dev.taboo.taboo.database.DatabaseManager
+import dev.taboo.taboo.database.PrefixManager
+import dev.taboo.taboo.events.GuildJoinHandler
+import dev.taboo.taboo.events.MessageLog
+import dev.taboo.taboo.events.ReadyHandler
+import dev.taboo.taboo.interactions.Bookmark
+import dev.taboo.taboo.util.PropertiesManager
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
@@ -38,7 +38,7 @@ class Taboo {
         @JvmField
         var INSTANCE: Taboo? = null
         @JvmField
-        val LOG_TABOO: Logger = LoggerFactory.getLogger(Taboo::class.java)
+        val TABOO_LOG: Logger = LoggerFactory.getLogger(Taboo::class.java)
         @Throws(LoginException::class)
         @JvmStatic
         fun main(args: Array<String>) {
@@ -56,27 +56,18 @@ class Taboo {
             try {
                 if (Files.notExists(config)) {
                     Files.createFile(config)
-                    LOG_TABOO.info("Config file doesn't exist! Creating one now!")
+                    TABOO_LOG.info("Config file doesn't exist! Creating one now!")
                     exitProcess(0)
                 }
             } catch (e: Exception) {
-                LOG_TABOO.error("Could not create config file!")
+                TABOO_LOG.error("Could not create config file!")
                 exitProcess(0)
             }
         }
-        val jda = DefaultShardManagerBuilder.createLight(PropertiesManager.token)
-            .setEnabledIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
-            .setChunkingFilter(ChunkingFilter.ALL)
-            .setRawEventsEnabled(true)
-            .setAutoReconnect(true)
-            .addEventListeners(GuildJoinHandler(), MessageLog())
-            .setShardsTotal(-1)
-            .build()
         val waiter = EventWaiter()
-        val prefix = String.format("<@!%s> ", PropertiesManager.botId)
         val commands = CommandClientBuilder()
             .setHelpConsumer(null)
-            .setPrefix(prefix)
+            .setPrefix(String.format("<@!%s> ", PropertiesManager.botId))
             .setPrefixFunction {
                 transaction {
                     PrefixManager.getPrefixFromGuild(it.guild.id)
@@ -90,18 +81,30 @@ class Taboo {
                 Ping(),
                 Shutdown(),
                 Stats(),
-                Prefix()
+                Help(),
+                Invite(),
+                Support(),
+                Settings()
             ).addCommands(
                 Ping(),
                 Shutdown(),
                 Stats(),
-                Prefix()
-            )
+                Help(),
+                Invite(),
+                Support(),
+                Settings()
+            ).build()
+        val jda = DefaultShardManagerBuilder.createLight(PropertiesManager.token)
+            .setEnabledIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
+            .setChunkingFilter(ChunkingFilter.ALL)
+            .setRawEventsEnabled(true)
+            .setAutoReconnect(true)
+            .addEventListeners(waiter, commands, GuildJoinHandler(), MessageLog(), ReadyHandler(), Bookmark())
+            .setShardsTotal(-1)
             .build()
-        jda.addEventListener(waiter)
-        jda.addEventListener(commands)
         DatabaseManager.startDb()
         this.jda = jda
         this.waiter = waiter
     }
+
 }

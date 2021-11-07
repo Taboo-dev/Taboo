@@ -1,4 +1,4 @@
-package io.github.taboodev.taboo.util
+package dev.taboo.taboo.util
 
 import java.util.*
 
@@ -14,17 +14,17 @@ object PropertiesManager {
     val token: String
         get() = properties!!.getProperty("token")
     @JvmStatic
-    val ownerId: String
-        get() = properties!!.getProperty("owner")
+    val ownerId: Long
+        get() = properties!!.getProperty("owner").toLong()
     @JvmStatic
-    val botId: String
-        get() = properties!!.getProperty("bot")
+    val botId: Long
+        get() = properties!!.getProperty("bot").toLong()
     @JvmStatic
-    val guildId: String
-        get() = properties!!.getProperty("guild")
+    val guildId: Long
+        get() = properties!!.getProperty("guild").toLong()
     @JvmStatic
-    val actionLog: String
-        get() = properties!!.getProperty("actionLog")
+    val actionLog: Long
+        get() = properties!!.getProperty("actionLog").toLong()
     @JvmStatic
     val jdbcUrl: String
         get() = properties!!.getProperty("jdbc")
