@@ -25,7 +25,7 @@ public class Invite extends SlashCommand {
         User user = event.getUser();
         InteractionHook hook = event.getHook();
         event.deferReply(true).queue();
-        hook.sendMessageEmbeds(inviteEmbed(user)).mentionRepliedUser(false).setEphemeral(false).queue();
+        hook.sendMessageEmbeds(inviteEmbed(user)).mentionRepliedUser(false).queue();
     }
 
     @Override
