@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.commands.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
@@ -37,7 +38,9 @@ public class Stats extends SlashCommand {
     protected void execute(SlashCommandEvent event) {
         JDA jda = event.getJDA();
         User user = event.getUser();
-        event.replyEmbeds(statsEmbed(jda, user)).mentionRepliedUser(false).setEphemeral(false).queue();
+        InteractionHook hook = event.getHook();
+        event.deferReply(true).queue();
+        hook.sendMessageEmbeds(statsEmbed(jda, user)).mentionRepliedUser(false).queue();
     }
 
     @Override
