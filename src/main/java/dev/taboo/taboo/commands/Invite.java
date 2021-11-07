@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.commands.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 
 import java.time.Instant;
 
@@ -22,7 +23,9 @@ public class Invite extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         User user = event.getUser();
-        event.replyEmbeds(inviteEmbed(user)).mentionRepliedUser(false).setEphemeral(false).queue();
+        InteractionHook hook = event.getHook();
+        event.deferReply(true).queue();
+        hook.sendMessageEmbeds(inviteEmbed(user)).mentionRepliedUser(false).setEphemeral(false).queue();
     }
 
     @Override
