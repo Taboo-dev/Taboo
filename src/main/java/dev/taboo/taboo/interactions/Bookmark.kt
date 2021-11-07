@@ -6,8 +6,12 @@ import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.commands.MessageContextCommandEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
+import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.components.Button
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.insertIgnore
+import org.jetbrains.exposed.sql.replace
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 import java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
@@ -20,44 +24,9 @@ class Bookmark: ListenerAdapter() {
             val user = event.user
             val userId = user.id
             val targetMessage = event.targetMessage
-            val jumpUrl = targetMessage.jumpUrl
             val hook = event.hook
-            var count: String? = null
             event.deferReply(true).queue()
-            user.openPrivateChannel()
-                .flatMap {
-                    transaction {
-                        Bookmark.insertIgnore { table ->
-                            table[Bookmark.userId] = userId
-                            table[bookmarkCount] = (0).toString()
-                        }
-                    }
-                    transaction {
-                        count = getBookmarkCountFromUser(userId)
-                    }
-                    transaction {
-                        Bookmark.replace { table ->
-                            table[Bookmark.userId] = userId
-                            table[bookmarkCount] = (Integer.parseInt(count) + 1).toString()
-                        }
-                    }
-                    transaction {
-                        count = getBookmarkCountFromUser(userId)
-                    }
-                    it.sendMessageEmbeds(bookmarkEmbed(user, targetMessage, "Bookmark $count")).setActionRow(
-                        Button.link(jumpUrl, "View")
-                    )
-                }.submit()
-                .thenAccept {
-                    hook.sendMessageEmbeds(bookmarkEmbed(user, targetMessage, "Bookmarked Message!"))
-                        .mentionRepliedUser(false).setEphemeral(true).addActionRow(
-                            Button.link(jumpUrl, "View")
-                    ).queue()
-                }.exceptionally {
-                    println("Exception Occurred: ${it.printStackTrace()}")
-                    hook.sendMessageEmbeds(dmsDisabledEmbed(user)).mentionRepliedUser(false).setEphemeral(true).queue()
-                    return@exceptionally null
-                }
+            databaseStuff(user, userId, hook, targetMessage)
         }
     }
 
@@ -75,7 +44,10 @@ class Bookmark: ListenerAdapter() {
         }.single()[Bookmark.bookmarkCount]
     }
 
-    private fun bookmarkEmbed(user: User, message: Message, title: String): MessageEmbed {
+    private fun databaseStuff(user: User, userId: String, hook: InteractionHook, message: Message) {
+        var count: String? = null
+        val guild = message.guild
+        val jumpUrl = message.jumpUrl
         var contentDisplay = message.contentDisplay
         if (contentDisplay.length > 100) {
             contentDisplay = contentDisplay.substring(0, 99) + "..."
@@ -83,22 +55,61 @@ class Bookmark: ListenerAdapter() {
         val author = message.author
         val messageId = message.id
         val timeCreated = message.timeCreated
-        val guild = message.guild
-        return EmbedBuilder()
-            .setTitle(title)
+        val attachments = message.attachments
+        if (attachments.isNotEmpty()) {
+            for (attachment in attachments) {
+                val attachmentUrl = attachment.url
+                contentDisplay += "\n" + attachmentUrl
+            }
+        }
+        val bookmarkEmbed = EmbedBuilder()
+            .setTitle("Bookmark")
             .setDescription(
                 """
-                    **Message Information:**
-                    Content: *$contentDisplay*
-                    Server: *${guild.name}*
-                    Author: *${author.asTag}*
-                    Time Created: *${timeCreated.format(RFC_1123_DATE_TIME)}*
-                    Message ID: *$messageId*
+                    ***Message Information:***
+                    **Content:** $contentDisplay
+                    **Server:** ${guild.name}
+                    **Author:** ${author.asTag}
+                    **Time Created:** ${timeCreated.format(RFC_1123_DATE_TIME)}
+                    **Message ID:** $messageId
                 """.trimIndent()
             ).setColor(0x9F90CF)
             .setFooter("Bookmarked by " + user.asTag, user.effectiveAvatarUrl)
             .setTimestamp(Instant.now())
-            .build()
+        user.openPrivateChannel()
+            .flatMap {
+                transaction {
+                    Bookmark.insertIgnore { table ->
+                        table[Bookmark.userId] = userId
+                        table[bookmarkCount] = (0).toString()
+                    }
+                }
+                transaction {
+                    count = getBookmarkCountFromUser(userId)
+                }
+                transaction {
+                    Bookmark.replace { table ->
+                        table[Bookmark.userId] = userId
+                        table[bookmarkCount] = (Integer.parseInt(count) + 1).toString()
+                    }
+                }
+                transaction {
+                    count = getBookmarkCountFromUser(userId)
+                }
+                it.sendMessageEmbeds(bookmarkEmbed.setTitle("Bookmark $count").build()).setActionRow(
+                    Button.link(jumpUrl, "View")
+                )
+            }.submit()
+            .thenAcceptAsync {
+                hook.sendMessageEmbeds(bookmarkEmbed.setTitle("Bookmarked Message!").build())
+                    .mentionRepliedUser(false).setEphemeral(true).addActionRow(
+                        Button.link(jumpUrl, "View")
+                    ).queue()
+            }.exceptionally {
+                // println("Exception Occurred: ${it.printStackTrace()}")
+                hook.sendMessageEmbeds(dmsDisabledEmbed(user)).mentionRepliedUser(false).setEphemeral(true).queue()
+                return@exceptionally null
+            }
     }
 
     private fun dmsDisabledEmbed(user: User): MessageEmbed {
