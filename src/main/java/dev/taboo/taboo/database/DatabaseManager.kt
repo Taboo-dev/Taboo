@@ -9,6 +9,7 @@ import dev.taboo.taboo.util.PropertiesManager.SQLPassword
 import dev.taboo.taboo.util.PropertiesManager.SQLUser
 import dev.taboo.taboo.util.PropertiesManager.driverClassName
 import dev.taboo.taboo.util.PropertiesManager.jdbcUrl
+import io.sentry.Sentry
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -29,8 +30,12 @@ object DatabaseManager {
     }
 
     fun startDb() {
-        transaction {
-            SchemaUtils.create(Settings.SetPrefix.Prefix, Settings.SetChannel.Channel, Bookmark.Bookmark)
+        try {
+            transaction {
+                SchemaUtils.create(Settings.SetPrefix.Prefix, Settings.SetChannel.Channel, Bookmark.Bookmark)
+            }
+        } catch (e: Exception) {
+            Sentry.captureException(e)
         }
     }
 
