@@ -13,6 +13,7 @@ import dev.taboo.taboo.interactions.Bookmark
 import dev.taboo.taboo.util.PropertiesManager
 import dev.taboo.taboo.util.PropertiesManager.sentryDsn
 import io.sentry.Sentry
+import io.sentry.SentryOptions
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
@@ -69,6 +70,7 @@ class Taboo {
         Sentry.init {
             it.dsn = sentryDsn
             it.tracesSampleRate = 1.0
+            it.tracesSampler = SentryOptions.TracesSamplerCallback { 1.0 }
             it.setDebug(true)
         }
         val waiter = EventWaiter()

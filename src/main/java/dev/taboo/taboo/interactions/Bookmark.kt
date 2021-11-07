@@ -1,5 +1,6 @@
 package dev.taboo.taboo.interactions
 
+import io.sentry.Sentry
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed
@@ -106,6 +107,7 @@ class Bookmark: ListenerAdapter() {
                         Button.link(jumpUrl, "View")
                     ).queue()
             }.exceptionally {
+                Sentry.captureException(it)
                 // println("Exception Occurred: ${it.printStackTrace()}")
                 hook.sendMessageEmbeds(dmsDisabledEmbed(user)).mentionRepliedUser(false).setEphemeral(true).queue()
                 return@exceptionally null

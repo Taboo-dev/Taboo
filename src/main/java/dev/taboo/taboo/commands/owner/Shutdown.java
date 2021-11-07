@@ -5,6 +5,7 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import dev.taboo.taboo.Taboo;
 import dev.taboo.taboo.util.PropertiesManager;
 import dev.taboo.taboo.util.ResponseHelper;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Message;
@@ -73,7 +74,7 @@ public class Shutdown extends SlashCommand {
                         try {
                             TimeUnit.SECONDS.sleep(10L);
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            Sentry.captureException(e);
                         }
                         Taboo.INSTANCE.jda.setStatus(OnlineStatus.INVISIBLE);
                         Taboo.INSTANCE.jda.shutdown();
