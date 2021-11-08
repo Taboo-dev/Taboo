@@ -56,11 +56,18 @@ class Settings: SlashCommand() {
             val guild = event.guild
             val guildId = guild!!.id
             val user = event.user
+            val member = event.member
             val channel = event.getOption("channel")!!.asGuildChannel
             val channelId = channel.id
             val isAudio = channel.type.isAudio
             val hook = event.hook
+            val manager = guild.getRolesByName("Taboo Manager", true)
+            val isManager = member!!.roles.stream().anyMatch { manager.contains(it) }
             event.deferReply(true).queue()
+            if (!isManager) {
+                hook.sendMessageEmbeds(noRoleEmbed(user)).mentionRepliedUser(false).queue()
+                return
+            }
             if (channel == null) {
                 hook.sendMessageEmbeds(noChannelEmbed(user)).mentionRepliedUser(false).queue()
                 return
@@ -132,6 +139,13 @@ class Settings: SlashCommand() {
             )
         }
 
+        private fun noRoleEmbed(user: User): MessageEmbed {
+            return ResponseHelper.generateFailureEmbed(
+                user, "You do not have the required role to use this command!",
+                ""
+            )
+        }
+
     }
 
     class SetPrefix: SlashCommand() {
@@ -163,51 +177,51 @@ class Settings: SlashCommand() {
             val jda = event.jda
             var actionLogId: String? = null
             event.deferReply(true).queue()
-            if (isManager) {
-                transaction {
-                    SetChannel.Channel.insertIgnore {
-                        it[SetChannel.Channel.guildId] = guildId
-                        it[SetChannel.Channel.channelId] = "0"
-                    }
-                }
-                transaction {
-                    actionLogId = SetChannel.Channel.select {
-                        SetChannel.Channel.guildId eq guildId
-                    }.single()[SetChannel.Channel.channelId]
-                }
-                if (actionLogId.isNullOrEmpty() || actionLogId.equals("0")) {
-                    hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
-                        user, "No channel set.", """
-                        You need to set a channel for me to post logs in.
-                        To set a channel via a Slash Command, select the channel.
-                        To set a channel via a normal command, ping the channel or give it's id.
-                    """.trimIndent()
-                    )).queue()
-                    return
-                }
-                val actionLog = actionLogId?.let { jda.getTextChannelById(it) }
-                if (actionLog == null) {
-                    hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
-                        user, "Channel does not exist.", """
-                        The channel you have set does not exist.
-                        **Channel ID:** $actionLogId
-                        If you think this is an error, check if the channel exists or if I have access to it.
-                    """.trimIndent()
-                    )).queue()
-                    return
-                }
-                transaction {
-                    Prefix.replace {
-                        it[Prefix.guildId] = guildId
-                        it[prefix] = newPrefix
-                    }
-                }
-                hook.sendMessageEmbeds(prefixEmbed(user, newPrefix)).mentionRepliedUser(false).queue {
-                    selfMember!!.modifyNickname("[$newPrefix] Taboo").queue()
-                    actionLog.sendMessageEmbeds(prefixEmbed(user, newPrefix)).queue()
-                }
-            } else {
+            if (!isManager) {
                 hook.sendMessageEmbeds(noRoleEmbed(user)).mentionRepliedUser(false).queue()
+                return
+            }
+            transaction {
+                SetChannel.Channel.insertIgnore {
+                    it[SetChannel.Channel.guildId] = guildId
+                    it[SetChannel.Channel.channelId] = "0"
+                }
+            }
+            transaction {
+                actionLogId = SetChannel.Channel.select {
+                    SetChannel.Channel.guildId eq guildId
+                }.single()[SetChannel.Channel.channelId]
+            }
+            if (actionLogId.isNullOrEmpty() || actionLogId.equals("0")) {
+                hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
+                    user, "No channel set.", """
+                    You need to set a channel for me to post logs in.
+                    To set a channel via a Slash Command, select the channel.
+                    To set a channel via a normal command, ping the channel or give it's id.
+                """.trimIndent()
+                )).queue()
+                return
+            }
+            val actionLog = actionLogId?.let { jda.getTextChannelById(it) }
+            if (actionLog == null) {
+                hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
+                    user, "Channel does not exist.", """
+                    The channel you have set does not exist.
+                    **Channel ID:** $actionLogId
+                    If you think this is an error, check if the channel exists or if I have access to it.
+                """.trimIndent()
+                )).queue()
+                return
+            }
+            transaction {
+                Prefix.replace {
+                    it[Prefix.guildId] = guildId
+                    it[prefix] = newPrefix
+                }
+            }
+            hook.sendMessageEmbeds(prefixEmbed(user, newPrefix)).mentionRepliedUser(false).queue {
+                selfMember!!.modifyNickname("[$newPrefix] Taboo").queue()
+                actionLog.sendMessageEmbeds(prefixEmbed(user, newPrefix)).queue()
             }
         }
 
