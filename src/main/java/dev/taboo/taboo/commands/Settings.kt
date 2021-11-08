@@ -88,11 +88,18 @@ class Settings: SlashCommand() {
             val guild = event.guild
             val guildId = guild!!.id
             val author = event.author
+            val member = event.member
             val message = event.message
             val args = event.args
+            val manager = guild.getRolesByName("Taboo Manager", true)
+            val isManager = member!!.roles.stream().anyMatch { manager.contains(it) }
             val channelId: String = if (args.contains("<#") && args.contains(">")) {
                 args.substring(args.indexOf("<#") + 2, args.indexOf(">"))
             } else args
+            if (!isManager) {
+                message.replyEmbeds(noRoleEmbed(author)).queue()
+                return
+            }
             if (args == null || channelId.isEmpty() || channelId.isBlank()) {
                 message.replyEmbeds(noChannelEmbed(author)).mentionRepliedUser(false).queue()
                 return
