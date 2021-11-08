@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.events.interaction.commands.SlashCommandEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.replace
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -152,7 +153,7 @@ class Settings: SlashCommand() {
             val user = event.user
             val member = event.member
             val guild = event.guild
-            val id = guild!!.id
+            val guildId = guild!!.id
             val newPrefix = event.getOption("prefix")!!.asString
             val selfMember = guild.getMemberById(PropertiesManager.botId)
             val manager = guild.getRolesByName("Taboo Manager", true)
@@ -162,36 +163,43 @@ class Settings: SlashCommand() {
             var actionLogId: String? = null
             event.deferReply(true).queue()
             transaction {
-                actionLogId = transaction {
-                    SetChannel.Channel.select {
-                        SetChannel.Channel.guildId eq id
-                    }
-                }.single()[SetChannel.Channel.channelId]
-                if (actionLogId == null) {
-                    event.replyEmbeds(ResponseHelper.generateFailureEmbed(user, "No channel set.", "You need to set a channel for me to post logs in."))
-                    return@transaction
+                SetChannel.Channel.insertIgnore {
+                    it[SetChannel.Channel.guildId] = guildId
+                    it[SetChannel.Channel.channelId] = "0"
                 }
             }
-            val actionLog = jda.getTextChannelById(actionLogId!!)
+            transaction {
+                actionLogId = SetChannel.Channel.select {
+                    SetChannel.Channel.guildId eq guildId
+                }.single()[SetChannel.Channel.channelId]
+            }
+            if (actionLogId.isNullOrEmpty() || actionLogId.equals("0")) {
+                hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
+                    user, "No channel set.", "You need to set a channel for me to post logs in."
+                )).queue()
+                return
+            }
+            val actionLog = actionLogId?.let { jda.getTextChannelById(it) }
+            if (actionLog == null) {
+                hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
+                    user, "Channel does not exist.", "The channel you have set does not exist."
+                )).queue()
+                return
+            }
             if (isManager) {
                 transaction {
                     Prefix.replace {
-                        it[guildId] = id
+                        it[Prefix.guildId] = guildId
                         it[prefix] = newPrefix
                     }
-                }
-                if (actionLog == null) {
-                    hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
-                        user, "No action log set.", "You need to set an action log channel before you can set a prefix."
-                    )).mentionRepliedUser(false).queue()
-                    return
                 }
                 hook.sendMessageEmbeds(prefixEmbed(user, newPrefix)).mentionRepliedUser(false).queue {
                     selfMember!!.modifyNickname("[$newPrefix] Taboo").queue()
                     actionLog.sendMessageEmbeds(prefixEmbed(user, newPrefix)).queue()
                 }
-                TODO("Add logs")
-            } else event.replyEmbeds(noRoleEmbed(user)).mentionRepliedUser(false).queue()
+            } else {
+                event.replyEmbeds(noRoleEmbed(user)).mentionRepliedUser(false).queue()
+            }
         }
 
         override fun execute(event: CommandEvent) {
