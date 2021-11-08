@@ -3,6 +3,7 @@ package dev.taboo.taboo.commands
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.command.SlashCommand
 import dev.taboo.taboo.util.PropertiesManager
+import dev.taboo.taboo.util.PropertiesManager.actionLog
 import dev.taboo.taboo.util.ResponseHelper
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
@@ -162,39 +163,39 @@ class Settings: SlashCommand() {
             val jda = event.jda
             var actionLogId: String? = null
             event.deferReply(true).queue()
-            transaction {
-                SetChannel.Channel.insertIgnore {
-                    it[SetChannel.Channel.guildId] = guildId
-                    it[SetChannel.Channel.channelId] = "0"
+            if (isManager) {
+                transaction {
+                    SetChannel.Channel.insertIgnore {
+                        it[SetChannel.Channel.guildId] = guildId
+                        it[SetChannel.Channel.channelId] = "0"
+                    }
                 }
-            }
-            transaction {
-                actionLogId = SetChannel.Channel.select {
-                    SetChannel.Channel.guildId eq guildId
-                }.single()[SetChannel.Channel.channelId]
-            }
-            if (actionLogId.isNullOrEmpty() || actionLogId.equals("0")) {
-                hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
-                    user, "No channel set.", """
+                transaction {
+                    actionLogId = SetChannel.Channel.select {
+                        SetChannel.Channel.guildId eq guildId
+                    }.single()[SetChannel.Channel.channelId]
+                }
+                if (actionLogId.isNullOrEmpty() || actionLogId.equals("0")) {
+                    hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
+                        user, "No channel set.", """
                         You need to set a channel for me to post logs in.
                         To set a channel via a Slash Command, select the channel.
                         To set a channel via a normal command, ping the channel or give it's id.
                     """.trimIndent()
-                )).queue()
-                return
-            }
-            val actionLog = actionLogId?.let { jda.getTextChannelById(it) }
-            if (actionLog == null) {
-                hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
-                    user, "Channel does not exist.", """
+                    )).queue()
+                    return
+                }
+                val actionLog = actionLogId?.let { jda.getTextChannelById(it) }
+                if (actionLog == null) {
+                    hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
+                        user, "Channel does not exist.", """
                         The channel you have set does not exist.
                         **Channel ID:** $actionLogId
                         If you think this is an error, check if the channel exists or if I have access to it.
                     """.trimIndent()
-                )).queue()
-                return
-            }
-            if (isManager) {
+                    )).queue()
+                    return
+                }
                 transaction {
                     Prefix.replace {
                         it[Prefix.guildId] = guildId
@@ -206,7 +207,7 @@ class Settings: SlashCommand() {
                     actionLog.sendMessageEmbeds(prefixEmbed(user, newPrefix)).queue()
                 }
             } else {
-                event.replyEmbeds(noRoleEmbed(user)).mentionRepliedUser(false).queue()
+                hook.sendMessageEmbeds(noRoleEmbed(user)).mentionRepliedUser(false).queue()
             }
         }
 
