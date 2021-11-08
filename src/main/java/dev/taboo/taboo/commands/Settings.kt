@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.replace
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.awt.Color
 
@@ -157,7 +158,21 @@ class Settings: SlashCommand() {
             val manager = guild.getRolesByName("Taboo Manager", true)
             val isManager = member!!.roles.stream().anyMatch { manager.contains(it) }
             val hook = event.hook
+            val jda = event.jda
+            var actionLogId: String? = null
             event.deferReply(true).queue()
+            transaction {
+                actionLogId = transaction {
+                    SetChannel.Channel.select {
+                        SetChannel.Channel.guildId eq id
+                    }
+                }.single()[SetChannel.Channel.channelId]
+                if (actionLogId == null) {
+                    event.replyEmbeds(ResponseHelper.generateFailureEmbed(user, "No channel set.", "You need to set a channel for me to post logs in."))
+                    return@transaction
+                }
+            }
+            val actionLog = jda.getTextChannelById(actionLogId!!)
             if (isManager) {
                 transaction {
                     Prefix.replace {
@@ -165,8 +180,15 @@ class Settings: SlashCommand() {
                         it[prefix] = newPrefix
                     }
                 }
+                if (actionLog == null) {
+                    hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
+                        user, "No action log set.", "You need to set an action log channel before you can set a prefix."
+                    )).mentionRepliedUser(false).queue()
+                    return
+                }
                 hook.sendMessageEmbeds(prefixEmbed(user, newPrefix)).mentionRepliedUser(false).queue {
                     selfMember!!.modifyNickname("[$newPrefix] Taboo").queue()
+                    actionLog.sendMessageEmbeds(prefixEmbed(user, newPrefix)).queue()
                 }
                 TODO("Add logs")
             } else event.replyEmbeds(noRoleEmbed(user)).mentionRepliedUser(false).queue()
