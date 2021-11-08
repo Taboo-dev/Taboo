@@ -175,14 +175,22 @@ class Settings: SlashCommand() {
             }
             if (actionLogId.isNullOrEmpty() || actionLogId.equals("0")) {
                 hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
-                    user, "No channel set.", "You need to set a channel for me to post logs in."
+                    user, "No channel set.", """
+                        You need to set a channel for me to post logs in.
+                        To set a channel via a Slash Command, select the channel.
+                        To set a channel via a normal command, ping the channel or give it's id.
+                    """.trimIndent()
                 )).queue()
                 return
             }
             val actionLog = actionLogId?.let { jda.getTextChannelById(it) }
             if (actionLog == null) {
                 hook.sendMessageEmbeds(ResponseHelper.generateFailureEmbed(
-                    user, "Channel does not exist.", "The channel you have set does not exist."
+                    user, "Channel does not exist.", """
+                        The channel you have set does not exist.
+                        **Channel ID:** $actionLogId
+                        If you think this is an error, check if the channel exists or if I have access to it.
+                    """.trimIndent()
                 )).queue()
                 return
             }
