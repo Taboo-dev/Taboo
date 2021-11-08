@@ -3,7 +3,6 @@ package dev.taboo.taboo.commands
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.command.SlashCommand
 import dev.taboo.taboo.util.PropertiesManager
-import dev.taboo.taboo.util.PropertiesManager.actionLog
 import dev.taboo.taboo.util.ResponseHelper
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
