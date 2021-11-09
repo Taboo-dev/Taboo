@@ -190,7 +190,7 @@ class Settings: SlashCommand() {
             transaction {
                 SetChannel.Channel.insertIgnore {
                     it[SetChannel.Channel.guildId] = guildId
-                    it[SetChannel.Channel.channelId] = "0"
+                    it[channelId] = "0"
                 }
             }
             transaction {
