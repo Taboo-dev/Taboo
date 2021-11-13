@@ -26,6 +26,9 @@ object PropertiesManager {
     val actionLog: Long
         get() = properties!!.getProperty("actionLog").toLong()
     @JvmStatic
+    val suggestionLog: Long
+        get() = properties!!.getProperty("suggestionLog").toLong()
+    @JvmStatic
     val jdbcUrl: String
         get() = properties!!.getProperty("jdbc")
     @JvmStatic

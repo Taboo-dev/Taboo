@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.taboo.taboo.Taboo
 import dev.taboo.taboo.commands.Settings
+import dev.taboo.taboo.commands.Suggest
 import dev.taboo.taboo.interactions.Bookmark
 import dev.taboo.taboo.util.PropertiesManager.SQLPassword
 import dev.taboo.taboo.util.PropertiesManager.SQLUser
@@ -32,7 +33,7 @@ object DatabaseManager {
     fun startDb() {
         try {
             transaction {
-                SchemaUtils.create(Settings.SetPrefix.Prefix, Settings.SetChannel.Channel, Bookmark.Bookmark)
+                SchemaUtils.create(Settings.SetPrefix.Prefix, Settings.SetChannel.Channel, Bookmark.Bookmark, Suggest.Suggest)
             }
         } catch (e: Exception) {
             Sentry.captureException(e)
