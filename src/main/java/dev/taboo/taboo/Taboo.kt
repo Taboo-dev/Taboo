@@ -76,7 +76,7 @@ class Taboo {
         val waiter = EventWaiter()
         val commands = CommandClientBuilder()
             .setHelpConsumer(null)
-            .setPrefix(String.format("<@!%s> ", PropertiesManager.botId))
+            .setPrefix("<@!${PropertiesManager.botId}> ")
             .setPrefixFunction {
                 transaction {
                     PrefixManager.getPrefixFromGuild(it.guild.id)
