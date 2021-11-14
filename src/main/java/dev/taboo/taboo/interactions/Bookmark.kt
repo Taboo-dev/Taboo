@@ -91,7 +91,7 @@ class Bookmark: ListenerAdapter() {
                 transaction {
                     Bookmark.replace { table ->
                         table[Bookmark.userId] = userId
-                        table[bookmarkCount] = (Integer.parseInt(count) + 1).toString()
+                        table[bookmarkCount] = (count!!.toInt() + 1).toString()
                     }
                 }
                 transaction {
@@ -108,7 +108,6 @@ class Bookmark: ListenerAdapter() {
                     ).queue()
             }.exceptionally {
                 Sentry.captureException(it)
-                // println("Exception Occurred: ${it.printStackTrace()}")
                 hook.sendMessageEmbeds(dmsDisabledEmbed(user)).mentionRepliedUser(false).setEphemeral(true).queue()
                 return@exceptionally null
             }

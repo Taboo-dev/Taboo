@@ -31,7 +31,7 @@ class Suggest: SlashCommand() {
         name = "suggest"
         aliases = arrayOf("suggestion")
         help = "Suggest a new feature for Taboo."
-        this.options = mutableListOf(OptionData(OptionType.STRING, "suggestion", "Your suggestion.").setRequired(true))
+        options = mutableListOf(OptionData(OptionType.STRING, "suggestion", "Your suggestion.").setRequired(true))
         guildOnly = true
     }
 
