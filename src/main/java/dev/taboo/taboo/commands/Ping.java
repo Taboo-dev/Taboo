@@ -22,36 +22,36 @@ public class Ping extends SlashCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent event) {
+    protected void execute(SlashCommandEvent event) {
         User user = event.getUser();
         JDA jda = event.getJDA();
         InteractionHook hook = event.getHook();
         event.deferReply(true).queue();
-        hook.sendMessageEmbeds(initialPingEmbed(user)).mentionRepliedUser(false).queue(h -> {
+        hook.sendMessageEmbeds(initialPingEmbed(user)).mentionRepliedUser(false).queue(m -> {
             jda.getRestPing().queue(restPing -> {
                 long gatewayPing = jda.getGatewayPing();
-                hook.editOriginalEmbeds(finalPingEmbed(user, restPing, gatewayPing)).queue();
+                m.editMessageEmbeds(finalPingEmbed(user, restPing, gatewayPing)).queue();
             });
         });
     }
 
     @Override
     protected void execute(CommandEvent event) {
-        User user = event.getMember().getUser();
+        User author = event.getAuthor();
         JDA jda = event.getJDA();
         Message message = event.getMessage();
-        message.replyEmbeds(initialPingEmbed(user)).mentionRepliedUser(false).queue(response -> {
+        message.replyEmbeds(initialPingEmbed(author)).mentionRepliedUser(false).queue(m -> {
             jda.getRestPing().queue(restPing -> {
-                long gatewayPing = event.getJDA().getGatewayPing();
-                response.editMessageEmbeds(finalPingEmbed(user, restPing, gatewayPing)).queue();
+                long gatewayPing = jda.getGatewayPing();
+                m.editMessageEmbeds(finalPingEmbed(author, restPing, gatewayPing)).queue();
             });
         });
     }
 
     private MessageEmbed initialPingEmbed(User user) {
         return new EmbedBuilder()
-                .setTitle("Ping!")
-                .setDescription("`Pong!` Shows the bot's ping!")
+                .setTitle("Ping")
+                .setDescription("Pong! Shows the bot's ping!")
                 .setColor(0x9F90CF)
                 .setFooter("Requested by " + user.getAsTag(), user.getEffectiveAvatarUrl())
                 .setTimestamp(Instant.now())
@@ -60,10 +60,10 @@ public class Ping extends SlashCommand {
 
     private MessageEmbed finalPingEmbed(User user, long restPing, long gatewayPing) {
         return new EmbedBuilder()
-                .setTitle("Ping!")
+                .setTitle("Ping")
                 .setDescription(String.format(
                         """
-                        `Pong!` Showing the bot's ping!
+                        Pong! Showing the bot's ping!
                         Gateway Ping: `%s ms`
                         Rest Ping: `%s ms`
                         """, gatewayPing, restPing))
@@ -72,5 +72,6 @@ public class Ping extends SlashCommand {
                 .setTimestamp(Instant.now())
                 .build();
     }
+
 
 }

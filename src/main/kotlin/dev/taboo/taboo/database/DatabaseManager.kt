@@ -3,14 +3,9 @@ package dev.taboo.taboo.database
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.taboo.taboo.Taboo
-import dev.taboo.taboo.commands.Settings
-import dev.taboo.taboo.commands.Suggest
-import dev.taboo.taboo.interactions.Bookmark
-import dev.taboo.taboo.util.PropertiesManager.SQLPassword
-import dev.taboo.taboo.util.PropertiesManager.SQLUser
-import dev.taboo.taboo.util.PropertiesManager.driverClassName
-import dev.taboo.taboo.util.PropertiesManager.jdbcUrl
+import dev.taboo.taboo.util.PropertiesManager
 import io.sentry.Sentry
+import okhttp3.internal.http2.Settings
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -18,16 +13,16 @@ import org.jetbrains.exposed.sql.transactions.transaction
 object DatabaseManager {
 
     private val config = HikariConfig()
-    private var dataSource: HikariDataSource
+    private val dataSource: HikariDataSource
 
     init {
-        config.jdbcUrl = jdbcUrl
-        config.username = SQLUser
-        config.password = SQLPassword
-        config.driverClassName = driverClassName
+        config.jdbcUrl = PropertiesManager.jdbcUrl
+        config.username = PropertiesManager.SQLUser
+        config.password = PropertiesManager.SQLPassword
+        config.driverClassName = PropertiesManager.driverClassName
         dataSource = HikariDataSource(config)
         Database.connect(dataSource)
-        Taboo.TABOO_LOG.info("Connected to database!")
+        Taboo.LOGGER.info("Connected to database!")
     }
 
     fun startDb() {
@@ -38,6 +33,18 @@ object DatabaseManager {
         } catch (e: Exception) {
             Sentry.captureException(e)
         }
+    }
+
+    object PrefixManager {
+
+        fun getPrefixFromGuild(id: String): String {
+            return transaction<String> {
+                Settings.SetPrefix.Prefix.select {
+                    Setting.SetPrefix.Prefix.guildId eq id
+                }
+            }.single()[Settings.SetPrefix.Prefix.prefix]
+        }
+
     }
 
 }

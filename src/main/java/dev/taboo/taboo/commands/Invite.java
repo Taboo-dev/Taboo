@@ -15,8 +15,8 @@ public class Invite extends SlashCommand {
 
     public Invite() {
         this.name = "invite";
-        this.aliases = new String[] { "inv", "invite" };
-        this.help = "Invite the bot to your server!";
+        this.aliases = new String[] { "inv" };
+        this.help = "Invite Taboo to your server";
         this.guildOnly = true;
     }
 
@@ -40,7 +40,7 @@ public class Invite extends SlashCommand {
                 .setTitle("Invite the bot to your server!")
                 .setDescription(
                         "[Click here to invite the bot to your server!]" +
-                        "(https://discord.com/api/oauth2/authorize?client_id=892077333878566962&permissions=8&scope=bot%20applications.commands)"
+                                "(https://discord.com/api/oauth2/authorize?client_id=892077333878566962&permissions=8&scope=bot%20applications.commands)"
                 ).setColor(0x9F90CF)
                 .setFooter("Requested by " + user.getAsTag(), user.getEffectiveAvatarUrl())
                 .setTimestamp(Instant.now())

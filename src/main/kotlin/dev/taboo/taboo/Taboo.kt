@@ -3,15 +3,12 @@ package dev.taboo.taboo
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import dev.taboo.taboo.commands.*
-import dev.taboo.taboo.commands.owner.Shutdown
 import dev.taboo.taboo.database.DatabaseManager
-import dev.taboo.taboo.database.PrefixManager
 import dev.taboo.taboo.events.GuildJoinHandler
 import dev.taboo.taboo.events.MessageLog
 import dev.taboo.taboo.events.ReadyHandler
 import dev.taboo.taboo.interactions.Bookmark
 import dev.taboo.taboo.util.PropertiesManager
-import dev.taboo.taboo.util.PropertiesManager.sentryDsn
 import io.sentry.Sentry
 import io.sentry.SentryOptions
 import net.dv8tion.jda.api.OnlineStatus
@@ -41,7 +38,7 @@ class Taboo {
         @JvmField
         var INSTANCE: Taboo? = null
         @JvmField
-        val TABOO_LOG: Logger = LoggerFactory.getLogger(Taboo::class.java)
+        val LOGGER: Logger = LoggerFactory.getLogger(Taboo::class.java)
         @Throws(LoginException::class)
         @JvmStatic
         fun main(args: Array<String>) {
@@ -59,19 +56,19 @@ class Taboo {
             try {
                 if (Files.notExists(config)) {
                     Files.createFile(config)
-                    TABOO_LOG.info("Config file doesn't exist! Creating one now!")
+                    LOGGER.info("Config file doesn't exist! Creating one now!")
                     exitProcess(0)
                 }
             } catch (e: Exception) {
-                TABOO_LOG.error("Could not create config file!")
+                LOGGER.error("Could not create config file!")
                 exitProcess(0)
             }
         }
-        Sentry.init {
-            it.dsn = sentryDsn
-            it.tracesSampleRate = 1.0
-            it.tracesSampler = SentryOptions.TracesSamplerCallback { 1.0 }
-            it.setDebug(true)
+        Sentry.init { options ->
+            options.dsn = PropertiesManager.sentryDsn
+            options.tracesSampleRate = 1.0
+            options.tracesSampler = SentryOptions.TracesSamplerCallback { 1.0 }
+            options.setDebug(true)
         }
         val waiter = EventWaiter()
         val commands = CommandClientBuilder()
@@ -79,7 +76,7 @@ class Taboo {
             .setPrefix("<@!${PropertiesManager.botId}> ")
             .setPrefixFunction {
                 transaction {
-                    PrefixManager.getPrefixFromGuild(it.guild.id)
+                    DatabaseManager.PrefixManager.getPrefixFromGuild(it.guild.id)
                 }
             }
             .setStatus(OnlineStatus.ONLINE)
@@ -93,7 +90,7 @@ class Taboo {
                 Help(),
                 Invite(),
                 Support(),
-                Settings(),
+                // Settings(),
                 Suggest()
             ).addCommands(
                 Ping(),
@@ -102,15 +99,16 @@ class Taboo {
                 Help(),
                 Invite(),
                 Support(),
-                Settings(),
+                // Settings(),
                 Suggest()
             ).build()
         val jda = DefaultShardManagerBuilder.createLight(PropertiesManager.token)
-            .setEnabledIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
+            .setEnabledIntents(GatewayIntent.GUILD_MESSAGES)
             .setChunkingFilter(ChunkingFilter.ALL)
             .setRawEventsEnabled(true)
             .setAutoReconnect(true)
             .addEventListeners(waiter, commands, GuildJoinHandler(), MessageLog(), ReadyHandler(), Bookmark())
+            // .addEventListeners(RemoveSlashCommand()) only to remove unwanted commands
             .setShardsTotal(-1)
             .build()
         DatabaseManager.startDb()

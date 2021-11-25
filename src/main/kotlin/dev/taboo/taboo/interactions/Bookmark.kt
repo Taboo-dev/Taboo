@@ -27,7 +27,7 @@ class Bookmark: ListenerAdapter() {
             val targetMessage = event.targetMessage
             val hook = event.hook
             event.deferReply(true).queue()
-            databaseStuff(user, userId, hook, targetMessage)
+            executeResponse(user, userId, hook, targetMessage)
         }
     }
 
@@ -45,7 +45,7 @@ class Bookmark: ListenerAdapter() {
         }.single()[Bookmark.bookmarkCount]
     }
 
-    private fun databaseStuff(user: User, userId: String, hook: InteractionHook, message: Message) {
+    private fun executeResponse(user: User, userId: String, hook: InteractionHook, message: Message) {
         var count: String? = null
         val guild = message.guild
         val jumpUrl = message.jumpUrl
@@ -60,7 +60,7 @@ class Bookmark: ListenerAdapter() {
         if (attachments.isNotEmpty()) {
             for (attachment in attachments) {
                 val attachmentUrl = attachment.url
-                contentDisplay += "\n" + attachmentUrl
+                contentDisplay += "\n$attachmentUrl"
             }
         }
         val bookmarkEmbed = EmbedBuilder()
@@ -75,10 +75,10 @@ class Bookmark: ListenerAdapter() {
                     **Message ID:** $messageId
                 """.trimIndent()
             ).setColor(0x9F90CF)
-            .setFooter("Bookmarked by " + user.asTag, user.effectiveAvatarUrl)
+            .setFooter("Bookmarked by ${user.asTag}", user.effectiveAvatarUrl)
             .setTimestamp(Instant.now())
         user.openPrivateChannel()
-            .flatMap {
+            .flatMap { channel ->
                 transaction {
                     Bookmark.insertIgnore { table ->
                         table[Bookmark.userId] = userId
@@ -97,7 +97,7 @@ class Bookmark: ListenerAdapter() {
                 transaction {
                     count = getBookmarkCountFromUser(userId)
                 }
-                it.sendMessageEmbeds(bookmarkEmbed.setTitle("Bookmark $count").build()).setActionRow(
+                channel.sendMessageEmbeds(bookmarkEmbed.setTitle("Bookmark $count").build()).setActionRow(
                     Button.link(jumpUrl, "View")
                 )
             }.submit()
@@ -106,8 +106,8 @@ class Bookmark: ListenerAdapter() {
                     .mentionRepliedUser(false).setEphemeral(true).addActionRow(
                         Button.link(jumpUrl, "View")
                     ).queue()
-            }.exceptionally {
-                Sentry.captureException(it)
+            }.exceptionally { exception ->
+                Sentry.captureException(exception)
                 hook.sendMessageEmbeds(dmsDisabledEmbed(user)).mentionRepliedUser(false).setEphemeral(true).queue()
                 return@exceptionally null
             }
@@ -118,7 +118,7 @@ class Bookmark: ListenerAdapter() {
             .setTitle("Bookmarking Disabled!")
             .setDescription("You have your DMs disabled. This means that I cannot DM you the bookmark.")
             .setColor(0x9F90CF)
-            .setFooter("Requested by " + user.asTag, user.effectiveAvatarUrl)
+            .setFooter("Requested by ${user.asTag}", user.effectiveAvatarUrl)
             .setTimestamp(Instant.now())
             .build()
     }

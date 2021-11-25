@@ -6,8 +6,8 @@ object PropertiesManager {
 
     private var properties: Properties? = null
 
-    fun loadProperties(config: Properties?) {
-        properties = config
+    fun loadProperties(file: Properties) {
+        properties = file
     }
 
     @JvmStatic

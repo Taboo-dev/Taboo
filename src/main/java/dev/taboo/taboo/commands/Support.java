@@ -40,7 +40,7 @@ public class Support extends SlashCommand {
                 .setTitle("Support")
                 .setDescription(
                         "If you need help with Taboo, please join the support server.\n" +
-                        "https://discord.gg/XWQWX2X" // TODO: Add support server link
+                                "https://discord.gg/XWQWX2X" // TODO: Add support server link
                 ).setColor(0x9F90CF)
                 .setFooter("Requested by " + user.getAsTag(), user.getEffectiveAvatarUrl())
                 .setTimestamp(Instant.now())

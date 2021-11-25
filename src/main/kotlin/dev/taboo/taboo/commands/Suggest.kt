@@ -3,6 +3,8 @@ package dev.taboo.taboo.commands
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.command.SlashCommand
 import dev.taboo.taboo.Taboo
+import dev.taboo.taboo.commands.Suggest.Suggest.suggestionCount
+import dev.taboo.taboo.commands.Suggest.Suggest.userId
 import dev.taboo.taboo.util.PropertiesManager.suggestionLog
 import dev.taboo.taboo.util.ResponseHelper
 import net.dv8tion.jda.api.EmbedBuilder
@@ -30,8 +32,8 @@ class Suggest: SlashCommand() {
     init {
         name = "suggest"
         aliases = arrayOf("suggestion")
-        help = "Suggest a new feature for Taboo."
-        options = mutableListOf(OptionData(OptionType.STRING, "suggestion", "Your suggestion.").setRequired(true))
+        help = "Suggest something to the developers"
+        options = mutableListOf(OptionData(OptionType.STRING, "suggestion", "Your suggestion", true))
         guildOnly = true
     }
 
@@ -43,8 +45,8 @@ class Suggest: SlashCommand() {
 
     override fun execute(event: SlashCommandEvent) {
         val user = event.user
-        val suggestion = event.getOption("suggestion")!!.asString
         val jda = event.jda
+        val suggestion = event.getOption("suggestion")!!.asString
         val guild = event.guild
         val hook = event.hook
         event.deferReply(true).queue()
@@ -53,13 +55,13 @@ class Suggest: SlashCommand() {
             .addActionRow(
                 Button.of(ButtonStyle.SECONDARY, "suggest:${user.id}:yes", "Yes"),
                 Button.of(ButtonStyle.SECONDARY, "suggest:${user.id}:no", "No")
-            ).queue { waitForEvent(user, suggestion, jda, guild!!) }
+            ).queue { waitForButtonClick(user, suggestion, jda, guild!!) }
     }
 
     override fun execute(event: CommandEvent) {
         val author = event.author
-        val suggestion = event.args
         val jda = event.jda
+        val suggestion = event.args
         val guild = event.guild
         val message = event.message
         message.replyEmbeds(initialSuggestEmbed(author, suggestion))
@@ -67,15 +69,15 @@ class Suggest: SlashCommand() {
             .setActionRow(
                 Button.of(ButtonStyle.SECONDARY, "suggest:${author.id}:yes", "Yes"),
                 Button.of(ButtonStyle.SECONDARY, "suggest:${author.id}:no", "No")
-            ).queue { waitForEvent(author, suggestion, jda, guild) }
+            ).queue { waitForButtonClick(author, suggestion, jda, guild) }
     }
 
-    private fun waitForEvent(user: User, suggestion: String, jda: JDA, guild: Guild) {
+    private fun waitForButtonClick(user: User, suggestion: String, jda: JDA, guild: Guild) {
         Taboo.INSTANCE!!.waiter.waitForEvent(ButtonClickEvent::class.java, { clickEvent ->
             if (clickEvent.user != user) return@waitForEvent false
             if (!equalsAny(clickEvent.componentId, user)) return@waitForEvent false
             !clickEvent.isAcknowledged
-        }, { clickEvent ->
+        }) { clickEvent ->
             val clickUser = clickEvent.user
             val userId = clickUser.id
             val id = clickEvent.componentId.split(":")[2]
@@ -84,8 +86,10 @@ class Suggest: SlashCommand() {
             clickEvent.deferEdit().queue()
             when (id) {
                 "yes" -> {
-                    hook.editOriginalEmbeds(finalSuggestEmbed(user, userCount)).setActionRows(Collections.emptyList()).queue()
-                    sendSuggestion(clickUser, suggestion, jda, guild)
+                    hook.editOriginalEmbeds(finalSuggestEmbed(user, userCount))
+                        .setActionRows(Collections.emptyList())
+                        .queue()
+                    sendSuggestion(user, suggestion, jda, guild)
                     transaction {
                         Suggest.insertIgnore { table ->
                             table[Suggest.userId] = userId
@@ -104,20 +108,23 @@ class Suggest: SlashCommand() {
                     transaction {
                         userCount = getSuggestionCountFromUser(userId)
                     }
-                    hook.editOriginalEmbeds(finalSuggestEmbed(user, userCount!!)).setActionRows(Collections.emptyList()).queue()
-                } "no" -> {
-                    hook.editOriginalEmbeds(noSuggestionEmbed(user)).setActionRows(Collections.emptyList()).queue()
+                    hook.editOriginalEmbeds(finalSuggestEmbed(user, userCount)).queue()
+                }
+                "no" -> {
+                    hook.editOriginalEmbeds(noSuggestionEmbed(user))
+                        .setActionRows(Collections.emptyList())
+                        .queue()
                 }
             }
-        })
+        }
     }
 
     private fun getSuggestionCountFromUser(id: String): String {
         return transaction {
             Suggest.select {
-                Suggest.userId eq id
+                userId eq id
             }
-        }.single()[Suggest.suggestionCount]
+        }.single()[suggestionCount]
     }
 
     private fun equalsAny(id: String, user: User): Boolean {

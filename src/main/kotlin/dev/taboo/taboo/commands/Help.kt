@@ -1,12 +1,12 @@
 package dev.taboo.taboo.commands
 
+import net.dv8tion.jda.api.events.interaction.commands.SlashCommandEvent
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.command.SlashCommand
-import dev.taboo.taboo.database.PrefixManager.getPrefixFromGuild
+import dev.taboo.taboo.database.DatabaseManager
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
-import net.dv8tion.jda.api.events.interaction.commands.SlashCommandEvent
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 
@@ -15,7 +15,7 @@ class Help: SlashCommand() {
     init {
         name = "help"
         help = "Displays all commands."
-        aliases = arrayOf("h", "?")
+        aliases = arrayOf("h", "?", "commands", "cmds")
         guildOnly = true
     }
 
@@ -26,7 +26,7 @@ class Help: SlashCommand() {
         val hook = event.hook
         event.deferReply(true).queue()
         transaction {
-            hook.sendMessageEmbeds(helpEmbed(user, getPrefixFromGuild(guildId)))
+            hook.sendMessageEmbeds(helpEmbed(user, DatabaseManager.PrefixManager.getPrefixFromGuild(guildId)))
                 .mentionRepliedUser(false)
                 .queue()
         }
@@ -34,11 +34,11 @@ class Help: SlashCommand() {
 
     override fun execute(event: CommandEvent) {
         val author = event.author
-        val message = event.message
         val guild = event.guild
         val guildId = guild.id
+        val message = event.message
         transaction {
-            message.replyEmbeds(helpEmbed(author, getPrefixFromGuild(guildId)))
+            message.replyEmbeds(helpEmbed(author, DatabaseManager.PrefixManager.getPrefixFromGuild(guildId)))
                 .mentionRepliedUser(false)
                 .queue()
         }

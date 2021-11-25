@@ -1,4 +1,4 @@
-package dev.taboo.taboo.commands.owner;
+package dev.taboo.taboo.commands;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.commands.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 
@@ -29,6 +28,7 @@ public class Shutdown extends SlashCommand {
         this.name = "shutdown";
         this.help = "Shuts down the bot.";
         this.defaultEnabled = false;
+        this.enabledUsers = new String[] { String.valueOf(PropertiesManager.getOwnerId()) };
         this.ownerCommand = true;
         this.guildOnly = true;
     }
@@ -41,25 +41,33 @@ public class Shutdown extends SlashCommand {
         TextChannel actionLog = jda.getTextChannelById(PropertiesManager.getActionLog());
         event.deferReply(true).queue();
         hook.sendMessageEmbeds(initialShutdownEmbed(user))
-                .addActionRows(getButtons())
-                .mentionRepliedUser(false)
-                .queue(h -> waitForEvent(user, actionLog));
+                .addActionRow(
+                        Button.of(ButtonStyle.SECONDARY, "shutdown:yes", "Yes"),
+                        Button.of(ButtonStyle.SECONDARY, "shutdown:no", "No")
+                ).mentionRepliedUser(false)
+                .queue(m -> waitForButtonClick(user, actionLog), Sentry::captureException);
     }
 
     @Override
     protected void execute(CommandEvent event) {
-        Message message = event.getMessage();
-        User author = message.getAuthor();
+        User author = event.getAuthor();
         JDA jda = event.getJDA();
+        Message message = event.getMessage();
         TextChannel actionLog = jda.getTextChannelById(PropertiesManager.getActionLog());
         message.replyEmbeds(initialShutdownEmbed(author))
-                .setActionRows(getButtons())
-                .mentionRepliedUser(false)
-                .queue(m -> waitForEvent(author, actionLog));
+                .setActionRow(
+                        Button.of(ButtonStyle.SECONDARY, "shutdown:yes", "Yes"),
+                        Button.of(ButtonStyle.SECONDARY, "shutdown:no", "No")
+                ).mentionRepliedUser(false)
+                .queue(m -> waitForButtonClick(author, actionLog), Sentry::captureException);
     }
 
-    private void waitForEvent(User user, TextChannel actionLog) {
-        Taboo.INSTANCE.waiter.waitForEvent(ButtonClickEvent.class, clickEvent -> {
+    private void waitForButtonClick(User user, TextChannel actionLog) throws RuntimeException {
+        Taboo taboo = Taboo.INSTANCE;
+        if (taboo == null) {
+            throw new RuntimeException("Taboo is null");
+        }
+        taboo.waiter.waitForEvent(ButtonClickEvent.class, clickEvent -> {
             if (!clickEvent.getUser().equals(user)) return false;
             if (!equalsAny(clickEvent.getComponentId())) return false;
             return !clickEvent.isAcknowledged();
@@ -70,19 +78,24 @@ public class Shutdown extends SlashCommand {
             clickEvent.deferEdit().queue();
             switch (id) {
                 case "yes" -> {
-                    hook.editOriginalEmbeds(finalShutdownEmbed(clickUser)).setActionRows(Collections.emptyList()).queue(m -> {
-                        actionLog.sendMessageEmbeds(finalShutdownEmbed(clickUser)).queue();
-                        try {
-                            TimeUnit.SECONDS.sleep(10L);
-                        } catch (InterruptedException e) {
-                            Sentry.captureException(e);
-                        }
-                        Taboo.INSTANCE.jda.setStatus(OnlineStatus.INVISIBLE);
-                        Taboo.INSTANCE.jda.shutdown();
-                        System.exit(0);
-                    });
+                    hook.editOriginalEmbeds(finalShutdownEmbed(clickUser))
+                            .setActionRows(Collections.emptyList())
+                            .submit()
+                            .thenAcceptAsync(m -> {
+                                actionLog.sendMessageEmbeds(finalShutdownEmbed(clickUser)).queue();
+                                try {
+                                    TimeUnit.SECONDS.sleep(10L);
+                                } catch (InterruptedException e) {
+                                    Sentry.captureException(e);
+                                }
+                                taboo.jda.setStatus(OnlineStatus.OFFLINE);
+                                taboo.jda.shutdown();
+                                System.exit(0);
+                            });
                 } case "no" -> {
-                    hook.editOriginalEmbeds(noShutdownEmbed(clickUser)).setActionRows(Collections.emptyList()).queue();
+                    hook.editOriginalEmbeds(noShutdownEmbed(clickUser))
+                            .setActionRows(Collections.emptyList())
+                            .queue();
                 }
             }
         });
@@ -111,17 +124,9 @@ public class Shutdown extends SlashCommand {
         );
     }
 
-    private ActionRow getButtons() {
-        return ActionRow.of(
-                Button.of(ButtonStyle.SECONDARY, "shutdown:yes", "Yes"),
-                Button.of(ButtonStyle.SECONDARY, "shutdown:no", "No")
-        );
-    }
-
     private boolean equalsAny(String id) {
         return id.equals("shutdown:yes") ||
                 id.equals("shutdown:no");
     }
-
 
 }
