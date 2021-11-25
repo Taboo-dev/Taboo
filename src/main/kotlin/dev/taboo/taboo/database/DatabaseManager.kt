@@ -25,7 +25,7 @@ object DatabaseManager {
         Taboo.LOGGER.info("Connected to database!")
     }
 
-    fun startDb() {
+    /*fun startDb() {
         try {
             transaction {
                 SchemaUtils.create(Settings.SetPrefix.Prefix, Settings.SetChannel.Channel, Bookmark.Bookmark, Suggest.Suggest)
@@ -45,6 +45,6 @@ object DatabaseManager {
             }.single()[Settings.SetPrefix.Prefix.prefix]
         }
 
-    }
+    }*/
 
 }

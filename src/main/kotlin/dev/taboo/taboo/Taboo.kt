@@ -74,11 +74,11 @@ class Taboo {
         val commands = CommandClientBuilder()
             .setHelpConsumer(null)
             .setPrefix("<@!${PropertiesManager.botId}> ")
-            .setPrefixFunction {
+            /*.setPrefixFunction {
                 transaction {
                     DatabaseManager.PrefixManager.getPrefixFromGuild(it.guild.id)
                 }
-            }
+            }*/
             .setStatus(OnlineStatus.ONLINE)
             .setActivity(null)
             .setOwnerId(PropertiesManager.ownerId)
@@ -111,7 +111,7 @@ class Taboo {
             // .addEventListeners(RemoveSlashCommand()) only to remove unwanted commands
             .setShardsTotal(-1)
             .build()
-        DatabaseManager.startDb()
+        // DatabaseManager.startDb()
         this.jda = jda
         this.waiter = waiter
     }

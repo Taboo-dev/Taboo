@@ -25,11 +25,11 @@ class Help: SlashCommand() {
         val guildId = guild.id
         val hook = event.hook
         event.deferReply(true).queue()
-        transaction {
+        /*transaction {
             hook.sendMessageEmbeds(helpEmbed(user, DatabaseManager.PrefixManager.getPrefixFromGuild(guildId)))
                 .mentionRepliedUser(false)
                 .queue()
-        }
+        }*/
     }
 
     override fun execute(event: CommandEvent) {
@@ -37,11 +37,11 @@ class Help: SlashCommand() {
         val guild = event.guild
         val guildId = guild.id
         val message = event.message
-        transaction {
+        /*transaction {
             message.replyEmbeds(helpEmbed(author, DatabaseManager.PrefixManager.getPrefixFromGuild(guildId)))
                 .mentionRepliedUser(false)
                 .queue()
-        }
+        }*/
     }
 
     private fun helpEmbed(user: User, prefix: String): MessageEmbed {

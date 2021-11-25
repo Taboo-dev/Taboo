@@ -44,12 +44,12 @@ class GuildJoinHandler: ListenerAdapter() {
                     .setTimestamp(Instant.now())
                     .build()
                 defaultChannel!!.sendMessageEmbeds(joinEmbed).queue()
-                transaction {
+                /*transaction {
                     Settings.SetPrefix.Prefix.insertIgnore { table ->
                         table[guildId] = id
                         table[prefix] = "t!"
                     }
-                }
+                }*/
             }
     }
 
