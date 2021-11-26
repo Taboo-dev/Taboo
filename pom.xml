@@ -59,7 +59,7 @@
         <dependency>
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
-            <version>5.8.4</version>
+            <version>5.8.5</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
