@@ -10,21 +10,22 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
-    maven("https://m2.dv8tion.net/releases")
     maven("https://jitpack.io")
 }
 
 dependencies {
-    implementation("com.github.aasmart:JDA:dbce81721f")
-    implementation("com.github.chalkyjeans:JDA-Chewtils:8197beaf9c")
+    implementation("com.github.altrisi:JDA:68a46e84ee")
+    implementation("com.github.altrisi:JDA-Chewtils:96b65c4fd")
+    implementation("com.github.MinnDevelopment:jda-ktx:master-SNAPSHOT")
+    implementation("com.github.MinnDevelopment:jda-reactor:master-SNAPSHOT")
     implementation("ch.qos.logback:logback-classic:1.2.7")
     implementation("com.zaxxer:HikariCP:5.0.0")
-    implementation("org.postgresql:postgresql:42.3.1")
-    implementation("com.github.oshi:oshi-core:5.8.4")
+    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
+    implementation("com.github.oshi:oshi-core:5.8.5")
     implementation("org.jetbrains.exposed:exposed-core:0.36.2")
     implementation("org.jetbrains.exposed:exposed-dao:0.36.2")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.36.2")
-    implementation("io.sentry:sentry:5.4.1")
+    implementation("io.sentry:sentry:5.4.3")
 }
 
 tasks.withType<KotlinCompile> {

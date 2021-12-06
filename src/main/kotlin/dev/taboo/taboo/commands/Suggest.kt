@@ -2,12 +2,12 @@ package dev.taboo.taboo.commands
 
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.command.SlashCommand
+import dev.minn.jda.ktx.Embed
 import dev.taboo.taboo.Taboo
 import dev.taboo.taboo.commands.Suggest.Suggest.suggestionCount
 import dev.taboo.taboo.commands.Suggest.Suggest.userId
 import dev.taboo.taboo.util.PropertiesManager.suggestionLog
 import dev.taboo.taboo.util.ResponseHelper
-import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.MessageEmbed
@@ -73,21 +73,25 @@ class Suggest: SlashCommand() {
     }
 
     private fun waitForButtonClick(user: User, suggestion: String, jda: JDA, guild: Guild) {
-        Taboo.INSTANCE!!.waiter.waitForEvent(ButtonClickEvent::class.java, { clickEvent ->
-            if (clickEvent.user != user) return@waitForEvent false
-            if (!equalsAny(clickEvent.componentId, user)) return@waitForEvent false
-            !clickEvent.isAcknowledged
-        }) { clickEvent ->
+        val taboo = Taboo.INSTANCE ?: throw RuntimeException("Taboo is null")
+        taboo.waiter.waitForEvent(
+            ButtonClickEvent::class.java,
+            { clickEvent ->
+                if (clickEvent.user != user) return@waitForEvent false
+                if (!equalsAny(clickEvent.componentId, user)) return@waitForEvent false
+                !clickEvent.isAcknowledged
+            }
+        ) { clickEvent ->
             val clickUser = clickEvent.user
             val userId = clickUser.id
-            val id = clickEvent.componentId.split(":")[2]
+            val id = clickEvent.componentId.split(":").toTypedArray()[2]
             val hook = clickEvent.hook
             var userCount: String? = null
             clickEvent.deferEdit().queue()
             when (id) {
                 "yes" -> {
                     hook.editOriginalEmbeds(finalSuggestEmbed(user, userCount))
-                        .setActionRows(Collections.emptyList())
+                        .setActionRows(emptyList())
                         .queue()
                     sendSuggestion(user, suggestion, jda, guild)
                     transaction {
@@ -112,7 +116,7 @@ class Suggest: SlashCommand() {
                 }
                 "no" -> {
                     hook.editOriginalEmbeds(noSuggestionEmbed(user))
-                        .setActionRows(Collections.emptyList())
+                        .setActionRows(emptyList())
                         .queue()
                 }
             }
@@ -132,27 +136,29 @@ class Suggest: SlashCommand() {
     }
 
     private fun initialSuggestEmbed(user: User, suggestion: String): MessageEmbed {
-        return EmbedBuilder()
-            .setTitle("Suggestion")
-            .setDescription("${user.asMention}, are you sure you want to suggest this?")
-            .setDescription("""
+        return Embed {
+            title = "Suggestion"
+            description =
+                """
                     ${user.asMention}, are you sure you want to suggest the following suggestion?
                     **Suggestion:** $suggestion
-            """.trimIndent())
-            .setColor(0x9F90CF)
-            .setFooter("Taboo", null)
-            .setTimestamp(Instant.now())
-            .build()
+                """.trimIndent()
+            color = 0x9F90CF
+            timestamp = Instant.now()
+        }
     }
 
     private fun finalSuggestEmbed(user: User, count: String?): MessageEmbed {
-        return EmbedBuilder()
-            .setTitle("Thank you for you're suggestion.")
-            .setDescription("Your suggestion has been sent to the developers. Thank you for your input!")
-            .setColor(0x9F90CF)
-            .setFooter("You have $count suggestions.", user.effectiveAvatarUrl)
-            .setTimestamp(Instant.now())
-            .build()
+        return Embed {
+            title = "Thank you for your suggestion."
+            description = "Your suggestion has been sent to the developers. Thank you for your input!"
+            color = 0x9F90CF
+            footer {
+                name = "You have $count suggestions."
+                iconUrl = user.effectiveAvatarUrl
+            }
+            timestamp = Instant.now()
+        }
     }
 
     private fun noSuggestionEmbed(user: User): MessageEmbed {
@@ -164,18 +170,22 @@ class Suggest: SlashCommand() {
 
     private fun sendSuggestion(user: User, suggestion: String, jda: JDA, guild: Guild) {
         val suggestionLog = jda.getTextChannelById(suggestionLog)
-        val suggestionEmbed = EmbedBuilder()
-            .setTitle("New Suggestion")
-            .setDescription("""
-                **Suggestion:** $suggestion
-                **Suggested by:** ${user.asTag}
-                **Server:** ${guild.name}
-                **Suggested at:** ${Date.from(Instant.now())}
-            """.trimIndent())
-            .setColor(0x9F90CF)
-            .setFooter("Sent by ${user.asTag}", user.effectiveAvatarUrl)
-            .setTimestamp(Instant.now())
-            .build()
+        val suggestionEmbed = Embed {
+            name = "New Suggestion"
+            description =
+                """
+                    **Suggestion:** $suggestion
+                    **Suggested by:** ${user.asTag}
+                    **Server:** ${guild.name}
+                    **Suggested at:** ${Date.from(Instant.now())}
+                """.trimIndent()
+            color = 0x9F90CF
+            footer {
+                name = "Sent by ${user.asTag}"
+                iconUrl = user.effectiveAvatarUrl
+            }
+            timestamp = Instant.now()
+        }
         suggestionLog!!.sendMessageEmbeds(suggestionEmbed).queue()
     }
 

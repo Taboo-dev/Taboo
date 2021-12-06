@@ -3,12 +3,15 @@ package dev.taboo.taboo.database
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.taboo.taboo.Taboo
+import dev.taboo.taboo.commands.Suggest
+import dev.taboo.taboo.interactions.Bookmark
 import dev.taboo.taboo.util.PropertiesManager
 import io.sentry.Sentry
-import okhttp3.internal.http2.Settings
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.nio.file.Files
+import java.nio.file.Path
 
 object DatabaseManager {
 
@@ -16,25 +19,28 @@ object DatabaseManager {
     private val dataSource: HikariDataSource
 
     init {
+        val database = Path.of("database.db")
+        if (Files.notExists(database)) {
+            Files.createFile(database)
+            Taboo.LOGGER.info("Created database file!")
+        }
         config.jdbcUrl = PropertiesManager.jdbcUrl
-        config.username = PropertiesManager.SQLUser
-        config.password = PropertiesManager.SQLPassword
-        config.driverClassName = PropertiesManager.driverClassName
         dataSource = HikariDataSource(config)
         Database.connect(dataSource)
         Taboo.LOGGER.info("Connected to database!")
     }
 
-    /*fun startDb() {
+    fun startDb() {
         try {
             transaction {
-                SchemaUtils.create(Settings.SetPrefix.Prefix, Settings.SetChannel.Channel, Bookmark.Bookmark, Suggest.Suggest)
+                SchemaUtils.create(/*Settings.SetPrefix.Prefix, Settings.SetChannel.Channel,*/ Bookmark.Bookmark, Suggest.Suggest)
             }
         } catch (e: Exception) {
             Sentry.captureException(e)
         }
     }
 
+    /*
     object PrefixManager {
 
         fun getPrefixFromGuild(id: String): String {

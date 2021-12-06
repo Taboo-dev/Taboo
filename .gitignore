@@ -76,3 +76,4 @@ target/
 
 # Project
 config.properties
+database.db

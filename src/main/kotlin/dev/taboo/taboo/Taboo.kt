@@ -4,9 +4,8 @@ import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import dev.taboo.taboo.commands.*
 import dev.taboo.taboo.database.DatabaseManager
+import dev.taboo.taboo.events.Events
 import dev.taboo.taboo.events.GuildJoinHandler
-import dev.taboo.taboo.events.MessageLog
-import dev.taboo.taboo.events.ReadyHandler
 import dev.taboo.taboo.interactions.Bookmark
 import dev.taboo.taboo.util.PropertiesManager
 import io.sentry.Sentry
@@ -15,8 +14,6 @@ import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
 import net.dv8tion.jda.api.sharding.ShardManager
-import net.dv8tion.jda.api.utils.ChunkingFilter
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.FileInputStream
@@ -104,14 +101,13 @@ class Taboo {
             ).build()
         val jda = DefaultShardManagerBuilder.createLight(PropertiesManager.token)
             .setEnabledIntents(GatewayIntent.GUILD_MESSAGES)
-            .setChunkingFilter(ChunkingFilter.ALL)
             .setRawEventsEnabled(true)
             .setAutoReconnect(true)
-            .addEventListeners(waiter, commands, GuildJoinHandler(), MessageLog(), ReadyHandler(), Bookmark())
-            // .addEventListeners(RemoveSlashCommand()) only to remove unwanted commands
+            .setEventManagerProvider { Events().manager }
+            .addEventListeners(waiter, commands, GuildJoinHandler(), Bookmark())
             .setShardsTotal(-1)
             .build()
-        // DatabaseManager.startDb()
+        DatabaseManager.startDb()
         this.jda = jda
         this.waiter = waiter
     }

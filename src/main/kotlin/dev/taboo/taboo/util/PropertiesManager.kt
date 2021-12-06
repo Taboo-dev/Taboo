@@ -12,34 +12,25 @@ object PropertiesManager {
 
     @JvmStatic
     val token: String
-        get() = properties!!.getProperty("token")
+        get() = properties!!.getProperty("token").toString()
     @JvmStatic
-    val ownerId: Long
-        get() = properties!!.getProperty("owner").toLong()
+    val ownerId: String
+        get() = properties!!.getProperty("owner").toString()
     @JvmStatic
-    val botId: Long
-        get() = properties!!.getProperty("bot").toLong()
+    val botId: String
+        get() = properties!!.getProperty("bot").toString()
     @JvmStatic
-    val guildId: Long
-        get() = properties!!.getProperty("guild").toLong()
+    val guildId: String
+        get() = properties!!.getProperty("guild").toString()
     @JvmStatic
-    val actionLog: Long
-        get() = properties!!.getProperty("actionLog").toLong()
+    val actionLog: String
+        get() = properties!!.getProperty("actionLog").toString()
     @JvmStatic
-    val suggestionLog: Long
-        get() = properties!!.getProperty("suggestionLog").toLong()
+    val suggestionLog: String
+        get() = properties!!.getProperty("suggestionLog").toString()
     @JvmStatic
     val jdbcUrl: String
         get() = properties!!.getProperty("jdbc")
-    @JvmStatic
-    val SQLUser: String
-        get() = properties!!.getProperty("sqluser")
-    @JvmStatic
-    val SQLPassword: String
-        get() = properties!!.getProperty("sqlpass")
-    @JvmStatic
-    val driverClassName: String
-        get() = properties!!.getProperty("driverClassName")
     @JvmStatic
     val sentryDsn: String
         get() = properties!!.getProperty("sentryDsn")
