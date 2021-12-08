@@ -3,12 +3,14 @@ package dev.taboo.taboo.database
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.taboo.taboo.Taboo
+import dev.taboo.taboo.commands.Settings
 import dev.taboo.taboo.commands.Suggest
 import dev.taboo.taboo.interactions.Bookmark
 import dev.taboo.taboo.util.PropertiesManager
 import io.sentry.Sentry
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Files
 import java.nio.file.Path
@@ -33,24 +35,23 @@ object DatabaseManager {
     fun startDb() {
         try {
             transaction {
-                SchemaUtils.create(/*Settings.SetPrefix.Prefix, Settings.SetChannel.Channel,*/ Bookmark.Bookmark, Suggest.Suggest)
+                SchemaUtils.create(Settings.SetPrefix.Prefix, Settings.SetChannel.Channel, Bookmark.Bookmark, Suggest.Suggest)
             }
         } catch (e: Exception) {
             Sentry.captureException(e)
         }
     }
 
-    /*
     object PrefixManager {
 
         fun getPrefixFromGuild(id: String): String {
-            return transaction<String> {
+            return transaction {
                 Settings.SetPrefix.Prefix.select {
-                    Setting.SetPrefix.Prefix.guildId eq id
+                    Settings.SetPrefix.Prefix.guildId eq id
                 }
             }.single()[Settings.SetPrefix.Prefix.prefix]
         }
 
-    }*/
+    }
 
 }

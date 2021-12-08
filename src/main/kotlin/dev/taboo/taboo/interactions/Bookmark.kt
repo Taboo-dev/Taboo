@@ -22,8 +22,8 @@ import java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
 class Bookmark: ListenerAdapter() {
 
     object Bookmark: Table("Bookmark") {
-        val userId = text("userId").uniqueIndex()
-        val bookmarkCount = text("bookmarkCount")
+        val userId = varchar("userId", 20).uniqueIndex()
+        val bookmarkCount = varchar("bookmarkCount", 20)
         override val primaryKey = PrimaryKey(userId)
     }
 

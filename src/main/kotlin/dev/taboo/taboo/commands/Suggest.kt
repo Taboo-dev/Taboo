@@ -38,8 +38,8 @@ class Suggest: SlashCommand() {
     }
 
     object Suggest: Table("Suggest") {
-        val userId = text("userId").uniqueIndex()
-        val suggestionCount = text("suggestionCount")
+        val userId = varchar("userId", 20).uniqueIndex()
+        val suggestionCount = varchar("suggestionCount", 1000000)
         override val primaryKey = PrimaryKey(userId)
     }
 

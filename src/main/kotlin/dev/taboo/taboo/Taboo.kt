@@ -5,7 +5,6 @@ import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import dev.taboo.taboo.commands.*
 import dev.taboo.taboo.database.DatabaseManager
 import dev.taboo.taboo.events.Events
-import dev.taboo.taboo.events.GuildJoinHandler
 import dev.taboo.taboo.interactions.Bookmark
 import dev.taboo.taboo.util.PropertiesManager
 import io.sentry.Sentry
@@ -14,6 +13,7 @@ import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
 import net.dv8tion.jda.api.sharding.ShardManager
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.FileInputStream
@@ -71,11 +71,11 @@ class Taboo {
         val commands = CommandClientBuilder()
             .setHelpConsumer(null)
             .setPrefix("<@!${PropertiesManager.botId}> ")
-            /*.setPrefixFunction {
+            .setPrefixFunction { event ->
                 transaction {
-                    DatabaseManager.PrefixManager.getPrefixFromGuild(it.guild.id)
+                    DatabaseManager.PrefixManager.getPrefixFromGuild(event.guild.id)
                 }
-            }*/
+            }
             .setStatus(OnlineStatus.ONLINE)
             .setActivity(null)
             .setOwnerId(PropertiesManager.ownerId)
@@ -87,7 +87,7 @@ class Taboo {
                 Help(),
                 Invite(),
                 Support(),
-                // Settings(),
+                Settings(),
                 Suggest()
             ).addCommands(
                 Ping(),
@@ -96,7 +96,7 @@ class Taboo {
                 Help(),
                 Invite(),
                 Support(),
-                // Settings(),
+                Settings(),
                 Suggest()
             ).build()
         val jda = DefaultShardManagerBuilder.createLight(PropertiesManager.token)
@@ -104,7 +104,7 @@ class Taboo {
             .setRawEventsEnabled(true)
             .setAutoReconnect(true)
             .setEventManagerProvider { Events().manager }
-            .addEventListeners(waiter, commands, GuildJoinHandler(), Bookmark())
+            .addEventListeners(waiter, commands, Bookmark())
             .setShardsTotal(-1)
             .build()
         DatabaseManager.startDb()

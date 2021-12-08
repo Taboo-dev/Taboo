@@ -1,12 +1,12 @@
 package dev.taboo.taboo.commands
 
-import net.dv8tion.jda.api.events.interaction.commands.SlashCommandEvent
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.command.SlashCommand
+import dev.minn.jda.ktx.Embed
 import dev.taboo.taboo.database.DatabaseManager
-import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.events.interaction.commands.SlashCommandEvent
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 
@@ -25,11 +25,11 @@ class Help: SlashCommand() {
         val guildId = guild.id
         val hook = event.hook
         event.deferReply(true).queue()
-        /*transaction {
+        transaction {
             hook.sendMessageEmbeds(helpEmbed(user, DatabaseManager.PrefixManager.getPrefixFromGuild(guildId)))
                 .mentionRepliedUser(false)
                 .queue()
-        }*/
+        }
     }
 
     override fun execute(event: CommandEvent) {
@@ -37,29 +37,64 @@ class Help: SlashCommand() {
         val guild = event.guild
         val guildId = guild.id
         val message = event.message
-        /*transaction {
+        transaction {
             message.replyEmbeds(helpEmbed(author, DatabaseManager.PrefixManager.getPrefixFromGuild(guildId)))
                 .mentionRepliedUser(false)
                 .queue()
-        }*/
+        }
     }
 
     private fun helpEmbed(user: User, prefix: String): MessageEmbed {
-        return EmbedBuilder()
-            .setTitle("Help")
-            .setColor(0x9F90CF)
-            .setDescription("All commands are listed below:")
-            .addField(prefix + "help", "Displays this message.", false)
-            .addField(prefix + "ping", "Pong!", false)
-            .addField(prefix + "info", "Displays information about me.", false)
-            .addField(prefix + "stats", "Displays my statistics.", false)
-            .addField(prefix + "invite", "Displays my invite link.", false)
-            .addField(prefix + "support", "Displays a link to my support server.", false)
-            .addField(prefix + "suggest", "Suggest a feature for me.", false)
-            .addField(prefix + "report", "Report a bug or a feature.", false)
-            .setFooter("Requested by ${user.asTag}", user.effectiveAvatarUrl)
-            .setTimestamp(Instant.now())
-            .build()
+        return Embed {
+            title = "Help"
+            color = 0x9F90CF
+            description = "All commands are listed below:"
+            field {
+                name = "${prefix}help"
+                value = "Displays this message."
+                inline = false
+            }
+            field {
+                name = "${prefix}ping"
+                value = "Pong!"
+                inline = false
+            }
+            field {
+                name = "${prefix}info"
+                value = "Displays information about me."
+                inline = false
+            }
+            field {
+                name = "${prefix}stats"
+                value = "Displays my statistics."
+                inline = false
+            }
+            field {
+                name = "${prefix}invite"
+                value = "Displays my invite link."
+                inline = false
+            }
+            field {
+                name = "${prefix}support"
+                value = "Displays a link to my support server."
+                inline = false
+            }
+            field {
+                name = "${prefix}suggest"
+                value = "Suggest a feature for me."
+                inline = false
+            }
+            field {
+                name = "${prefix}report"
+                value = "Report a bug or a feature."
+                inline = false
+            }
+            footer {
+                name = "Requested by ${user.asTag}"
+                iconUrl = user.effectiveAvatarUrl
+            }
+            timestamp = Instant.now()
+        }
     }
 
 }

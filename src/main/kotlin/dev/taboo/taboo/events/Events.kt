@@ -3,12 +3,15 @@ package dev.taboo.taboo.events
 import club.minnced.jda.reactor.ReactiveEventManager
 import club.minnced.jda.reactor.on
 import dev.minn.jda.ktx.Embed
+import dev.taboo.taboo.commands.Settings
 import dev.taboo.taboo.util.PropertiesManager
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.interactions.commands.CommandType
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
+import org.jetbrains.exposed.sql.insertIgnore
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.time.Instant
 
@@ -45,37 +48,42 @@ class Events {
                 val guildId = guild.id
                 val roles = guild.roles
                 val defaultChannel = guild.defaultChannel
-                val owner = guild.owner
+                val owner = guild.retrieveOwner().complete()
                 val jda = event.jda
-                jda.retrieveUserById(PropertiesManager.ownerId).queue { botOwner ->
-                    if (roles.stream().noneMatch { role ->
-                            role.name == "Taboo Manager"
-                    }) {
-                        guild.createRole()
-                            .setName("Taboo Manager")
-                            .setHoisted(false)
-                            .setMentionable(false)
-                            .flatMap { role ->
-                                guild.addRoleToMember(owner!!, role)
-                            }
-                            .queue()
-                    }
-                    val joinEmbed = Embed {
-                        title = "Hi! I'm Taboo!"
-                        description =
-                            """
-                                I'm a bot that deletes harmful files or uploads them to Hastebin when they are uploaded by server members. I can do both at the same time too!
-                                My prefix is simply mentioning me (or **t!**), or using Slash Commands, but it can be changed by running **@Taboo prefix <newPrefix>**.
-                                To configure my settings, you need to have the **Taboo Manager** role, and you will need to run the **Settings** command.
-                                By default, I have already given this role to the Server Owner, ${guild.owner!!.user.asMention}
-                            """.trimIndent()
-                        color = 0x9F90CF
-                        footer {
-                            name = "Made with <3 by ${botOwner.asTag}"
+                val botOwner = jda.retrieveUserById(PropertiesManager.ownerId).complete()
+                if (roles.stream().noneMatch { role ->
+                        role.name == "Taboo Manager"
+                }) {
+                    guild.createRole()
+                        .setName("Taboo Manager")
+                        .setHoisted(false)
+                        .setMentionable(false)
+                        .flatMap { role ->
+                            guild.addRoleToMember(owner!!, role)
                         }
-                        timestamp = Instant.now()
+                        .queue()
+                }
+                val joinEmbed = Embed {
+                    title = "Hi! I'm Taboo!"
+                    description =
+                        """
+                            I'm a bot that deletes harmful files or uploads them to Hastebin when they are uploaded by server members. I can do both at the same time too!
+                            My prefix is simply mentioning me (or **t!**), or using Slash Commands, but it can be changed by running **@Taboo prefix <newPrefix>**.
+                            To configure my settings, you need to have the **Taboo Manager** role, and you will need to run the **Settings** command.
+                            By default, I have already given this role to the Server Owner, ${owner.user.asMention}
+                        """.trimIndent()
+                    color = 0x9F90CF
+                    footer {
+                        name = "Made with <3 by ${botOwner.asTag}"
                     }
-                    defaultChannel!!.sendMessageEmbeds(joinEmbed).queue()
+                    timestamp = Instant.now()
+                }
+                defaultChannel!!.sendMessageEmbeds(joinEmbed).queue()
+                transaction {
+                    Settings.SetPrefix.Prefix.insertIgnore { table ->
+                        table[Settings.SetPrefix.Prefix.guildId] = guildId
+                        table[prefix] = "t!"
+                    }
                 }
             }
         /*
