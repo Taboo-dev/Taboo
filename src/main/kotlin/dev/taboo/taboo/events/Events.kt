@@ -71,6 +71,7 @@ class Events {
                             My prefix is simply mentioning me (or **t!**), or using Slash Commands, but it can be changed by running **@Taboo prefix <newPrefix>**.
                             To configure my settings, you need to have the **Taboo Manager** role, and you will need to run the **Settings** command.
                             By default, I have already given this role to the Server Owner, ${owner.user.asMention}
+                            You should run the **Settings Setup** command to configure me!
                         """.trimIndent()
                     color = 0x9F90CF
                     footer {

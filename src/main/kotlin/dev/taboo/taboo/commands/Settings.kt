@@ -5,6 +5,7 @@ import com.jagrosh.jdautilities.command.SlashCommand
 import dev.minn.jda.ktx.Embed
 import dev.taboo.taboo.util.PropertiesManager
 import dev.taboo.taboo.util.ResponseHelper
+import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.commands.SlashCommandEvent
@@ -24,7 +25,7 @@ class Settings: SlashCommand() {
         aliases = arrayOf("set")
         help = "Sets settings for Taboo."
         guildOnly = true
-        children = arrayOf(SetChannel(), SetPrefix())
+        children = arrayOf(Setup(), SetChannel(), SetPrefix())
     }
 
     override fun execute(event: SlashCommandEvent) {
@@ -48,6 +49,58 @@ class Settings: SlashCommand() {
             }
         }
         event.reply(settingsEmbed, false)
+    }
+
+    // settings setup automatic / manual
+
+    class Setup: SlashCommand() {
+
+        init {
+            name = "setup"
+            help = "Sets up Taboo."
+            options = mutableListOf(OptionData(OptionType.STRING, "setup", "How Taboo should be setup.", true)
+                .addChoice("automatic", "automatic").addChoice("manual", "manual"))
+            guildOnly = true
+        }
+
+        override fun execute(event: SlashCommandEvent) {
+            event.deferReply().queue()
+            val user = event.user
+            val hook = event.hook
+            val guild = event.guild
+            val selfMember = event.guild!!.selfMember
+            when (event.getOption("setup")!!.asString) {
+                "automatic" -> {
+                    hook.sendMessage("automatic setup").queue()
+                    val allow  = Permission.ALL_TEXT_PERMISSIONS or Permission.ALL_CHANNEL_PERMISSIONS
+                    val deny = Permission.VIEW_CHANNEL.rawValue
+                    val managerRole = guild!!.getRolesByName("Taboo Manager", true).first().idLong
+                    val publicRole = guild.publicRole.idLong
+                    guild.createTextChannel("taboo-logs")
+                        .addMemberPermissionOverride(selfMember.idLong, allow, 0)
+                        .addRolePermissionOverride(managerRole, allow, 0)
+                        .addRolePermissionOverride(publicRole, 0, deny)
+                        .setPosition(guild.channels.size)
+                        .queue { channel ->
+                            val channelId = channel.id
+                            transaction {
+                                SetChannel.Channel.insertIgnore { table ->
+                                    table[guildId] = guild.id
+                                    table[SetChannel.Channel.channelId] = channelId
+                                }
+                            }
+                            channel.sendMessage("I will now log in this channel. Feel free to move this channel around - just don't delete it!").queue()
+                        }
+                } "manual" -> {
+                    hook.sendMessage("manual setup").queue()
+                }
+            }
+        }
+
+        override fun execute(event: CommandEvent) {
+            // event.args
+        }
+
     }
 
     class SetPrefix: SlashCommand() {
@@ -304,7 +357,5 @@ class Settings: SlashCommand() {
         }
 
     }
-
-    // settings setup automatic / manual
 
 }
