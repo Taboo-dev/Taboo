@@ -16,7 +16,7 @@ repositories {
 dependencies {
     implementation("com.github.altrisi:JDA:68a46e84ee")
     implementation("com.github.altrisi:JDA-Chewtils:96b65c4fd")
-    implementation("com.github.MinnDevelopment:jda-ktx:0.8.1-alpha.2")
+    implementation("com.github.MinnDevelopment:jda-ktx:0.8.2-alpha.2")
     implementation("com.github.MinnDevelopment:jda-reactor:1.5.0")
     implementation("ch.qos.logback:logback-classic:1.2.8")
     implementation("com.zaxxer:HikariCP:5.0.0")
