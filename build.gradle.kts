@@ -18,7 +18,7 @@ dependencies {
     implementation("com.github.altrisi:JDA-Chewtils:96b65c4fd")
     implementation("com.github.MinnDevelopment:jda-ktx:0.8.2-alpha.2")
     implementation("com.github.MinnDevelopment:jda-reactor:1.5.0")
-    implementation("ch.qos.logback:logback-classic:1.2.8")
+    implementation("ch.qos.logback:logback-classic:1.2.9")
     implementation("com.zaxxer:HikariCP:5.0.0")
     implementation("org.xerial:sqlite-jdbc:3.36.0.3")
     implementation("com.github.oshi:oshi-core:5.8.6")
