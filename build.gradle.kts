@@ -25,7 +25,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:0.36.2")
     implementation("org.jetbrains.exposed:exposed-dao:0.36.2")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.36.2")
-    implementation("io.sentry:sentry:5.5.0")
+    implementation("io.sentry:sentry:5.5.1")
 }
 
 tasks.withType<KotlinCompile> {
