@@ -24,7 +24,7 @@ dependencies {
     implementation("com.github.oshi:oshi-core:5.8.6")
     implementation("org.jetbrains.exposed:exposed-core:0.37.3")
     implementation("org.jetbrains.exposed:exposed-dao:0.36.2")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.36.2")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.37.3")
     implementation("io.sentry:sentry:5.5.2")
 }
 
