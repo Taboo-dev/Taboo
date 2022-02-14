@@ -21,7 +21,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.2.10")
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("org.xerial:sqlite-jdbc:3.36.0.3")
-    implementation("com.github.oshi:oshi-core:6.1.0")
+    implementation("com.github.oshi:oshi-core:6.1.1")
     implementation("org.jetbrains.exposed:exposed-core:0.37.3")
     implementation("org.jetbrains.exposed:exposed-dao:0.37.3")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.37.3")
