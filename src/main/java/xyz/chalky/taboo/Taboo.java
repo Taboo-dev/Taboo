@@ -1,0 +1,180 @@
+package xyz.chalky.taboo;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import mu.KotlinLogging;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
+import net.dv8tion.jda.api.sharding.ShardManager;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.slf4j.Logger;
+import xyz.chalky.taboo.backend.GenericCommand;
+import xyz.chalky.taboo.backend.InteractionCommandHandler;
+import xyz.chalky.taboo.database.DatabaseManager;
+import xyz.chalky.taboo.events.InteractionsListener;
+import xyz.chalky.taboo.events.MessageListener;
+import xyz.chalky.taboo.events.ReadyHandler;
+import xyz.chalky.taboo.util.PropertiesManager;
+
+import javax.security.auth.login.LoginException;
+import java.io.FileInputStream;
+import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+public class Taboo {
+
+    private static final Logger LOGGER = KotlinLogging.INSTANCE.logger("Taboo");
+    private static Taboo instance;
+    private final ShardManager shardManager;
+    private final boolean isDebug;
+
+    private final ExecutorService commandExecutor =
+            Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
+                    new ThreadFactoryBuilder()
+                            .setNameFormat("Taboo Command Thread %d")
+                            .setUncaughtExceptionHandler((thread, throwable) -> {
+                                LOGGER.error("An uncaught error occurred on the command thread-pool! (Thread {})", thread.getName(), throwable);
+                            }).build());
+
+    private final ScheduledExecutorService scheduledExecutor =
+            Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
+                    .setNameFormat("Taboo Scheduled Executor Thread")
+                    .setUncaughtExceptionHandler((thread, throwable) -> {
+                        LOGGER.error("An uncaught error occurred on the scheduled executor!", throwable);
+                    }).build());
+
+    private final ExecutorService executor =
+            Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
+                    .setNameFormat("Taboo Executor Thread")
+                    .setUncaughtExceptionHandler((thread, throwable) -> {
+                        LOGGER.error("An uncaught error occurred on the executor!", throwable);
+                    }).build());
+
+    private final InteractionCommandHandler interactionCommandHandler;
+    private final EventWaiter eventWaiter;
+
+    Taboo() throws Exception {
+        instance = this;
+        Properties properties = new Properties();
+        properties.load(new FileInputStream("config.properties"));
+        PropertiesManager propertiesManager = new PropertiesManager(properties);
+        interactionCommandHandler = new InteractionCommandHandler(propertiesManager);
+        isDebug = propertiesManager.getDebugState();
+        eventWaiter = new EventWaiter();
+        DatabaseManager.INSTANCE.startDatabase();
+        shardManager = DefaultShardManagerBuilder.createDefault(propertiesManager.getToken())
+                .enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_EMOJIS)
+                .enableCache(CacheFlag.VOICE_STATE)
+                .setShardsTotal(-1)
+                .setStatus(OnlineStatus.ONLINE)
+                .addEventListeners(
+                        new InteractionsListener(propertiesManager), new ReadyHandler(propertiesManager),
+                        new MessageListener()
+                ).build();
+    }
+
+    public static Taboo getInstance() {
+        return instance;
+    }
+
+    public ExecutorService getExecutor() {
+        return executor;
+    }
+
+    public ExecutorService getCommandExecutor() {
+        return commandExecutor;
+    }
+
+    public ScheduledExecutorService getScheduledExecutor() {
+        return scheduledExecutor;
+    }
+
+    public boolean isDebug() {
+        return isDebug;
+    }
+
+    public ShardManager getShardManager() {
+        return shardManager;
+    }
+
+    public InteractionCommandHandler getInteractionCommandHandler() {
+        return interactionCommandHandler;
+    }
+
+    public EventWaiter getEventWaiter() {
+        return eventWaiter;
+    }
+
+    public static Logger getLogger() {
+        return LOGGER;
+    }
+
+    public void initCommandCheck(PropertiesManager propertiesManager) {
+        LOGGER.info("Checking for outdated commands...");
+        commandExecutor.submit(() -> {
+            if (!isDebug) {
+                Guild guild = shardManager.getGuildById(propertiesManager.getGuildId());
+                if (guild == null) {
+                    LOGGER.error("Debug guild not found!");
+                    return;
+                }
+                guild.retrieveCommands().queue(discordCommands -> {
+                    List<GenericCommand> localCommands = InteractionCommandHandler
+                            .getRegisteredGuildCommands()
+                            .get(guild.getIdLong());
+                    handleCommandUpdates(discordCommands, localCommands);
+                });
+            } else {
+                shardManager.getShards().get(0).retrieveCommands().queue(discordCommands -> {
+                    List<GenericCommand> localCommands = InteractionCommandHandler
+                            .getRegisteredCommands()
+                            .stream()
+                            .filter(GenericCommand::isGlobal)
+                            .toList();
+                    handleCommandUpdates(discordCommands, localCommands);
+                });
+            }
+        });
+    }
+
+    private void handleCommandUpdates(Collection<Command> discordCommands, Collection<GenericCommand> localCommands) {
+        boolean commandRemovedOrAdded = localCommands.size() != discordCommands.size();
+        if (commandRemovedOrAdded) {
+            if (localCommands.size() > discordCommands.size()) {
+                LOGGER.warn("New command(s) have been added! Updating Discord...");
+            } else {
+                LOGGER.warn("Command(s) have been removed! Updating Discord...");
+            }
+            interactionCommandHandler.updateCommands(commands -> {
+                LOGGER.info("Updated {} commands!", commands.size());
+            }, null);
+            return;
+        }
+        boolean outdated = false;
+        for (GenericCommand localCommand : localCommands) {
+            Command discordCommand = discordCommands.stream()
+                    .filter(cmd -> cmd.getName().equalsIgnoreCase(localCommand.getData().getName()))
+                    .findFirst()
+                    .orElse(null);
+            CommandData localCommandData = localCommand.getData();
+            CommandData discordCommandData = CommandData.fromCommand(discordCommand);
+            if (!localCommandData.equals(discordCommandData)) {
+                outdated = true;
+            }
+        }
+        if (outdated) {
+            interactionCommandHandler.updateCommands(commands -> {
+                LOGGER.info("Updated {} commands!", commands.size());
+            }, null);
+        }
+    }
+
+}

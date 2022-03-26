@@ -1,0 +1,5 @@
+database.db
+config.properties
+.idea/
+build/
+/.gradle
