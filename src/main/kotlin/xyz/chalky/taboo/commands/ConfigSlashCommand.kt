@@ -1,7 +1,6 @@
 package xyz.chalky.taboo.commands
 
 import dev.minn.jda.ktx.interactions.getOption
-import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
@@ -11,7 +10,6 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.chalky.taboo.backend.SlashCommand
-import xyz.chalky.taboo.backend.SlashCommandContext
 import xyz.chalky.taboo.database.Config
 import xyz.chalky.taboo.util.onSubCommand
 
@@ -32,7 +30,7 @@ class ConfigSlashCommand : SlashCommand() {
         )
     }
 
-    override fun executeCommand(event: SlashCommandInteractionEvent, sender: Member, ctx: SlashCommandContext) {
+    override fun executeCommand(event: SlashCommandInteractionEvent) {
         event.onSubCommand("set") {
             val actionLogChannel = event.getOption<TextChannel>("action-log")
             val runCatching = runCatching {

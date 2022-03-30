@@ -5,6 +5,7 @@ import java.awt.Color;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import xyz.chalky.taboo.Taboo;
 import xyz.chalky.taboo.util.PropertiesManager;
@@ -35,6 +36,16 @@ public class InteractionsListener extends ListenerAdapter {
             event.replyEmbeds(ResponseHelper.createEmbed(null, "I am in debug mode! Only my owner can use commands!", Color.RED, event.getUser()).build()).queue();
         } else {
             Taboo.getInstance().getInteractionCommandHandler().handleMessageContextCommand(event);
+        }
+    }
+
+    @Override
+    public void onUserContextInteraction(UserContextInteractionEvent event) {
+        if (!event.isFromGuild()) return;
+        if (Taboo.getInstance().isDebug() && !(propertiesManager.getOwnerId() == (event.getUser().getIdLong()))) {
+            event.replyEmbeds(ResponseHelper.createEmbed(null, "I am in debug mode! Only my owner can use commands!", Color.RED, event.getUser()).build()).queue();
+        } else {
+            Taboo.getInstance().getInteractionCommandHandler().handleUserContextCommand(event);
         }
     }
 

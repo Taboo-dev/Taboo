@@ -9,16 +9,20 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.slf4j.Logger;
 import xyz.chalky.taboo.Taboo;
-import xyz.chalky.taboo.commands.*;
+import xyz.chalky.taboo.commands.ConfigSlashCommand;
+import xyz.chalky.taboo.commands.context.BookmarkContextMenuMessageCommand;
+import xyz.chalky.taboo.commands.misc.InfoSlashCommand;
+import xyz.chalky.taboo.commands.misc.PingSlashCommand;
+import xyz.chalky.taboo.commands.music.PlaySlashCommand;
+import xyz.chalky.taboo.commands.music.QueueSlashCommand;
 import xyz.chalky.taboo.util.PropertiesManager;
-import xyz.chalky.taboo.util.ResponseHelper;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,14 +32,16 @@ import java.util.function.Consumer;
 
 public class InteractionCommandHandler {
 
-    private final PropertiesManager propertiesManager;
-    private final static List<GenericCommand> registeredCommands = new ArrayList<>();
-    private final static ConcurrentHashMap<Long, List<GenericCommand>> registeredGuildCommands = new ConcurrentHashMap<>();
-    private CommandListUpdateAction commandUpdateAction;
     private static final Logger LOGGER = KotlinLogging.INSTANCE.logger("InteractionCommandHandler");
+    private final List<GenericCommand> registeredCommands;
+    private final ConcurrentHashMap<Long, List<GenericCommand>> registeredGuildCommands;
+    private CommandListUpdateAction commandUpdateAction;
+    private final PropertiesManager propertiesManager;
 
     public InteractionCommandHandler(PropertiesManager propertiesManager) {
         this.propertiesManager = propertiesManager;
+        registeredCommands = Collections.synchronizedList(new ArrayList<>());
+        registeredGuildCommands = new ConcurrentHashMap<>();
     }
 
     public void initialize() {
@@ -43,18 +49,19 @@ public class InteractionCommandHandler {
         registerAllCommands();
     }
 
-    private void registerAllCommands() {
-        registerCommand(new InfoSlashCommand());
+    public void registerAllCommands() {
         registerCommand(new PingSlashCommand());
-        registerCommand(new PlaySlashCommand(propertiesManager));
+        registerCommand(new InfoSlashCommand());
+        registerCommand(new PlaySlashCommand());
+        registerCommand(new QueueSlashCommand());
         registerCommand(new ConfigSlashCommand());
+        // context
         registerCommand(new BookmarkContextMenuMessageCommand());
     }
 
     public void updateCommands(Consumer<List<Command>> success, Consumer<Throwable> failure) {
         if (!Taboo.getInstance().isDebug()) {
             commandUpdateAction.queue(success, failure);
-
             for (Map.Entry<Long, List<GenericCommand>> entrySet : registeredGuildCommands.entrySet()) {
                 Long guildId = entrySet.getKey();
                 List<GenericCommand> slashCommands = entrySet.getValue();
@@ -63,8 +70,8 @@ public class InteractionCommandHandler {
                 Guild guild = Taboo.getInstance().getShardManager().getGuildById(guildId);
                 if (guild == null) continue;
                 CommandListUpdateAction guildCommandUpdateAction = guild.updateCommands();
-                for (GenericCommand cmd : slashCommands) {
-                    guildCommandUpdateAction = guildCommandUpdateAction.addCommands(cmd.getData());
+                for (GenericCommand command : slashCommands) {
+                    guildCommandUpdateAction = guildCommandUpdateAction.addCommands(command.getData());
                 }
                 if (slashCommands.size() > 0) guildCommandUpdateAction.queue();
             }
@@ -74,21 +81,21 @@ public class InteractionCommandHandler {
                 Guild guild = Taboo.getInstance().getShardManager().getGuildById(propertiesManager.getGuildId());
                 if (guild == null) return;
                 CommandListUpdateAction commandListUpdateAction = guild.updateCommands();
-                for (GenericCommand cmd : commands) {
-                    commandListUpdateAction.addCommands(cmd.getData());
-                }
-                commandListUpdateAction.queue(success, failure);
+                for (GenericCommand command : commands)
+                    commandListUpdateAction.addCommands(command.getData());
+                commandListUpdateAction.queue();
             }
         }
     }
 
     private void registerCommand(GenericCommand command) {
         if (!command.isGlobal() && !Taboo.getInstance().isDebug()) {
-            if (command.getEnabledGuilds().isEmpty()) return;
+            if (command.getEnabledGuilds() == null || command.getEnabledGuilds().isEmpty()) return;
             for (Long guildId : command.getEnabledGuilds()) {
                 Guild guild = Taboo.getInstance().getShardManager().getGuildById(guildId);
                 if (guild == null) continue;
-                List<GenericCommand> alreadyRegistered = registeredGuildCommands.containsKey(guildId) ? registeredGuildCommands.get(guildId) : new ArrayList<>();
+                List<GenericCommand> alreadyRegistered = registeredGuildCommands.containsKey(guildId) ?
+                        registeredGuildCommands.get(guildId) : new ArrayList<>();
                 alreadyRegistered.add(command);
                 registeredGuildCommands.put(guildId, alreadyRegistered);
             }
@@ -97,7 +104,8 @@ public class InteractionCommandHandler {
         if (Taboo.getInstance().isDebug()) {
             Guild guild = Taboo.getInstance().getShardManager().getGuildById(propertiesManager.getGuildId());
             if (guild != null) {
-                List<GenericCommand> alreadyRegistered = registeredGuildCommands.containsKey(propertiesManager.getGuildId()) ? registeredGuildCommands.get(propertiesManager.getGuildId()) : new ArrayList<>();
+                List<GenericCommand> alreadyRegistered = registeredGuildCommands.containsKey(propertiesManager.getGuildId()) ?
+                        registeredGuildCommands.get(propertiesManager.getGuildId()) : new ArrayList<>();
                 alreadyRegistered.add(command);
                 registeredGuildCommands.put(propertiesManager.getGuildId(), alreadyRegistered);
             }
@@ -105,81 +113,10 @@ public class InteractionCommandHandler {
         }
         commandUpdateAction.addCommands(command.getData());
         registeredCommands.add(command);
-        LOGGER.info("Registered commands");
-    }
-
-    public void handleSlashCommand(SlashCommandInteractionEvent event, Member member) {
-        Runnable r = () -> {
-            try {
-                if (!event.isFromGuild()) return;
-                Guild guild = event.getGuild();
-                SlashCommand command = null;
-                long guildId = guild.getIdLong();
-                if (registeredGuildCommands.containsKey(guildId)) {
-                    List<SlashCommand> guildCommands = registeredGuildCommands.get(guildId)
-                            .stream()
-                            .filter(cmd -> cmd instanceof SlashCommand)
-                            .map(cmd -> (SlashCommand) cmd)
-                            .toList();
-                    SlashCommand guildCommand = guildCommands.stream()
-                            .filter(cmd -> cmd.getCommandName().equalsIgnoreCase(event.getName()))
-                            .findFirst()
-                            .orElse(null);
-                    if (guildCommand != null) command = guildCommand;
-                }
-                if (command == null) {
-                    SlashCommand globalCommand = getRegisteredSlashCommands()
-                            .stream()
-                            .filter(cmd -> cmd.getCommandName().equalsIgnoreCase(event.getName()))
-                            .findFirst()
-                            .orElse(null);
-                    if (globalCommand != null) command = globalCommand;
-                }
-                if (command != null) {
-                    SlashCommandContext ctx = new SlashCommandContext(event);
-                    List<Permission> neededPermissions = command.getRequiredUserPermissions();
-                    List<Permission> neededBotPermissions = command.getRequiredBotPermissions();
-                    if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
-                        event.replyEmbeds(ResponseHelper.createEmbed(null, "You do not have the required permissions to use this command!", Color.RED, event.getUser()).build()).queue();
-                        return;
-                    }
-                    if (neededBotPermissions != null && !guild.getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
-                        event.replyEmbeds(ResponseHelper.createEmbed(null, "I do not have the required permissions to use this command!", Color.RED, event.getUser()).build()).queue();
-                        return;
-                    }
-                    if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
-                        GuildVoiceState guildVoiceState = member.getVoiceState();
-                        if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
-                            event.replyEmbeds(ResponseHelper.createEmbed(null, "You must be in a voice channel to use this command!", Color.RED, event.getUser()).build()).queue();
-                            return;
-                        }
-                    }
-                    if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_SAME_VC)) {
-                        GuildVoiceState guildVoiceState = member.getVoiceState();
-                        AudioManager audioManager = event.getGuild().getAudioManager();
-                        if (guildVoiceState == null || guildVoiceState.getChannel() == null || !audioManager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
-                            event.replyEmbeds(ResponseHelper.createEmbed(null, "You must be in the same voice channel as me to use this command!", Color.RED, event.getUser()).build()).queue();
-                            return;
-                        }
-                    }
-                    event.deferReply().queue();
-                    command.executeCommand(event, member, ctx);
-                }
-            } catch (Exception e) {
-                if (event.isAcknowledged()) {
-                    event.getHook().sendMessage("An error occurred while handling the command!").queue();
-                    LOGGER.error("Could not execute slash-command!", e);
-                } else {
-                    event.reply("An error occurred while handling the command!").queue();
-                    LOGGER.error("Could not execute slash-command!", e);
-                }
-            }
-        };
-        Taboo.getInstance().getCommandExecutor().execute(r);
     }
 
     public void handleAutoComplete(CommandAutoCompleteInteractionEvent event) {
-        if (!event.isFromGuild()) return;
+        if (event.getGuild() == null) return;
         Runnable r = () -> {
             try {
                 SlashCommand command = null;
@@ -190,25 +127,29 @@ public class InteractionCommandHandler {
                             .filter(cmd -> cmd instanceof SlashCommand)
                             .map(cmd -> (SlashCommand) cmd)
                             .toList();
-                    SlashCommand guildCommand = guildCommands.stream()
-                            .filter(cmd -> cmd.getCommandName().equalsIgnoreCase(event.getName()))
-                            .findFirst()
-                            .orElse(null);
-                    if (guildCommand != null) command = guildCommand;
-                }
-                if (command == null) {
-                    SlashCommand globalCommand = getRegisteredSlashCommands()
+                    SlashCommand guildCommand = guildCommands
                             .stream()
-                            .filter(cmd -> cmd instanceof SlashCommand)
-                            .map(cmd -> (SlashCommand) cmd)
                             .filter(cmd -> cmd.getCommandName().equalsIgnoreCase(event.getName()))
                             .findFirst()
                             .orElse(null);
-                    if (globalCommand != null) command = globalCommand;
-                }
+                    if (guildCommand != null)
+                        command = guildCommand;
+            }
+            if (command == null) {
+                SlashCommand globalCommand = registeredCommands
+                        .stream()
+                        .filter(cmd -> cmd instanceof SlashCommand)
+                        .map(cmd -> (SlashCommand) cmd)
+                        .filter(cmd -> cmd.getCommandName().equalsIgnoreCase(event.getName()))
+                        .findFirst()
+                        .orElse(null);
+                if (globalCommand != null)
+                    command = globalCommand;
+            }
+            if (command != null)
                 command.handleAutoComplete(event);
             } catch (Exception e) {
-                LOGGER.error("An error occurred while handling autocomplete!", e);
+                LOGGER.warn("Error while handling auto complete", e);
                 event.replyChoices(Collections.emptyList()).queue();
             }
         };
@@ -218,20 +159,19 @@ public class InteractionCommandHandler {
     public void handleMessageContextCommand(MessageContextInteractionEvent event) {
         if (!event.isFromGuild()) return;
         Guild guild = event.getGuild();
-        long guildId = guild.getIdLong();
         Member member = event.getMember();
         MessageContextCommand command = null;
-        if (registeredGuildCommands.containsKey(guildId)) {
-            List<MessageContextCommand> guildCommands = registeredGuildCommands.get(guildId)
+        if (registeredGuildCommands.containsKey(guild.getIdLong())) {
+            List<MessageContextCommand> guildCommands = registeredGuildCommands.get(guild.getIdLong())
                     .stream()
                     .filter(cmd -> cmd instanceof MessageContextCommand)
                     .map(cmd -> (MessageContextCommand) cmd)
                     .toList();
-            MessageContextCommand guildCommand = guildCommands.stream()
-                    .filter(cmd -> cmd.getCommandName().equalsIgnoreCase(event.getName()))
+            MessageContextCommand guildCommand = guildCommands.stream().filter(cmd -> cmd.getData().getName().equalsIgnoreCase(event.getName()))
                     .findFirst()
                     .orElse(null);
-            if (guildCommand != null) command = guildCommand;
+            if (guildCommand != null)
+                command = guildCommand;
         }
         if (command == null) {
             MessageContextCommand globalCommand = getRegisteredMessageContextCommands()
@@ -239,66 +179,233 @@ public class InteractionCommandHandler {
                     .filter(cmd -> cmd.getData().getName().equalsIgnoreCase(event.getName()))
                     .findFirst()
                     .orElse(null);
-            if (globalCommand != null) command = globalCommand;
-            if (command == null) return;
-            List<Permission> neededPermissions = command.getRequiredUserPermissions();
-            List<Permission> neededBotPermissions = command.getRequiredBotPermissions();
-            if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
-                event.reply("You don't have the required permissions to use this command.").queue();
-                return;
-            }
-            if (neededBotPermissions != null && !guild.getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
-                event.reply("I don't have the required permissions to use this command.").queue();
-                return;
-            }
-            if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
-                GuildVoiceState guildVoiceState = member.getVoiceState();
-                if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
-                    event.reply("You must be in a voice channel to use this command!").queue();
-                    return;
-                }
-            }
-            if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_SAME_VC)) {
-                GuildVoiceState guildVoiceState = member.getVoiceState();
-                AudioManager audioManager = event.getGuild().getAudioManager();
-                if (guildVoiceState == null || guildVoiceState.getChannel() == null || !audioManager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
-                    event.reply("You must be in the same voice channel as me to use this command!").queue();
-                    return;
-                }
-            }
-            MessageContextCommand finalCommand = command;
-            Runnable r = () -> {
-                try {
-                    finalCommand.executeCommand(event);
-                } catch (Exception e) {
-                    LOGGER.error("An error occurred while executing a message context command!", e);
-                    event.reply("An error occurred while executing this command!").queue();
-                }
-            };
-            Taboo.getInstance().getCommandExecutor().submit(r);
+            if (globalCommand != null)
+                command = globalCommand;
         }
+        if (command == null) return;
+        List<Permission> neededPermissions = command.getRequiredUserPermissions();
+        List<Permission> neededBotPermissions = command.getRequiredBotPermissions();
+        if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
+            event.reply("You don't have the required permissions to execute this command.").queue();
+            return;
+        }
+        if (neededBotPermissions != null && !event.getGuild().getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
+            event.reply("I don't have the required permissions to execute this command.").queue();
+            return;
+        }
+        if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
+            GuildVoiceState guildVoiceState = member.getVoiceState();
+            if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
+                event.reply("You must be in a voice channel to execute this command.").queue();
+                return;
+            }
+        }
+        if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_SAME_VC)) {
+            GuildVoiceState guildVoiceState = member.getVoiceState();
+            AudioManager manager = event.getGuild().getAudioManager();
+            if (manager.isConnected()) {
+                if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
+                    event.reply("You must be in the same voice channel as me to execute this command.").queue();
+                    return;
+                }
+            }
+        }
+        MessageContextCommand finalCommand = command;
+        Runnable r = () -> {
+            try {
+                finalCommand.executeCommand(event);
+            } catch (Exception e) {
+                LOGGER.warn("Error while executing command", e);
+                if (event.isAcknowledged()) {
+                    event.getHook().sendMessage("An error occurred while executing the command.").queue();
+                } else {
+                    event.reply("An error occurred while executing the command.").queue();
+                }
+            }
+        };
+        event.deferReply().queue();
+        Taboo.getInstance().getCommandExecutor().submit(r);
     }
 
-    private List<SlashCommand> getRegisteredSlashCommands() {
-        return registeredCommands.stream()
-            .filter(cmd -> cmd instanceof SlashCommand)
-            .map(cmd -> (SlashCommand) cmd)
-            .toList();
+    public void handleUserContextCommand(UserContextInteractionEvent event) {
+        if (!event.isFromGuild()) return;
+        Guild guild = event.getGuild();
+        Member member = event.getMember();
+        UserContextCommand command = null;
+        if (registeredGuildCommands.containsKey(guild.getIdLong())) {
+            List<UserContextCommand> guildCommands = registeredGuildCommands.get(guild.getIdLong())
+                    .stream()
+                    .filter(cmd -> cmd instanceof UserContextCommand)
+                    .map(cmd -> (UserContextCommand) cmd)
+                    .toList();
+            UserContextCommand guildCommand = guildCommands
+                    .stream()
+                    .filter(cmd -> cmd.getData().getName().equalsIgnoreCase(event.getName()))
+                    .findFirst()
+                    .orElse(null);
+            if (guildCommand != null)
+                command = guildCommand;
+        }
+        if (command == null) {
+            UserContextCommand globalCommand = getRegisteredUserContextCommands()
+                    .stream()
+                    .filter(cmd -> cmd.getData().getName().equalsIgnoreCase(event.getName()))
+                    .findFirst()
+                    .orElse(null);
+            if (globalCommand != null)
+                command = globalCommand;
+        }
+        if (command == null)
+            return;
+        List<Permission> neededPermissions = command.getRequiredUserPermissions();
+        List<Permission> neededBotPermissions = command.getRequiredBotPermissions();
+        if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
+            event.reply("You don't have the required permissions to execute this command.").queue();
+            return;
+        }
+        if (neededBotPermissions != null && !event.getGuild().getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
+            event.reply("I don't have the required permissions to execute this command.").queue();
+            return;
+        }
+        if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
+            GuildVoiceState guildVoiceState = member.getVoiceState();
+            if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
+                event.reply("You must be in a voice channel to execute this command.").queue();
+                return;
+            }
+        }
+        if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_SAME_VC)) {
+            GuildVoiceState guildVoiceState = member.getVoiceState();
+            AudioManager manager = event.getGuild().getAudioManager();
+            if (manager.isConnected()) {
+                if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
+                    event.reply("You must be in the same voice channel as me to execute this command.").queue();
+                    return;
+                }
+            }
+        }
+        UserContextCommand finalCommand = command;
+        Runnable r = () -> {
+            try {
+                finalCommand.executeCommand(event);
+            } catch (Exception e) {
+                LOGGER.warn("An error occurred while executing a user context command.", e);
+                if (event.isAcknowledged()) {
+                    event.getHook().sendMessage("An error occurred while executing the command.").queue();
+                } else {
+                    event.reply("An error occurred while executing the command.").queue();
+                }
+            }
+        };
+        event.deferReply().queue();
+        Taboo.getInstance().getCommandExecutor().submit(r);
     }
 
-    private List<MessageContextCommand> getRegisteredMessageContextCommands() {
-        return registeredCommands.stream()
-            .filter(cmd -> cmd instanceof MessageContextCommand)
-            .map(cmd -> (MessageContextCommand) cmd)
-            .toList();
+    public void handleSlashCommand(SlashCommandInteractionEvent event, Member member) {
+        Runnable r = () -> {
+            try {
+                if (!event.isFromGuild()) return;
+                Guild guild = event.getGuild();
+                SlashCommand command = null;
+                long guildId = event.getGuild().getIdLong();
+                if (registeredGuildCommands.containsKey(guildId)) {
+                    List<SlashCommand> guildCommands = registeredGuildCommands.get(guildId)
+                            .stream()
+                            .filter(cmd -> cmd instanceof SlashCommand)
+                            .map(cmd -> (SlashCommand) cmd)
+                            .toList();
+                    SlashCommand guildCommand = guildCommands
+                            .stream()
+                            .filter(cmd -> cmd.getCommandName().equalsIgnoreCase(event.getName()))
+                            .findFirst()
+                            .orElse(null);
+                    if (guildCommand != null)
+                        command = guildCommand;
+                }
+                if (command == null) {
+                    SlashCommand globalCommand = getRegisteredSlashCommands()
+                            .stream()
+                            .filter(cmd -> cmd.getCommandName().equalsIgnoreCase(event.getName()))
+                            .findFirst()
+                            .orElse(null);
+                    if (globalCommand != null)
+                        command = globalCommand;
+                }
+                if (command != null) {
+                    List<Permission> neededPermissions = command.getRequiredUserPermissions();
+                    List<Permission> neededBotPermissions = command.getRequiredBotPermissions();
+                    if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
+                        event.reply("You don't have the required permissions to execute this command.").queue();
+                        return;
+                    }
+                    if (neededBotPermissions != null && !event.getGuild().getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
+                        event.reply("I don't have the required permissions to execute this command.").queue();
+                        return;
+                    }
+                    if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
+                        GuildVoiceState guildVoiceState = member.getVoiceState();
+                        if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
+                            event.reply("You must be in a voice channel to execute this command.").queue();
+                            return;
+                        }
+                    }
+                    if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_SAME_VC)) {
+                        GuildVoiceState voiceState = member.getVoiceState();
+                        AudioManager manager = event.getGuild().getAudioManager();
+                        if (manager.isConnected()) {
+                            if (!manager.getConnectedChannel().equals(voiceState.getChannel())) {
+                                event.reply("You must be in the same voice channel as me to execute this command.").queue();
+                                return;
+                            }
+                        }
+                    }
+                    command.executeCommand(event);
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Error while executing slash command", e);
+                if (event.isAcknowledged()) {
+                    event.getHook().sendMessage("An error occurred while executing this command.").queue();
+                    return;
+                } else {
+                    event.reply("An error occurred while executing this command.").queue();
+                    return;
+                }
+            }
+        };
+        event.deferReply().queue();
+        Taboo.getInstance().getCommandExecutor().execute(r);
     }
 
-    public static ConcurrentHashMap<Long, List<GenericCommand>> getRegisteredGuildCommands() {
-        return registeredGuildCommands;
-    }
-
-    public static List<GenericCommand> getRegisteredCommands() {
+    public List<GenericCommand> getRegisteredCommands() {
         return registeredCommands;
+    }
+
+    public List<SlashCommand> getRegisteredSlashCommands() {
+        return registeredCommands
+                .stream()
+                .filter(cmd -> cmd instanceof SlashCommand)
+                .map(cmd -> (SlashCommand) cmd)
+                .toList();
+    }
+
+    public List<MessageContextCommand> getRegisteredMessageContextCommands() {
+        return registeredCommands
+                .stream()
+                .filter(cmd -> cmd instanceof MessageContextCommand)
+                .map(cmd -> (MessageContextCommand) cmd)
+                .toList();
+    }
+
+    public List<UserContextCommand> getRegisteredUserContextCommands() {
+        return registeredCommands
+                .stream()
+                .filter(cmd -> cmd instanceof UserContextCommand)
+                .map(cmd -> (UserContextCommand) cmd)
+                .toList();
+    }
+
+    public ConcurrentHashMap<Long, List<GenericCommand>> getRegisteredGuildCommands() {
+        return registeredGuildCommands;
     }
 
 }

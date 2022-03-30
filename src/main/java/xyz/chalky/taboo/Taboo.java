@@ -20,7 +20,6 @@ import xyz.chalky.taboo.events.MessageListener;
 import xyz.chalky.taboo.events.ReadyHandler;
 import xyz.chalky.taboo.util.PropertiesManager;
 
-import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
 import java.util.Collection;
 import java.util.List;
@@ -77,7 +76,7 @@ public class Taboo {
                 .setStatus(OnlineStatus.ONLINE)
                 .addEventListeners(
                         new InteractionsListener(propertiesManager), new ReadyHandler(propertiesManager),
-                        new MessageListener()
+                        new MessageListener(), eventWaiter
                 ).build();
     }
 
@@ -118,62 +117,65 @@ public class Taboo {
     }
 
     public void initCommandCheck(PropertiesManager propertiesManager) {
-        LOGGER.info("Checking for outdated commands...");
-        commandExecutor.submit(() -> {
-            if (!isDebug) {
-                Guild guild = shardManager.getGuildById(propertiesManager.getGuildId());
+        LOGGER.info("Checking for outdated command cache...");
+        getCommandExecutor().submit(() -> {
+            if (getInstance().isDebug()) {
+                Guild guild = getInstance().getShardManager().getGuildById(propertiesManager.getGuildId());
                 if (guild == null) {
-                    LOGGER.error("Debug guild not found!");
+                    LOGGER.error("Debug guild does not exist!");
                     return;
                 }
                 guild.retrieveCommands().queue(discordCommands -> {
-                    List<GenericCommand> localCommands = InteractionCommandHandler
+                    List<GenericCommand> localCommands = getInstance().getInteractionCommandHandler()
                             .getRegisteredGuildCommands()
                             .get(guild.getIdLong());
                     handleCommandUpdates(discordCommands, localCommands);
                 });
-            } else {
-                shardManager.getShards().get(0).retrieveCommands().queue(discordCommands -> {
-                    List<GenericCommand> localCommands = InteractionCommandHandler
-                            .getRegisteredCommands()
-                            .stream()
-                            .filter(GenericCommand::isGlobal)
-                            .toList();
-                    handleCommandUpdates(discordCommands, localCommands);
-                });
+                return;
             }
+            getInstance().getShardManager().getShards().get(0).retrieveCommands().queue(discordCommands -> {
+                List<GenericCommand> localCommands = getInstance().getInteractionCommandHandler()
+                        .getRegisteredCommands()
+                        .stream()
+                        .filter(GenericCommand::isGlobal)
+                        .toList();
+                handleCommandUpdates(discordCommands, localCommands);
+            });
         });
     }
 
-    private void handleCommandUpdates(Collection<Command> discordCommands, Collection<GenericCommand> localCommands) {
+    private static void handleCommandUpdates(Collection<? extends Command> discordCommands, Collection<? extends GenericCommand> localCommands) {
         boolean commandRemovedOrAdded = localCommands.size() != discordCommands.size();
         if (commandRemovedOrAdded) {
             if (localCommands.size() > discordCommands.size()) {
-                LOGGER.warn("New command(s) have been added! Updating Discord...");
+                LOGGER.warn("New command(s) has/have been added! Updating Discord's cache...");
             } else {
-                LOGGER.warn("Command(s) have been removed! Updating Discord...");
+                LOGGER.warn("Command(s) has/have been removed! Updating Discord's cache...");
             }
-            interactionCommandHandler.updateCommands(commands -> {
+            getInstance().getInteractionCommandHandler().updateCommands(commands -> {
                 LOGGER.info("Updated {} commands!", commands.size());
-            }, null);
+            }, throwable -> {});
             return;
         }
         boolean outdated = false;
         for (GenericCommand localCommand : localCommands) {
             Command discordCommand = discordCommands.stream()
-                    .filter(cmd -> cmd.getName().equalsIgnoreCase(localCommand.getData().getName()))
+                    .filter(command -> command.getName().equalsIgnoreCase(localCommand.getData().getName()))
                     .findFirst()
                     .orElse(null);
             CommandData localCommandData = localCommand.getData();
             CommandData discordCommandData = CommandData.fromCommand(discordCommand);
             if (!localCommandData.equals(discordCommandData)) {
                 outdated = true;
+                break;
             }
         }
         if (outdated) {
-            interactionCommandHandler.updateCommands(commands -> {
+            getInstance().getInteractionCommandHandler().updateCommands(commands -> {
                 LOGGER.info("Updated {} commands!", commands.size());
-            }, null);
+            }, throwable -> {});
+        } else {
+            LOGGER.info("No outdated commands found!");
         }
     }
 

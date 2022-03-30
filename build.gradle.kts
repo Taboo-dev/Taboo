@@ -12,9 +12,9 @@ version = "1.0-SNAPSHOT"
 repositories {
     mavenCentral()
     maven("https://m2.dv8tion.net/releases")
+    maven("https://m2.chew.pro/snapshots")
     maven("https://jcenter.bintray.com")
     maven("https://jitpack.io")
-    maven("https://m2.chew.pro/snapshots")
 }
 
 dependencies {
@@ -22,6 +22,7 @@ dependencies {
     implementation("pw.chew:jda-chewtils:2.0-SNAPSHOT")
     implementation("com.github.MinnDevelopment:jda-ktx:master-SNAPSHOT")
     implementation("com.github.walkyst:lavaplayer-fork:1.3.97")
+    // implementation("com.github.walkyst:lavaplayer-fork:custom-SNAPSHOT")
     implementation("ch.qos.logback:logback-classic:1.2.11")
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("org.xerial:sqlite-jdbc:3.36.0.3")
