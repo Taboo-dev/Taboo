@@ -2,6 +2,7 @@ package xyz.chalky.taboo;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
 import mu.KotlinLogging;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Guild;
@@ -74,6 +75,7 @@ public class Taboo {
                 .enableCache(CacheFlag.VOICE_STATE)
                 .setShardsTotal(-1)
                 .setStatus(OnlineStatus.ONLINE)
+                .setAudioSendFactory(new NativeAudioSendFactory())
                 .addEventListeners(
                         new InteractionsListener(propertiesManager), new ReadyHandler(propertiesManager),
                         new MessageListener(), eventWaiter

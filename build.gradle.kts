@@ -22,7 +22,7 @@ dependencies {
     implementation("pw.chew:jda-chewtils:2.0-SNAPSHOT")
     implementation("com.github.MinnDevelopment:jda-ktx:master-SNAPSHOT")
     implementation("com.github.walkyst:lavaplayer-fork:1.3.97")
-    // implementation("com.github.walkyst:lavaplayer-fork:custom-SNAPSHOT")
+    implementation("com.sedmelluq:jda-nas:1.1.0")
     implementation("ch.qos.logback:logback-classic:1.2.11")
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("org.xerial:sqlite-jdbc:3.36.0.3")
