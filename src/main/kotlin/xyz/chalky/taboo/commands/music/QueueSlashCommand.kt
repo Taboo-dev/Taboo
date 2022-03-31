@@ -10,6 +10,7 @@ import xyz.chalky.taboo.backend.CommandFlag.MUST_BE_IN_SAME_VC
 import xyz.chalky.taboo.backend.CommandFlag.MUST_BE_IN_VC
 import xyz.chalky.taboo.backend.SlashCommand
 import xyz.chalky.taboo.music.AudioHandler
+import xyz.chalky.taboo.util._reply
 import xyz.chalky.taboo.util.onSubCommand
 import java.time.Instant
 
@@ -60,13 +61,27 @@ class QueueSlashCommand : SlashCommand() {
                     .append("`")
                     .append(" more tracks...")
             }
+            if (trackList == 0) {
+                desc.append("No tracks in queue.")
+            }
             val embed = Embed {
                 title = "Queue"
                 description = desc.toString()
                 color = 0x9F90CF
                 timestamp = Instant.now()
             }
-            event.hook.sendMessageEmbeds(embed).queue()
+            event._reply(embed).queue()
+        }
+        event.onSubCommand("clear") {
+            val trackScheduler = AudioHandler(event).trackScheduler
+            trackScheduler.queue.clear()
+            val embed = Embed {
+                title = "Queue"
+                description = "Queue cleared."
+                color = 0x9F90CF
+                timestamp = Instant.now()
+            }
+            event._reply(embed).queue()
         }
     }
 

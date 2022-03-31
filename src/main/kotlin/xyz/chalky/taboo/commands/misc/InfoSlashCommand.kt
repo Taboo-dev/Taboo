@@ -3,6 +3,7 @@ package xyz.chalky.taboo.commands.misc
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import xyz.chalky.taboo.backend.SlashCommand
+import xyz.chalky.taboo.util._reply
 
 class InfoSlashCommand : SlashCommand() {
 
@@ -11,7 +12,7 @@ class InfoSlashCommand : SlashCommand() {
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
-        event.hook.sendMessage("Hi! I'm Taboo!").queue()
+        event._reply("Hi! I'm Taboo!").queue()
     }
 
 }

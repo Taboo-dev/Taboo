@@ -11,6 +11,7 @@ import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.transactions.transaction
 import xyz.chalky.taboo.backend.SlashCommand
 import xyz.chalky.taboo.database.Config
+import xyz.chalky.taboo.util._reply
 import xyz.chalky.taboo.util.onSubCommand
 
 class ConfigSlashCommand : SlashCommand() {
@@ -42,10 +43,10 @@ class ConfigSlashCommand : SlashCommand() {
                 }
             }
             runCatching.onFailure {
-                event.hook.sendMessage("Failed to set config: ${it.message}").queue()
+                event._reply("Failed to set config: ${it.message}").queue()
             }
             runCatching.onSuccess {
-                event.hook.sendMessage("Config set!").queue()
+                event._reply("Config set!").queue()
             }
         }
         event.onSubCommand("clear") {
@@ -57,10 +58,10 @@ class ConfigSlashCommand : SlashCommand() {
                 }
             }
             runCatching.onFailure {
-                event.hook.sendMessage("Failed to clear config: ${it.message}").queue()
+                event._reply("Failed to clear config: ${it.message}").queue()
             }
             runCatching.onSuccess {
-                event.hook.sendMessage("Config cleared!").queue()
+                event._reply("Config cleared!").queue()
             }
         }
     }

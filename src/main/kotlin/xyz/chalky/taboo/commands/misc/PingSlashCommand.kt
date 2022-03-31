@@ -1,18 +1,15 @@
 package xyz.chalky.taboo.commands.misc
 
 import dev.minn.jda.ktx.EmbedBuilder
-import dev.minn.jda.ktx.InlineEmbed
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import net.dv8tion.jda.api.JDA
-import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.EmbedBuilder
-import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import xyz.chalky.taboo.backend.SlashCommand
-import java.awt.SystemColor.text
+import xyz.chalky.taboo.util._edit
+import xyz.chalky.taboo.util._reply
 import java.time.Instant
 
 class PingSlashCommand : SlashCommand() {
+
     init {
         setCommandData(Commands.slash("ping", "Pong!"))
     }
@@ -31,16 +28,17 @@ class PingSlashCommand : SlashCommand() {
             }
             timestamp = Instant.now()
         }
-        hook.sendMessageEmbeds(pingEmbed.build()).queue { msg: Message ->
-            jda.restPing.queue { restPing: Long? ->
+        event._reply(pingEmbed.build()).queue { msg ->
+            jda.restPing.queue { restPing ->
                 val gatewayPing = jda.gatewayPing
                 pingEmbed.description = """
                     Pong!
                     Rest Ping: $restPing ms
                     Gateway Ping: $gatewayPing ms
                 """.trimIndent()
-                msg.editMessageEmbeds(pingEmbed.build()).queue()
+                msg._edit(pingEmbed.build()).queue()
             }
         }
     }
+
 }
