@@ -17,7 +17,6 @@ class PingSlashCommand : SlashCommand() {
     override fun executeCommand(event: SlashCommandInteractionEvent) {
         val jda = event.jda
         val user = event.user
-        val hook = event.hook
         val pingEmbed = EmbedBuilder {
             title = "Ping!"
             description = "Pong! Shows the bot's ping!"
