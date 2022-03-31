@@ -186,17 +186,17 @@ public class InteractionCommandHandler {
         List<Permission> neededPermissions = command.getRequiredUserPermissions();
         List<Permission> neededBotPermissions = command.getRequiredBotPermissions();
         if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
-            event.reply("You don't have the required permissions to execute this command.").queue();
+            event.getHook().sendMessage("You don't have the required permissions to execute this command.").queue();
             return;
         }
         if (neededBotPermissions != null && !event.getGuild().getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
-            event.reply("I don't have the required permissions to execute this command.").queue();
+            event.getHook().sendMessage("I don't have the required permissions to execute this command.").queue();
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
             GuildVoiceState guildVoiceState = member.getVoiceState();
             if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
-                event.reply("You must be in a voice channel to execute this command.").queue();
+                event.getHook().sendMessage("You must be in a voice channel to execute this command.").queue();
                 return;
             }
         }
@@ -205,7 +205,7 @@ public class InteractionCommandHandler {
             AudioManager manager = event.getGuild().getAudioManager();
             if (manager.isConnected()) {
                 if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
-                    event.reply("You must be in the same voice channel as me to execute this command.").queue();
+                    event.getHook().sendMessage("You must be in the same voice channel as me to execute this command.").queue();
                     return;
                 }
             }
@@ -260,17 +260,17 @@ public class InteractionCommandHandler {
         List<Permission> neededPermissions = command.getRequiredUserPermissions();
         List<Permission> neededBotPermissions = command.getRequiredBotPermissions();
         if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
-            event.reply("You don't have the required permissions to execute this command.").queue();
+            event.getHook().sendMessage("You don't have the required permissions to execute this command.").queue();
             return;
         }
         if (neededBotPermissions != null && !event.getGuild().getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
-            event.reply("I don't have the required permissions to execute this command.").queue();
+            event.getHook().sendMessage("I don't have the required permissions to execute this command.").queue();
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
             GuildVoiceState guildVoiceState = member.getVoiceState();
             if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
-                event.reply("You must be in a voice channel to execute this command.").queue();
+                event.getHook().sendMessage("You must be in a voice channel to execute this command.").queue();
                 return;
             }
         }
@@ -279,7 +279,7 @@ public class InteractionCommandHandler {
             AudioManager manager = event.getGuild().getAudioManager();
             if (manager.isConnected()) {
                 if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
-                    event.reply("You must be in the same voice channel as me to execute this command.").queue();
+                    event.getHook().sendMessage("You must be in the same voice channel as me to execute this command.").queue();
                     return;
                 }
             }
@@ -307,7 +307,7 @@ public class InteractionCommandHandler {
                 if (!event.isFromGuild()) return;
                 Guild guild = event.getGuild();
                 SlashCommand command = null;
-                long guildId = event.getGuild().getIdLong();
+                long guildId = guild.getIdLong();
                 if (registeredGuildCommands.containsKey(guildId)) {
                     List<SlashCommand> guildCommands = registeredGuildCommands.get(guildId)
                             .stream()
@@ -335,17 +335,17 @@ public class InteractionCommandHandler {
                     List<Permission> neededPermissions = command.getRequiredUserPermissions();
                     List<Permission> neededBotPermissions = command.getRequiredBotPermissions();
                     if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
-                        event.reply("You don't have the required permissions to execute this command.").queue();
+                        event.getHook().sendMessage("You don't have the required permissions to execute this command.").queue();
                         return;
                     }
                     if (neededBotPermissions != null && !event.getGuild().getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
-                        event.reply("I don't have the required permissions to execute this command.").queue();
+                        event.getHook().sendMessage("I don't have the required permissions to execute this command.").queue();
                         return;
                     }
                     if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
                         GuildVoiceState guildVoiceState = member.getVoiceState();
                         if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
-                            event.reply("You must be in a voice channel to execute this command.").queue();
+                            event.getHook().sendMessage("You must be in a voice channel to execute this command.").queue();
                             return;
                         }
                     }
@@ -354,7 +354,7 @@ public class InteractionCommandHandler {
                         AudioManager manager = event.getGuild().getAudioManager();
                         if (manager.isConnected()) {
                             if (!manager.getConnectedChannel().equals(voiceState.getChannel())) {
-                                event.reply("You must be in the same voice channel as me to execute this command.").queue();
+                                event.getHook().sendMessage("You must be in the same voice channel as me to execute this command.").queue();
                                 return;
                             }
                         }
