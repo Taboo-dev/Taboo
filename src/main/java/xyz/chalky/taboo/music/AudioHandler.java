@@ -37,7 +37,6 @@ public class AudioHandler {
         return trackScheduler;
     }
 
-    // Remove when switch to Lavalink
     public void connect(AudioChannel audioChannel) {
         if (audioManager == null || !audioManager.isConnected()) {
             audioManager = audioChannel.getGuild().getAudioManager();
