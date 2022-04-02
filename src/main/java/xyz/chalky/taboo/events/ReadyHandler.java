@@ -1,5 +1,6 @@
 package xyz.chalky.taboo.events;
 
+import lavalink.client.io.jda.JdaLavalink;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -23,6 +24,10 @@ public class ReadyHandler extends ListenerAdapter {
             Taboo.getInstance().getInteractionCommandHandler().initialize();
             if (Taboo.getInstance().isDebug()) Taboo.getLogger().warn("Debug mode is enabled.");
             Taboo.getInstance().initCommandCheck(propertiesManager);
+            JdaLavalink lavalink = Taboo.getInstance().getLavalink();
+            lavalink.setJdaProvider(id -> Taboo.getInstance().getShardManager().getShardById(id));
+            lavalink.setUserId(event.getJDA().getSelfUser().getId());
+            lavalink.addNode("node-1", propertiesManager.getLavalinkHost(), propertiesManager.getLavalinkPassword());
             Guild guild = Taboo.getInstance().getShardManager().getGuildById(propertiesManager.getGuildId());
             TextChannel channel = guild.getTextChannelById(propertiesManager.getActionLogId());
             channel.sendMessageEmbeds(ResponseHelper.createEmbed("Taboo is ready!", null, "0x9F90CF", null).build()).queue();

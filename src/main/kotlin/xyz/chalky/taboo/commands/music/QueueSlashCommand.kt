@@ -2,14 +2,11 @@ package xyz.chalky.taboo.commands.music
 
 import dev.minn.jda.ktx.Embed
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
-import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
-import xyz.chalky.taboo.backend.CommandFlag.MUST_BE_IN_SAME_VC
-import xyz.chalky.taboo.backend.CommandFlag.MUST_BE_IN_VC
+import xyz.chalky.taboo.backend.CommandFlag.*
 import xyz.chalky.taboo.backend.SlashCommand
-import xyz.chalky.taboo.music.AudioHandler
+import xyz.chalky.taboo.music.GuildAudioPlayer
 import xyz.chalky.taboo.util._reply
 import xyz.chalky.taboo.util.onSubCommand
 import java.time.Instant
@@ -25,21 +22,16 @@ class QueueSlashCommand : SlashCommand() {
                     ),
                     SubcommandData(
                         "clear", "Clear the current queue."
-                    ),
-                    SubcommandData(
-                        "add", "Add a song to the queue."
-                    ).addOptions(OptionData(
-                        OptionType.STRING, "song", "The song to add to the queue.", true
-                    ))
+                    )
                 )
         )
         addCommandFlags(MUST_BE_IN_VC, MUST_BE_IN_SAME_VC)
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
+        val guildAudioPlayer = GuildAudioPlayer(event)
+        val queue = guildAudioPlayer.scheduler.queue
         event.onSubCommand("list") {
-            val trackScheduler = AudioHandler(event).trackScheduler
-            val queue = trackScheduler.getQueue()
             val desc = StringBuilder("Tracks:\n")
             val trackList = queue.size
             val trackCount = trackList.coerceAtMost(10)
@@ -73,8 +65,7 @@ class QueueSlashCommand : SlashCommand() {
             event._reply(embed).queue()
         }
         event.onSubCommand("clear") {
-            val trackScheduler = AudioHandler(event).trackScheduler
-            trackScheduler.queue.clear()
+            queue.clear()
             val embed = Embed {
                 title = "Queue"
                 description = "Queue cleared."

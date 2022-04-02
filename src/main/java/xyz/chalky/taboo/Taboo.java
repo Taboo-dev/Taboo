@@ -2,7 +2,7 @@ package xyz.chalky.taboo;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
+import lavalink.client.io.jda.JdaLavalink;
 import mu.KotlinLogging;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Guild;
@@ -60,6 +60,7 @@ public class Taboo {
 
     private final InteractionCommandHandler interactionCommandHandler;
     private final EventWaiter eventWaiter;
+    private final JdaLavalink lavalink;
 
     Taboo() throws Exception {
         instance = this;
@@ -69,13 +70,14 @@ public class Taboo {
         interactionCommandHandler = new InteractionCommandHandler(propertiesManager);
         isDebug = propertiesManager.getDebugState();
         eventWaiter = new EventWaiter();
+        lavalink = new JdaLavalink(null, 1, null);
         DatabaseManager.INSTANCE.startDatabase();
         shardManager = DefaultShardManagerBuilder.createDefault(propertiesManager.getToken())
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_EMOJIS)
                 .enableCache(CacheFlag.VOICE_STATE)
                 .setShardsTotal(-1)
                 .setStatus(OnlineStatus.ONLINE)
-                .setAudioSendFactory(new NativeAudioSendFactory())
+                .setVoiceDispatchInterceptor(lavalink.getVoiceInterceptor())
                 .addEventListeners(
                         new InteractionsListener(propertiesManager), new ReadyHandler(propertiesManager),
                         new MessageListener(), eventWaiter
@@ -112,6 +114,10 @@ public class Taboo {
 
     public EventWaiter getEventWaiter() {
         return eventWaiter;
+    }
+
+    public JdaLavalink getLavalink() {
+        return lavalink;
     }
 
     public static Logger getLogger() {

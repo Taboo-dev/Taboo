@@ -1,13 +1,17 @@
 package xyz.chalky.taboo.commands.music
 
 import dev.minn.jda.ktx.interactions.getOption
-import net.dv8tion.jda.api.interactions.commands.build.OptionData
-import xyz.chalky.taboo.backend.CommandFlag.*
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.exceptions.PermissionException
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
+import net.dv8tion.jda.api.interactions.commands.build.OptionData
+import xyz.chalky.taboo.backend.CommandFlag.*
 import xyz.chalky.taboo.backend.SlashCommand
-import xyz.chalky.taboo.music.AudioHandler
+import xyz.chalky.taboo.music.AudioLoadHandler
+import xyz.chalky.taboo.music.GuildAudioPlayer
+import xyz.chalky.taboo.util._reply
+import xyz.chalky.taboo.util.isUrl
 
 class PlaySlashCommand : SlashCommand() {
 
@@ -20,17 +24,28 @@ class PlaySlashCommand : SlashCommand() {
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
+        val guild = event.guild
+        val guildAudioPlayer = GuildAudioPlayer(event)
+        val link = guildAudioPlayer.link
+        val player = guildAudioPlayer.player
         val input = event.getOption<String>("song")!!
         val member = event.member!!
         val voiceState = member.voiceState
-        val query = if (input.startsWith("http://") || input.startsWith("https://")) {
+        val manager = guild!!.audioManager
+        if (manager.connectedChannel == null) {
+            try {
+                link.connect(voiceState?.channel!!)
+            } catch (e: PermissionException) {
+                event._reply("I don't have permission to connect to your voice channel.").queue()
+                return
+            }
+        }
+        val query = if (isUrl(input)) {
             input
         } else {
             "ytsearch:$input"
         }
-        val audioHandler = AudioHandler(event)
-        audioHandler.connect(voiceState!!.channel)
-        audioHandler.loadItem(query, event)
+        link.restClient.loadItem(query, AudioLoadHandler(event, player, guildAudioPlayer))
     }
 
 }
