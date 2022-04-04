@@ -16,9 +16,7 @@ import org.slf4j.Logger;
 import xyz.chalky.taboo.backend.GenericCommand;
 import xyz.chalky.taboo.backend.InteractionCommandHandler;
 import xyz.chalky.taboo.database.DatabaseManager;
-import xyz.chalky.taboo.events.InteractionsListener;
-import xyz.chalky.taboo.events.MessageListener;
-import xyz.chalky.taboo.events.ReadyHandler;
+import xyz.chalky.taboo.events.EventManager;
 import xyz.chalky.taboo.util.PropertiesManager;
 
 import java.io.FileInputStream;
@@ -71,6 +69,8 @@ public class Taboo {
         isDebug = propertiesManager.getDebugState();
         eventWaiter = new EventWaiter();
         lavalink = new JdaLavalink(null, 1, null);
+        EventManager eventManager = new EventManager(propertiesManager);
+        eventManager.init();
         DatabaseManager.INSTANCE.startDatabase();
         shardManager = DefaultShardManagerBuilder.createDefault(propertiesManager.getToken())
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_EMOJIS)
@@ -78,10 +78,8 @@ public class Taboo {
                 .setShardsTotal(-1)
                 .setStatus(OnlineStatus.ONLINE)
                 .setVoiceDispatchInterceptor(lavalink.getVoiceInterceptor())
-                .addEventListeners(
-                        new InteractionsListener(propertiesManager), new ReadyHandler(propertiesManager),
-                        new MessageListener(), eventWaiter
-                ).build();
+                .setEventManagerProvider(i -> eventManager)
+                .build();
     }
 
     public static Taboo getInstance() {
