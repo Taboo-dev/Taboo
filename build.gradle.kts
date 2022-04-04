@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.1.0"
-    kotlin("jvm") version "1.6.20-RC"
+    kotlin("jvm") version "1.6.20"
 }
 
 group = "xyz.chalky.taboo"
