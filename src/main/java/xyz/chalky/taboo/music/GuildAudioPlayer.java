@@ -14,7 +14,7 @@ public class GuildAudioPlayer {
 
     public GuildAudioPlayer(SlashCommandInteractionEvent event) {
         this.guildId = event.getGuild().getIdLong();
-        this.link = Taboo.getInstance().getLavalink().getLink(String.valueOf(guildId));
+        this.link = Taboo.getInstance().getLavalink().getLink(guildId);
         this.player = link.getPlayer();
         this.scheduler = new AudioScheduler(event, player, this, guildId);
         player.addListener(scheduler);

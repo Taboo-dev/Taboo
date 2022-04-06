@@ -53,10 +53,6 @@ public class EventManager implements IEventManager {
         for (var listener : listeners) {
             try {
                 listener.onEvent(event);
-                String name = event.getClass().getName();
-                String[] split = name.split("\\.");
-                String eventName = split[split.length - 1];
-                LOGGER.debug("Handled event: {}", eventName);
             } catch (Exception e) {
                 LOGGER.error("Error while handling event", e);
             }

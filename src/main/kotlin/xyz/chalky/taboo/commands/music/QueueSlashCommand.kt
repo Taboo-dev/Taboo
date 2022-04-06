@@ -1,15 +1,17 @@
 package xyz.chalky.taboo.commands.music
 
 import dev.minn.jda.ktx.Embed
+import lavalink.client.player.track.AudioTrack
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
-import xyz.chalky.taboo.backend.CommandFlag.*
+import xyz.chalky.taboo.backend.CommandFlag
 import xyz.chalky.taboo.backend.SlashCommand
 import xyz.chalky.taboo.music.GuildAudioPlayer
 import xyz.chalky.taboo.util._reply
 import xyz.chalky.taboo.util.onSubCommand
 import java.time.Instant
+import java.util.*
 
 class QueueSlashCommand : SlashCommand() {
 
@@ -25,40 +27,21 @@ class QueueSlashCommand : SlashCommand() {
                     )
                 )
         )
-        addCommandFlags(MUST_BE_IN_VC, MUST_BE_IN_SAME_VC)
+        addCommandFlags(CommandFlag.MUST_BE_IN_VC, CommandFlag.MUST_BE_IN_SAME_VC)
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
         val guildAudioPlayer = GuildAudioPlayer(event)
-        val queue = guildAudioPlayer.scheduler.queue
+        val queue: Queue<AudioTrack> = guildAudioPlayer.scheduler.queue
         event.onSubCommand("list") {
-            val desc = StringBuilder("Tracks:\n")
-            val trackList = queue.size
-            val trackCount = trackList.coerceAtMost(10)
-            for (i in 0 until trackCount) {
-                val track = queue[i]
-                val info = track.info
-                desc.append("`#")
-                    .append(i + 1)
-                    .append("` ")
-                    .append(info.title)
-                    .append(" [")
-                    .append(info.author)
-                    .append("]\n")
+            val builder = StringBuilder()
+            queue.forEach {
+                builder.append("${it.info.title} - ${it.info.author} - ${it.info.length} - ${it.info.uri}\n")
             }
-            if (trackList > trackCount) {
-                desc.append("And ")
-                    .append("`")
-                    .append(trackList - trackCount)
-                    .append("`")
-                    .append(" more tracks...")
-            }
-            if (trackList == 0) {
-                desc.append("No tracks in queue.")
-            }
+            // Still broken
             val embed = Embed {
                 title = "Queue"
-                description = desc.toString()
+                description = "Queue Size: ${queue.size}"
                 color = 0x9F90CF
                 timestamp = Instant.now()
             }

@@ -1,7 +1,7 @@
 package xyz.chalky.taboo.util
 
 import java.net.URI
-import java.util.Properties
+import java.util.*
 
 data class PropertiesManager(val properties: Properties) {
 
@@ -25,8 +25,5 @@ data class PropertiesManager(val properties: Properties) {
 
     val lavalinkPassword: String
         get() = properties.getProperty("lavalinkPassword")
-
-    val youTubeApiKey: String
-        get() = properties.getProperty("youtubeApiKey")
 
 }

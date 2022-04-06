@@ -1,19 +1,21 @@
 package xyz.chalky.taboo.commands.music
 
 import dev.minn.jda.ktx.interactions.getOption
+import net.dv8tion.jda.api.entities.VoiceChannel
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.exceptions.PermissionException
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
-import xyz.chalky.taboo.backend.CommandFlag.*
+import xyz.chalky.taboo.backend.CommandFlag.MUST_BE_IN_SAME_VC
+import xyz.chalky.taboo.backend.CommandFlag.MUST_BE_IN_VC
 import xyz.chalky.taboo.backend.SlashCommand
 import xyz.chalky.taboo.music.AudioLoadHandler
 import xyz.chalky.taboo.music.GuildAudioPlayer
 import xyz.chalky.taboo.util._reply
 import xyz.chalky.taboo.util.isUrl
 
-class PlaySlashCommand : SlashCommand() {
+class PlaySlashCommand() : SlashCommand() {
 
     init {
         setCommandData(
@@ -32,20 +34,20 @@ class PlaySlashCommand : SlashCommand() {
         val member = event.member!!
         val voiceState = member.voiceState
         val manager = guild!!.audioManager
-        if (manager.connectedChannel == null) {
-            try {
-                link.connect(voiceState?.channel!!)
-            } catch (e: PermissionException) {
-                event._reply("I don't have permission to connect to your voice channel.").queue()
-                return
-            }
-        }
         val query = if (isUrl(input)) {
             input
         } else {
             "ytsearch:$input"
         }
-        link.restClient.loadItem(query, AudioLoadHandler(event, player, guildAudioPlayer))
+        if (manager.connectedChannel == null) {
+            try {
+                link.connect(voiceState?.channel as VoiceChannel)
+                link.restClient.loadItem(query, AudioLoadHandler(event, player, guildAudioPlayer))
+            } catch (e: PermissionException) {
+                event._reply("I don't have permission to connect to your voice channel.").queue()
+                return
+            }
+        }
     }
 
 }

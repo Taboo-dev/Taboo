@@ -1,24 +1,25 @@
 package xyz.chalky.taboo.music;
 
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavalinkPlayer;
 import lavalink.client.player.event.PlayerEventListenerAdapter;
+import lavalink.client.player.track.AudioTrack;
+import lavalink.client.player.track.AudioTrackEndReason;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.awt.*;
 import java.time.Instant;
-import java.util.LinkedList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class AudioScheduler extends PlayerEventListenerAdapter {
 
     private final SlashCommandInteractionEvent event;
     private final LavalinkPlayer player;
-    private final LinkedList<AudioTrack> queue;
+    private final BlockingQueue<AudioTrack> queue;
     private final GuildAudioPlayer guildAudioPlayer;
     private final long guildId;
     private boolean repeat = false;
@@ -29,13 +30,13 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
         this.guildId = guildId;
         this.player = player;
         this.guildAudioPlayer = guildAudioPlayer;
-        this.queue = new LinkedList<>();
+        this.queue = new LinkedBlockingQueue<>();
         this.event = event;
     }
 
     public void queue(AudioTrack track) {
         if (player.getPlayingTrack() != null) {
-            queue.offer(track);
+            queue.add(track);
         } else {
             player.playTrack(track);
         }
@@ -66,7 +67,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
         this.shuffle = shuffle;
     }
 
-    public LinkedList<AudioTrack> getQueue() {
+    public BlockingQueue<AudioTrack> getQueue() {
         return queue;
     }
 
@@ -76,35 +77,48 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
 
     @Override
     public void onTrackStart(IPlayer player, AudioTrack track) {
-        long length = track.getInfo().length;
+        System.out.println("start fired");
+        long length = track.getInfo().getLength();
         long minutes = length / 60000;
         long seconds = length % 60;
-        MessageEmbed embed = new EmbedBuilder()
-                .setTitle("Now Playing:")
-                .setDescription(track.getInfo().title)
-                .addField("Duration:", String.format("%02d:%02d", minutes, seconds), false)
-                .setImage(String.format("https://img.youtube.com/vi/%s/mqdefault.jpg", track.getInfo().identifier))
-                .setColor(0x9F90CF)
-                .setTimestamp(Instant.now())
-                .build();
-        event.getHook().sendMessageEmbeds(embed).queue(message -> {
-            message.delete().queueAfter(length, TimeUnit.MILLISECONDS);
-        });
+        if (!repeat) {
+            MessageEmbed embed = new EmbedBuilder()
+                    .setTitle("Now Playing:")
+                    .setDescription(String.format("[%s](%s) by %s", track.getInfo().getTitle(),
+                            track.getInfo().getUri(), track.getInfo().getAuthor()))
+                    .addField("Duration:", String.format("%02d:%02d", minutes, seconds), false)
+                    .setColor(0x9F90CF)
+                    .setTimestamp(Instant.now())
+                    .build();
+            event.getChannel().sendMessageEmbeds(embed).queue(message -> {
+                message.delete().queueAfter(length, TimeUnit.MILLISECONDS);
+            });
+        }
     }
 
     @Override
     public void onTrackEnd(IPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+        System.out.println("end fired");
         if (endReason.mayStartNext) {
             if (repeat) {
-                player.playTrack(lastTrack.makeClone());
-            } else {
+                player.playTrack(track);
                 MessageEmbed embed = new EmbedBuilder()
-                        .setTitle("Track Ended:")
-                        .setDescription(track.getInfo().title)
+                        .setTitle("Looping:")
+                        .setDescription(String.format("[%s](%s) by %s", track.getInfo().getTitle(),
+                                track.getInfo().getUri(), track.getInfo().getUri()))
                         .setColor(0x9F90CF)
                         .setTimestamp(Instant.now())
                         .build();
-                event.getHook().sendMessageEmbeds(embed).queue();
+                event.getChannel().sendMessageEmbeds(embed).queue();
+            } else {
+                MessageEmbed embed = new EmbedBuilder()
+                        .setTitle("Track Ended:")
+                        .setDescription(String.format("[%s](%s) by %s", track.getInfo().getTitle(),
+                                track.getInfo().getUri(), track.getInfo().getAuthor()))
+                        .setColor(0x9F90CF)
+                        .setTimestamp(Instant.now())
+                        .build();
+                event.getChannel().sendMessageEmbeds(embed).queue();
                 nextTrack();
             }
         }
@@ -114,11 +128,11 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     public void onTrackException(IPlayer player, AudioTrack track, Exception exception) {
         MessageEmbed embed = new EmbedBuilder()
                 .setTitle("An error occurred while playing the track:")
-                .setDescription(track.getInfo().title)
+                .setDescription(track.getInfo().getTitle())
                 .setColor(Color.RED)
                 .setTimestamp(Instant.now())
                 .build();
-        event.getHook().sendMessageEmbeds(embed).queue();
+        event.getChannel().sendMessageEmbeds(embed).queue();
     }
 
     public long getGuildId() {

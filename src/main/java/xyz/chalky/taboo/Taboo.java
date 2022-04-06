@@ -79,6 +79,7 @@ public class Taboo {
                 .setStatus(OnlineStatus.ONLINE)
                 .setVoiceDispatchInterceptor(lavalink.getVoiceInterceptor())
                 .setEventManagerProvider(i -> eventManager)
+                .addEventListeners(lavalink)
                 .build();
     }
 
