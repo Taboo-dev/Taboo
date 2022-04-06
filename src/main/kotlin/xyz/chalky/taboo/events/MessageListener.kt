@@ -19,7 +19,9 @@ class MessageListener : ListenerAdapter() {
     override fun onMessageReceived(event: MessageReceivedEvent) {
         if (!event.isFromGuild) return
         val message = event.message
-        if (message.author.isBot) return
+        val author = message.author
+        if (author.isBot) return
+        if (author.idLong == event.jda.selfUser.idLong) return
         val msgId = message.idLong
         val msgContent = message.contentRaw
         messages[msgId] = msgContent
@@ -35,13 +37,13 @@ class MessageListener : ListenerAdapter() {
             transaction {
                 channelId = Config.select {
                     Config.guildId eq guild.idLong
-                }.first()[Config.actionLog]
+                }.firstOrNull()?.get(Config.actionLog)
             }
             val msgId = message.idLong
             val msgContent = message.contentRaw
             val originalContent = messages[msgId]
             if (channelId != null) {
-                val channel = Taboo.getInstance().shardManager!!.getTextChannelById(channelId!!)
+                val channel = Taboo.getInstance().shardManager.getTextChannelById(channelId!!)
                 val embed = Embed {
                     title = "Message Edited"
                     description = """
@@ -61,14 +63,23 @@ class MessageListener : ListenerAdapter() {
     override fun onMessageDelete(event: MessageDeleteEvent) {
         if (!event.isFromGuild) return
         val msgId = event.messageIdLong
-        val channel = event.channel
-        val msgContent = messages[msgId]
-        val embed = Embed {
-            title = "Message Deleted"
-            description = "Message: $msgContent"
-            color = 0x9F90CF
-            timestamp = Instant.now()
+        val guild = event.guild
+        val msgContent = messages[msgId] ?: return
+        var channelId: Long? = null
+        transaction {
+            channelId = Config.select {
+                Config.guildId eq guild.idLong
+            }.firstOrNull()?.get(Config.actionLog)
         }
-        channel.sendMessageEmbeds(embed).queue()
+        if (channelId != null) {
+            val channel = Taboo.getInstance().shardManager.getTextChannelById(channelId!!)
+            val embed = Embed {
+                title = "Message Deleted"
+                description = "Message: $msgContent"
+                color = 0x9F90CF
+                timestamp = Instant.now()
+            }
+            channel!!.sendMessageEmbeds(embed).queue()
+        }
     }
 }
