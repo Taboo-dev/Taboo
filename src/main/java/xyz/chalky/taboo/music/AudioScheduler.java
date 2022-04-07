@@ -105,7 +105,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
                 MessageEmbed embed = new EmbedBuilder()
                         .setTitle("Looping:")
                         .setDescription(String.format("[%s](%s) by %s", track.getInfo().getTitle(),
-                                track.getInfo().getUri(), track.getInfo().getUri()))
+                                track.getInfo().getUri(), track.getInfo().getAuthor()))
                         .setColor(0x9F90CF)
                         .setTimestamp(Instant.now())
                         .build();
