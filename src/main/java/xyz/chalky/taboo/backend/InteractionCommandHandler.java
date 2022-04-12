@@ -18,10 +18,8 @@ import xyz.chalky.taboo.Taboo;
 import xyz.chalky.taboo.commands.ConfigSlashCommand;
 import xyz.chalky.taboo.commands.context.BookmarkContextMenuMessageCommand;
 import xyz.chalky.taboo.commands.misc.InfoSlashCommand;
+import xyz.chalky.taboo.commands.music.*;
 import xyz.chalky.taboo.commands.misc.PingSlashCommand;
-import xyz.chalky.taboo.commands.music.LoopSlashCommand;
-import xyz.chalky.taboo.commands.music.PlaySlashCommand;
-import xyz.chalky.taboo.commands.music.QueueSlashCommand;
 import xyz.chalky.taboo.util.PropertiesManager;
 
 import java.util.ArrayList;
@@ -57,6 +55,10 @@ public class InteractionCommandHandler {
         registerCommand(new LoopSlashCommand());
         registerCommand(new QueueSlashCommand());
         registerCommand(new ConfigSlashCommand());
+        registerCommand(new NowPlayingSlashCommand());
+        registerCommand(new SkipSlashCommand());
+        registerCommand(new ShuffleSlashCommand());
+        registerCommand(new StopSlashCommand());
         // context
         registerCommand(new BookmarkContextMenuMessageCommand());
     }

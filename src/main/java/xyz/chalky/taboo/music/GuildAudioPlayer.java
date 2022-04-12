@@ -2,7 +2,7 @@ package xyz.chalky.taboo.music;
 
 import lavalink.client.io.jda.JdaLink;
 import lavalink.client.player.LavalinkPlayer;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.entities.Guild;
 import xyz.chalky.taboo.Taboo;
 
 public class GuildAudioPlayer {
@@ -12,24 +12,16 @@ public class GuildAudioPlayer {
     private final long guildId;
     private final JdaLink link;
 
-    public GuildAudioPlayer(SlashCommandInteractionEvent event) {
-        this.guildId = event.getGuild().getIdLong();
-        this.link = Taboo.getInstance().getLavalink().getLink(guildId);
+    public GuildAudioPlayer(long guildId) {
+        Guild guild = Taboo.getInstance().getShardManager().getGuildById(guildId);
+        this.guildId = guild.getIdLong();
+        this.link = Taboo.getInstance().getLavalink().getLink(guild);
         this.player = link.getPlayer();
-        this.scheduler = new AudioScheduler(event, player, this, guildId);
-        player.addListener(scheduler);
+        this.scheduler = new AudioScheduler(player, this, guildId);
     }
 
     public AudioScheduler getScheduler() {
         return scheduler;
-    }
-
-    public LavalinkPlayer getPlayer() {
-        return player;
-    }
-
-    public JdaLink getLink() {
-        return link;
     }
 
     public long getGuildId() {

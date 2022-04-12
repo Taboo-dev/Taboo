@@ -17,6 +17,7 @@ import xyz.chalky.taboo.backend.GenericCommand;
 import xyz.chalky.taboo.backend.InteractionCommandHandler;
 import xyz.chalky.taboo.database.DatabaseManager;
 import xyz.chalky.taboo.events.EventManager;
+import xyz.chalky.taboo.music.AudioManager;
 import xyz.chalky.taboo.util.PropertiesManager;
 
 import java.io.FileInputStream;
@@ -59,6 +60,7 @@ public class Taboo {
     private final InteractionCommandHandler interactionCommandHandler;
     private final EventWaiter eventWaiter;
     private final JdaLavalink lavalink;
+    private final AudioManager audioManager;
 
     Taboo() throws Exception {
         instance = this;
@@ -69,6 +71,7 @@ public class Taboo {
         isDebug = propertiesManager.getDebugState();
         eventWaiter = new EventWaiter();
         lavalink = new JdaLavalink(null, 1, null);
+        audioManager = new AudioManager();
         EventManager eventManager = new EventManager(propertiesManager);
         eventManager.init();
         DatabaseManager.INSTANCE.startDatabase();
@@ -117,6 +120,10 @@ public class Taboo {
 
     public JdaLavalink getLavalink() {
         return lavalink;
+    }
+
+    public AudioManager getAudioManager() {
+        return audioManager;
     }
 
     public static Logger getLogger() {

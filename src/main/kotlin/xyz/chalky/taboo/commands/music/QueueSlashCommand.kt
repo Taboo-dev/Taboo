@@ -1,17 +1,17 @@
 package xyz.chalky.taboo.commands.music
 
 import dev.minn.jda.ktx.Embed
+import dev.minn.jda.ktx.EmbedBuilder
 import lavalink.client.player.track.AudioTrack
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
+import xyz.chalky.taboo.Taboo
 import xyz.chalky.taboo.backend.CommandFlag
 import xyz.chalky.taboo.backend.SlashCommand
-import xyz.chalky.taboo.music.GuildAudioPlayer
 import xyz.chalky.taboo.util._reply
 import xyz.chalky.taboo.util.onSubCommand
 import java.time.Instant
-import java.util.*
 
 class QueueSlashCommand : SlashCommand() {
 
@@ -31,21 +31,42 @@ class QueueSlashCommand : SlashCommand() {
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
-        val guildAudioPlayer = GuildAudioPlayer(event)
-        val queue: Queue<AudioTrack> = guildAudioPlayer.scheduler.queue
+        val guildAudioPlayer = Taboo.getInstance().audioManager.getAudioPlayer(event.guild!!.idLong)
+        val queue = guildAudioPlayer.scheduler.queue
         event.onSubCommand("list") {
-            val builder = StringBuilder()
-            queue.forEach {
-                builder.append("${it.info.title} - ${it.info.author} - ${it.info.length} - ${it.info.uri}\n")
+            val description = StringBuilder("Queue:\n")
+            val trackSize = queue.size
+            val trackCount = trackSize.coerceAtMost(10)
+            val trackList: List<AudioTrack> = queue.toList()
+            for (i in 0 until trackCount) {
+                val track = trackList[i]
+                val info = track.info
+                description.append("`#")
+                    .append(i + 1)
+                    .append("` ")
+                    .append(info.title)
+                    .append(" [")
+                    .append(info.author)
+                    .append("]\n")
             }
-            // Still broken
-            val embed = Embed {
+            if (trackSize > trackCount) {
+                description.append("And ")
+                    .append("`")
+                    .append(trackSize - trackCount)
+                    .append("`")
+                    .append(" more tracks...")
+            }
+            val embed = EmbedBuilder {
                 title = "Queue"
-                description = "Queue Size: ${queue.size}"
                 color = 0x9F90CF
                 timestamp = Instant.now()
             }
-            event._reply(embed).queue()
+            if (trackSize == 0) {
+                embed.description = "The queue is empty."
+            } else {
+                embed.description = description.toString()
+            }
+            event._reply(embed.build()).queue()
         }
         event.onSubCommand("clear") {
             queue.clear()
