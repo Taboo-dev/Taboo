@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
 import xyz.chalky.taboo.backend.GenericCommand;
@@ -76,8 +78,10 @@ public class Taboo {
         eventManager.init();
         DatabaseManager.INSTANCE.startDatabase();
         shardManager = DefaultShardManagerBuilder.createDefault(propertiesManager.getToken())
-                .enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_EMOJIS)
+                .enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.GUILD_MEMBERS)
                 .enableCache(CacheFlag.VOICE_STATE)
+                .setMemberCachePolicy(MemberCachePolicy.ALL)
+                .setChunkingFilter(ChunkingFilter.ALL)
                 .setShardsTotal(-1)
                 .setStatus(OnlineStatus.ONLINE)
                 .setVoiceDispatchInterceptor(lavalink.getVoiceInterceptor())
