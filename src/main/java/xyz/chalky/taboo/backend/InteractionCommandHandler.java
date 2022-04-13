@@ -20,6 +20,7 @@ import xyz.chalky.taboo.commands.ConfigSlashCommand;
 import xyz.chalky.taboo.commands.context.BookmarkContextMenuMessageCommand;
 import xyz.chalky.taboo.commands.misc.InfoSlashCommand;
 import xyz.chalky.taboo.commands.misc.PingSlashCommand;
+import xyz.chalky.taboo.commands.moderation.*;
 import xyz.chalky.taboo.commands.music.*;
 import xyz.chalky.taboo.util.PropertiesManager;
 import xyz.chalky.taboo.util.ResponseHelper;
@@ -52,16 +53,24 @@ public class InteractionCommandHandler {
     }
 
     public void registerAllCommands() {
-        registerCommand(new PingSlashCommand());
-        registerCommand(new InfoSlashCommand());
+        // music commands
         registerCommand(new PlaySlashCommand());
         registerCommand(new LoopSlashCommand());
         registerCommand(new QueueSlashCommand());
-        registerCommand(new ConfigSlashCommand());
         registerCommand(new NowPlayingSlashCommand());
         registerCommand(new SkipSlashCommand());
         registerCommand(new ShuffleSlashCommand());
         registerCommand(new StopSlashCommand());
+
+        // misc commands
+        registerCommand(new PingSlashCommand());
+        registerCommand(new InfoSlashCommand());
+
+        // moderation commands
+        registerCommand(new BanSlashCommand());
+        registerCommand(new KickSlashCommand());
+        registerCommand(new ConfigSlashCommand());
+
         // context
         registerCommand(new BookmarkContextMenuMessageCommand());
     }
