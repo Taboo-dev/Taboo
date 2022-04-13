@@ -1,6 +1,7 @@
 package xyz.chalky.taboo.backend;
 
 import mu.KotlinLogging;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
@@ -18,10 +19,12 @@ import xyz.chalky.taboo.Taboo;
 import xyz.chalky.taboo.commands.ConfigSlashCommand;
 import xyz.chalky.taboo.commands.context.BookmarkContextMenuMessageCommand;
 import xyz.chalky.taboo.commands.misc.InfoSlashCommand;
-import xyz.chalky.taboo.commands.music.*;
 import xyz.chalky.taboo.commands.misc.PingSlashCommand;
+import xyz.chalky.taboo.commands.music.*;
 import xyz.chalky.taboo.util.PropertiesManager;
+import xyz.chalky.taboo.util.ResponseHelper;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -190,17 +193,23 @@ public class InteractionCommandHandler {
         List<Permission> neededPermissions = command.getRequiredUserPermissions();
         List<Permission> neededBotPermissions = command.getRequiredBotPermissions();
         if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
-            event.getHook().sendMessage("You don't have the required permissions to execute this command.").queue();
+            EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
+                    Color.RED, null);
+            event.getHook().sendMessageEmbeds(embed.build()).queue();
             return;
         }
         if (neededBotPermissions != null && !event.getGuild().getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
-            event.getHook().sendMessage("I don't have the required permissions to execute this command.").queue();
+            EmbedBuilder embed = ResponseHelper.createEmbed(null, "I don't have the required permissions to execute this command.",
+                    Color.RED, null);
+            event.getHook().sendMessageEmbeds(embed.build()).queue();
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
             GuildVoiceState guildVoiceState = member.getVoiceState();
             if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
-                event.getHook().sendMessage("You must be in a voice channel to execute this command.").queue();
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in a voice channel to execute this command.",
+                        Color.RED, null);
+                event.getHook().sendMessageEmbeds(embed.build()).queue();
                 return;
             }
         }
@@ -209,7 +218,9 @@ public class InteractionCommandHandler {
             AudioManager manager = event.getGuild().getAudioManager();
             if (manager.isConnected()) {
                 if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
-                    event.getHook().sendMessage("You must be in the same voice channel as me to execute this command.").queue();
+                    EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in the same voice channel as me to execute this command.",
+                            Color.RED, null);
+                    event.getHook().sendMessageEmbeds(embed.build()).queue();
                     return;
                 }
             }
@@ -220,10 +231,12 @@ public class InteractionCommandHandler {
                 finalCommand.executeCommand(event);
             } catch (Exception e) {
                 LOGGER.warn("Error while executing command", e);
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command.",
+                        Color.RED, null);
                 if (event.isAcknowledged()) {
-                    event.getHook().sendMessage("An error occurred while executing the command.").queue();
+                    event.getHook().sendMessageEmbeds(embed.build()).queue();
                 } else {
-                    event.reply("An error occurred while executing the command.").queue();
+                    event.replyEmbeds(embed.build()).queue();
                 }
             }
         };
@@ -264,17 +277,23 @@ public class InteractionCommandHandler {
         List<Permission> neededPermissions = command.getRequiredUserPermissions();
         List<Permission> neededBotPermissions = command.getRequiredBotPermissions();
         if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
-            event.getHook().sendMessage("You don't have the required permissions to execute this command.").queue();
+            EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
+                    Color.RED, null);
+            event.getHook().sendMessageEmbeds(embed.build()).queue();
             return;
         }
         if (neededBotPermissions != null && !event.getGuild().getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
-            event.getHook().sendMessage("I don't have the required permissions to execute this command.").queue();
+            EmbedBuilder embed = ResponseHelper.createEmbed(null, "I don't have the required permissions to execute this command.",
+                    Color.RED, null);
+            event.getHook().sendMessageEmbeds(embed.build()).queue();
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
             GuildVoiceState guildVoiceState = member.getVoiceState();
             if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
-                event.getHook().sendMessage("You must be in a voice channel to execute this command.").queue();
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in a voice channel to execute this command.",
+                        Color.RED, null);
+                event.getHook().sendMessageEmbeds(embed.build()).queue();
                 return;
             }
         }
@@ -283,7 +302,9 @@ public class InteractionCommandHandler {
             AudioManager manager = event.getGuild().getAudioManager();
             if (manager.isConnected()) {
                 if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
-                    event.getHook().sendMessage("You must be in the same voice channel as me to execute this command.").queue();
+                    EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in the same voice channel as me to execute this command.",
+                            Color.RED, null);
+                    event.getHook().sendMessageEmbeds(embed.build()).queue();
                     return;
                 }
             }
@@ -294,10 +315,12 @@ public class InteractionCommandHandler {
                 finalCommand.executeCommand(event);
             } catch (Exception e) {
                 LOGGER.warn("An error occurred while executing a user context command.", e);
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command.",
+                        Color.RED, null);
                 if (event.isAcknowledged()) {
-                    event.getHook().sendMessage("An error occurred while executing the command.").queue();
+                    event.getHook().sendMessageEmbeds(embed.build()).queue();
                 } else {
-                    event.reply("An error occurred while executing the command.").queue();
+                    event.replyEmbeds(embed.build()).queue();
                 }
             }
         };
@@ -339,17 +362,23 @@ public class InteractionCommandHandler {
                     List<Permission> neededPermissions = command.getRequiredUserPermissions();
                     List<Permission> neededBotPermissions = command.getRequiredBotPermissions();
                     if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
-                        event.getHook().sendMessage("You don't have the required permissions to execute this command.").queue();
+                        EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
+                                Color.RED, null);
+                        event.getHook().sendMessageEmbeds(embed.build()).queue();
                         return;
                     }
                     if (neededBotPermissions != null && !event.getGuild().getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
-                        event.getHook().sendMessage("I don't have the required permissions to execute this command.").queue();
+                        EmbedBuilder embed = ResponseHelper.createEmbed(null, "I don't have the required permissions to execute this command.",
+                                Color.RED, null);
+                        event.getHook().sendMessageEmbeds(embed.build()).queue();
                         return;
                     }
                     if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
                         GuildVoiceState guildVoiceState = member.getVoiceState();
                         if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
-                            event.getHook().sendMessage("You must be in a voice channel to execute this command.").queue();
+                            EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in a voice channel to execute this command.",
+                                    Color.RED, null);
+                            event.getHook().sendMessageEmbeds(embed.build()).queue();
                             return;
                         }
                     }
@@ -358,7 +387,9 @@ public class InteractionCommandHandler {
                         AudioManager manager = event.getGuild().getAudioManager();
                         if (manager.isConnected()) {
                             if (!manager.getConnectedChannel().equals(voiceState.getChannel())) {
-                                event.getHook().sendMessage("You must be in the same voice channel as me to execute this command.").queue();
+                                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in the same voice channel as me to execute this command.",
+                                        Color.RED, null);
+                                event.getHook().sendMessageEmbeds(embed.build()).queue();
                                 return;
                             }
                         }
@@ -367,12 +398,12 @@ public class InteractionCommandHandler {
                 }
             } catch (Exception e) {
                 LOGGER.warn("Error while executing slash command", e);
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command.",
+                        Color.RED, null);
                 if (event.isAcknowledged()) {
-                    event.getHook().sendMessage("An error occurred while executing this command.").queue();
-                    return;
+                    event.getHook().sendMessageEmbeds(embed.build()).queue();
                 } else {
-                    event.reply("An error occurred while executing this command.").queue();
-                    return;
+                    event.replyEmbeds(embed.build()).queue();
                 }
             }
         };
