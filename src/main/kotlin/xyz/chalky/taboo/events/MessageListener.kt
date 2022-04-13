@@ -46,11 +46,24 @@ class MessageListener : ListenerAdapter() {
                 val channel = Taboo.getInstance().shardManager.getTextChannelById(channelId!!)
                 val embed = Embed {
                     title = "Message Edited"
-                    description = """
-                        Original Message: $originalContent
-                        New Message: $msgContent
-                    """.trimIndent()
+                    field {
+                        name = "Original Message"
+                        value = originalContent!!
+                        inline = false
+                    }
+                    field {
+                        name = "New Message"
+                        value = msgContent
+                        inline = false
+                    }
+                    author {
+                        name = message.author.asTag
+                        iconUrl = message.author.effectiveAvatarUrl
+                    }
                     color = 0x9F90CF
+                    footer {
+                        name = "Message ID: $msgId"
+                    }
                     timestamp = Instant.now()
                 }
                 channel!!.sendMessageEmbeds(embed).queue()
@@ -75,8 +88,15 @@ class MessageListener : ListenerAdapter() {
             val channel = Taboo.getInstance().shardManager.getTextChannelById(channelId!!)
             val embed = Embed {
                 title = "Message Deleted"
-                description = "Message: $msgContent"
+                field {
+                    name = "Message"
+                    value = msgContent
+                    inline = false
+                }
                 color = 0x9F90CF
+                footer {
+                    name = "Message ID: $msgId"
+                }
                 timestamp = Instant.now()
             }
             channel!!.sendMessageEmbeds(embed).queue()
