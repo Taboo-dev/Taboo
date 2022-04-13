@@ -55,26 +55,28 @@ class ConfigSlashCommand : SlashCommand() {
             }
             runCatching.onFailure {
                 DatabaseManager.logger.warn { "Failed to set config for guild ${event.guild!!.name}" }
-                val embed = Embed {
-                    title = "Failed to set config!"
-                    description = "You may already have a config set! " +
-                            "If this issue persists, please contact my owner."
-                    color = Color.RED.hashCode()
-                    timestamp = Instant.now()
-                }
-                event._reply(embed).queue()
+                event._reply(
+                    Embed {
+                        title = "Failed to set config!"
+                        description = "You may already have a config set! " +
+                                "If this issue persists, please contact my owner."
+                        color = Color.RED.hashCode()
+                        timestamp = Instant.now()
+                    }
+                ).queue()
             }
             runCatching.onSuccess {
-                val embed = Embed {
-                    title = "Config set!"
-                    description = """
+                event._reply(
+                    Embed {
+                        title = "Config set!"
+                        description = """
                         Action log channel set to ${actionLogChannel!!.asMention}
                         Join/leave log channel set to ${joinLeaveLogChannel!!.asMention}
                     """.trimIndent()
-                    color = 0x9F90CF
-                    timestamp = Instant.now()
-                }
-                event._reply(embed).queue()
+                        color = 0x9F90CF
+                        timestamp = Instant.now()
+                    }
+                ).queue()
             }
         }
         event.onSubCommand("clear") {
@@ -87,21 +89,23 @@ class ConfigSlashCommand : SlashCommand() {
             }
             runCatching.onFailure {
                 DatabaseManager.logger.warn { "Failed to clear config for guild ${event.guild!!.name}" }
-                val embed = Embed {
-                    title = "Failed to clear config!"
-                    description = "If this issue persists, please contact my owner."
-                    color = Color.RED.hashCode()
-                    timestamp = Instant.now()
-                }
-                event._reply(embed).queue()
+                event._reply(
+                    Embed {
+                        title = "Failed to clear config!"
+                        description = "If this issue persists, please contact my owner."
+                        color = Color.RED.hashCode()
+                        timestamp = Instant.now()
+                    }
+                ).queue()
             }
             runCatching.onSuccess {
-                val embed = Embed {
-                    title = "Config cleared!"
-                    color = 0x9F90CF
-                    timestamp = Instant.now()
-                }
-                event._reply(embed).queue()
+                event._reply(
+                    Embed {
+                        title = "Config cleared!"
+                        color = 0x9F90CF
+                        timestamp = Instant.now()
+                    }
+                ).queue()
             }
         }
         event.onSubCommand("view") {
@@ -109,16 +113,17 @@ class ConfigSlashCommand : SlashCommand() {
                 Config.select {
                     Config.guildId eq event.guild!!.idLong
                 }.forEach {
-                    val embed = Embed {
-                        title = "Config for ${event.guild!!.name}"
-                        description = """
+                    event._reply(
+                        Embed {
+                            title = "Config for ${event.guild!!.name}"
+                            description = """
                             Action log channel: ${event.guild!!.getTextChannelById(it[Config.actionLog])!!.asMention}
                             Join/leave log channel: ${event.guild!!.getTextChannelById(it[Config.joinLeaveLog])!!.asMention}
                         """.trimIndent()
-                        color = 0x9F90CF
-                        timestamp = Instant.now()
-                    }
-                    event._reply(embed).queue()
+                            color = 0x9F90CF
+                            timestamp = Instant.now()
+                        }
+                    ).queue()
                 }
             }
         }

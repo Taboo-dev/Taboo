@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.events.message.MessageUpdateEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
-import xyz.chalky.taboo.Taboo
 import xyz.chalky.taboo.database.Config
 import java.sql.SQLException
 import java.time.Instant
@@ -37,36 +36,37 @@ class MessageListener : ListenerAdapter() {
             transaction {
                 channelId = Config.select {
                     Config.guildId eq guild.idLong
-                }.firstOrNull()?.get(Config.actionLog)
+                }.firstOrNull()?.getOrNull(Config.actionLog)
             }
             val msgId = message.idLong
             val msgContent = message.contentRaw
             val originalContent = messages[msgId]
             if (channelId != null) {
-                val channel = Taboo.getInstance().shardManager.getTextChannelById(channelId!!)
-                val embed = Embed {
-                    title = "Message Edited"
-                    field {
-                        name = "Original Message"
-                        value = originalContent!!
-                        inline = false
+                val channel = guild.getTextChannelById(channelId!!)
+                channel!!.sendMessageEmbeds(
+                    Embed {
+                        title = "Message Edited"
+                        field {
+                            name = "Original Message"
+                            value = originalContent!!
+                            inline = false
+                        }
+                        field {
+                            name = "New Message"
+                            value = msgContent
+                            inline = false
+                        }
+                        author {
+                            name = message.author.asTag
+                            iconUrl = message.author.effectiveAvatarUrl
+                        }
+                        color = 0x9F90CF
+                        footer {
+                            name = "Message ID: $msgId"
+                        }
+                        timestamp = Instant.now()
                     }
-                    field {
-                        name = "New Message"
-                        value = msgContent
-                        inline = false
-                    }
-                    author {
-                        name = message.author.asTag
-                        iconUrl = message.author.effectiveAvatarUrl
-                    }
-                    color = 0x9F90CF
-                    footer {
-                        name = "Message ID: $msgId"
-                    }
-                    timestamp = Instant.now()
-                }
-                channel!!.sendMessageEmbeds(embed).queue()
+                ).queue()
             }
         } catch (e: SQLException) {
             e.printStackTrace()
@@ -82,24 +82,25 @@ class MessageListener : ListenerAdapter() {
         transaction {
             channelId = Config.select {
                 Config.guildId eq guild.idLong
-            }.firstOrNull()?.get(Config.actionLog)
+            }.firstOrNull()?.getOrNull(Config.actionLog)
         }
         if (channelId != null) {
-            val channel = Taboo.getInstance().shardManager.getTextChannelById(channelId!!)
-            val embed = Embed {
-                title = "Message Deleted"
-                field {
-                    name = "Message"
-                    value = msgContent
-                    inline = false
+            val channel = guild.getTextChannelById(channelId!!)
+            channel!!.sendMessageEmbeds(
+                Embed {
+                    title = "Message Deleted"
+                    field {
+                        name = "Message"
+                        value = msgContent
+                        inline = false
+                    }
+                    color = 0x9F90CF
+                    footer {
+                        name = "Message ID: $msgId"
+                    }
+                    timestamp = Instant.now()
                 }
-                color = 0x9F90CF
-                footer {
-                    name = "Message ID: $msgId"
-                }
-                timestamp = Instant.now()
-            }
-            channel!!.sendMessageEmbeds(embed).queue()
+            ).queue()
         }
     }
 }

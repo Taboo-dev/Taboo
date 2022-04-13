@@ -70,13 +70,14 @@ class QueueSlashCommand : SlashCommand() {
         }
         event.onSubCommand("clear") {
             queue.clear()
-            val embed = Embed {
-                title = "Queue"
-                description = "Queue cleared."
-                color = 0x9F90CF
-                timestamp = Instant.now()
-            }
-            event._reply(embed).queue()
+            event._reply(
+                Embed {
+                    title = "Queue"
+                    description = "Queue cleared."
+                    color = 0x9F90CF
+                    timestamp = Instant.now()
+                }
+            ).queue()
         }
     }
 
