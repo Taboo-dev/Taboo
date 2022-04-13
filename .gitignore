@@ -1,5 +1,7 @@
 database.db
 config.properties
+config.properties.dev
+config.properties.prod
 .idea/
 build/
 /.gradle
