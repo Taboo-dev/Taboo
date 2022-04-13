@@ -11,6 +11,7 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import xyz.chalky.taboo.backend.CommandFlag
 import xyz.chalky.taboo.backend.SlashCommand
 import xyz.chalky.taboo.database.Config
 import xyz.chalky.taboo.database.DatabaseManager
@@ -38,6 +39,7 @@ class ConfigSlashCommand : SlashCommand() {
                     )
                 )
         )
+        addCommandFlags(CommandFlag.MODERATOR_ONLY)
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {

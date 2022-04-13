@@ -234,6 +234,29 @@ public class InteractionCommandHandler {
                 }
             }
         }
+        if (command.getCommandFlags().contains(CommandFlag.DEVELOPER_ONLY)) {
+            long idLong = event.getUser().getIdLong();
+            if (idLong != propertiesManager.getOwnerId()) {
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is only available for the developer.",
+                        Color.RED, null);
+                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                return;
+            }
+        }
+        if (command.getCommandFlags().contains(CommandFlag.DISABLED)) {
+            EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is currently disabled.",
+                    Color.RED, null);
+            event.getHook().sendMessageEmbeds(embed.build()).queue();
+            return;
+        }
+        if (command.getCommandFlags().contains(CommandFlag.MODERATOR_ONLY)) {
+            if (!member.hasPermission(List.of(Permission.KICK_MEMBERS, Permission.MANAGE_ROLES, Permission.MANAGE_SERVER))) {
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
+                        Color.RED, null);
+                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                return;
+            }
+        }
         MessageContextCommand finalCommand = command;
         Runnable r = () -> {
             try {
@@ -316,6 +339,29 @@ public class InteractionCommandHandler {
                     event.getHook().sendMessageEmbeds(embed.build()).queue();
                     return;
                 }
+            }
+        }
+        if (command.getCommandFlags().contains(CommandFlag.DEVELOPER_ONLY)) {
+            long idLong = event.getUser().getIdLong();
+            if (idLong != propertiesManager.getOwnerId()) {
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is only available for the developer.",
+                        Color.RED, null);
+                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                return;
+            }
+        }
+        if (command.getCommandFlags().contains(CommandFlag.DISABLED)) {
+            EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is currently disabled.",
+                    Color.RED, null);
+            event.getHook().sendMessageEmbeds(embed.build()).queue();
+            return;
+        }
+        if (command.getCommandFlags().contains(CommandFlag.MODERATOR_ONLY)) {
+            if (!member.hasPermission(List.of(Permission.KICK_MEMBERS, Permission.MANAGE_ROLES, Permission.MANAGE_SERVER))) {
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
+                        Color.RED, null);
+                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                return;
             }
         }
         UserContextCommand finalCommand = command;
@@ -401,6 +447,29 @@ public class InteractionCommandHandler {
                                 event.getHook().sendMessageEmbeds(embed.build()).queue();
                                 return;
                             }
+                        }
+                    }
+                    if (command.getCommandFlags().contains(CommandFlag.DEVELOPER_ONLY)) {
+                        long idLong = event.getUser().getIdLong();
+                        if (idLong != propertiesManager.getOwnerId()) {
+                            EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is only available for the developer.",
+                                    Color.RED, null);
+                            event.getHook().sendMessageEmbeds(embed.build()).queue();
+                            return;
+                        }
+                    }
+                    if (command.getCommandFlags().contains(CommandFlag.DISABLED)) {
+                        EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is currently disabled.",
+                                Color.RED, null);
+                        event.getHook().sendMessageEmbeds(embed.build()).queue();
+                        return;
+                    }
+                    if (command.getCommandFlags().contains(CommandFlag.MODERATOR_ONLY)) {
+                        if (!member.hasPermission(List.of(Permission.KICK_MEMBERS, Permission.MANAGE_ROLES, Permission.MANAGE_SERVER))) {
+                            EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
+                                    Color.RED, null);
+                            event.getHook().sendMessageEmbeds(embed.build()).queue();
+                            return;
                         }
                     }
                     command.executeCommand(event);
