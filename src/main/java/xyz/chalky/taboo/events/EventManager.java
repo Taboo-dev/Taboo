@@ -32,6 +32,7 @@ public class EventManager implements IEventManager {
         register(new InteractionsListener(propertiesManager));
         register(new MessageListener());
         register(new JoinLeaveListener());
+        register(new GuildJoinListener());
         register(Taboo.getInstance().getEventWaiter());
     }
 
