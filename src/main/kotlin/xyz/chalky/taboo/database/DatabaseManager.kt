@@ -13,7 +13,7 @@ import kotlin.system.exitProcess
 
 object DatabaseManager {
 
-    private val logger = KotlinLogging.logger { }
+    val logger = KotlinLogging.logger { }
     private val config = HikariConfig()
     private var dataSource: HikariDataSource
 
@@ -37,7 +37,7 @@ object DatabaseManager {
             exitProcess(1)
         }
         transaction {
-            SchemaUtils.createMissingTablesAndColumns(Config, Play)
+            SchemaUtils.createMissingTablesAndColumns(Config)
         }
     }
 
