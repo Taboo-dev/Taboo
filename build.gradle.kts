@@ -21,7 +21,9 @@ dependencies {
     implementation("net.dv8tion:JDA:5.0.0-alpha.9")
     implementation("pw.chew:jda-chewtils:2.0-SNAPSHOT")
     implementation("com.github.MinnDevelopment:jda-ktx:master-SNAPSHOT")
-    implementation("com.github.KittyBot-Org:Lavalink-Client:ba5094f880")
+    implementation("com.github.KittyBot-Org:Lavalink-Client:ba5094f880") {
+        exclude("net.dv8tion", "JDA")
+    }
     implementation("ch.qos.logback:logback-classic:1.2.11")
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("org.xerial:sqlite-jdbc:3.36.0.3")
