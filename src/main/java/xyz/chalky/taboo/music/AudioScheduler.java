@@ -83,8 +83,12 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     }
 
     // Cursed - someone please fix this
-    public void setupScheduler(long channelId) {
+    public void setChannelId(long channelId) {
         this.channelId = channelId;
+    }
+
+    public long getChannelId() {
+        return channelId;
     }
 
     public JdaLink getLink() {

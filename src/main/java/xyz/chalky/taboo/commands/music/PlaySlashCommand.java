@@ -67,7 +67,7 @@ public class PlaySlashCommand extends SlashCommand {
             query = String.format("%s:%s", provider, input);
         }
         if (manager.getConnectedChannel() == null) {
-            scheduler.setupScheduler(event.getChannel().getIdLong()); // Cursed
+            scheduler.setChannelId(event.getChannel().getIdLong()); // Cursed
             link.connect((VoiceChannel) voiceState.getChannel());
             link.getRestClient().loadItem(query, new LoadResultHandler() {
                 private final Logger LOGGER = KotlinLogging.INSTANCE.logger("AudioLoadResultHandler");
