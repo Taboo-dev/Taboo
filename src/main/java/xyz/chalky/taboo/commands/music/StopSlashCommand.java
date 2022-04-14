@@ -24,6 +24,7 @@ public class StopSlashCommand extends SlashCommand {
         GuildAudioPlayer guildAudioPlayer = Taboo.getInstance().getAudioManager().getAudioPlayer(event.getGuild().getIdLong());
         AudioScheduler scheduler = guildAudioPlayer.getScheduler();
         scheduler.destroy();
+        event.getJDA().getDirectAudioController().disconnect(event.getGuild());
         MessageEmbed embed = new EmbedBuilder()
                 .setTitle("Stopped playing.")
                 .setColor(0x9F90CF)
