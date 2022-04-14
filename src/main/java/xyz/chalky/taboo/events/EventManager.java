@@ -34,6 +34,7 @@ public class EventManager implements IEventManager {
         register(new JoinLeaveListener());
         register(new GuildJoinListener());
         register(new GuildEvents());
+        register(new VoiceListener());
         register(Taboo.getInstance().getEventWaiter());
     }
 
