@@ -1,7 +1,5 @@
 package xyz.chalky.taboo.events;
 
-import java.awt.Color;
-
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -10,6 +8,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import xyz.chalky.taboo.Taboo;
 import xyz.chalky.taboo.util.PropertiesManager;
 import xyz.chalky.taboo.util.ResponseHelper;
+
+import java.awt.*;
 
 public class InteractionsListener extends ListenerAdapter {
 
