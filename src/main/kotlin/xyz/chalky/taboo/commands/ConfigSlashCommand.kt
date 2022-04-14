@@ -121,7 +121,7 @@ class ConfigSlashCommand : SlashCommand() {
                             description = """
                             Action log channel: ${event.guild!!.getTextChannelById(it[Config.actionLog])!!.asMention}
                             Join/leave log channel: ${event.guild!!.getTextChannelById(it[Config.joinLeaveLog])!!.asMention}
-                        """.trimIndent()
+                            """.trimIndent()
                             color = 0x9F90CF
                             timestamp = Instant.now()
                         }
