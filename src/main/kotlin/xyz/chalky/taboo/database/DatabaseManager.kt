@@ -37,7 +37,7 @@ object DatabaseManager {
             exitProcess(1)
         }
         transaction {
-            SchemaUtils.createMissingTablesAndColumns(Config, AutoLeave)
+            SchemaUtils.createMissingTablesAndColumns(Config)
         }
     }
 

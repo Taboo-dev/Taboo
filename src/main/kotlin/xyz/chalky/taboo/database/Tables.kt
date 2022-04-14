@@ -8,9 +8,3 @@ object Config : Table("config") {
     val joinLeaveLog = long("join_leave_log_id")
     override val primaryKey = PrimaryKey(guildId)
 }
-
-object AutoLeave : Table("auto-leave") {
-    val channelId = long("channel_id").uniqueIndex()
-    val leave = bool("leave")
-    override val primaryKey = PrimaryKey(channelId)
-}
