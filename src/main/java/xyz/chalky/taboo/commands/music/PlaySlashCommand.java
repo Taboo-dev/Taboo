@@ -13,8 +13,10 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.managers.AudioManager;
 import org.slf4j.Logger;
 import xyz.chalky.taboo.Taboo;
@@ -32,8 +34,13 @@ import static xyz.chalky.taboo.util.ExtensionsKt.isUrl;
 public class PlaySlashCommand extends SlashCommand {
 
     public PlaySlashCommand() {
-        setCommandData(Commands.slash("play", "Plays a song.")
-                .addOption(OptionType.STRING, "song", "The song to play.", true));
+        setCommandData(Commands.slash("play", "Plays a song.").addOptions(
+                new OptionData(OptionType.STRING, "song", "The song to play.", true),
+                new OptionData(OptionType.STRING, "provider", "Provider to search in. (Ignore if link)", false)
+                        .addChoice("YouTube (Default)", "ytsearch")
+                        .addChoice("Spotify", "spsearch")
+                        .addChoice("SoundCloud", "scsearch")
+                        .addChoice("YouTube Music", "ytmsearch")));
         addCommandFlags(CommandFlag.MUST_BE_IN_VC, CommandFlag.MUST_BE_IN_SAME_VC);
     }
 
@@ -43,14 +50,21 @@ public class PlaySlashCommand extends SlashCommand {
         AudioScheduler scheduler = guildAudioPlayer.getScheduler();
         JdaLink link = guildAudioPlayer.getScheduler().getLink();
         String input = event.getOption("song").getAsString();
+        OptionMapping providerOption = event.getOption("provider");
         Member member = event.getMember();
         GuildVoiceState voiceState = member.getVoiceState();
         AudioManager manager = event.getGuild().getAudioManager();
         String query;
+        String provider;
+        if (providerOption == null) {
+            provider = "ytsearch";
+        } else {
+            provider = providerOption.getAsString();
+        }
         if (isUrl(input)) {
             query = input;
         } else {
-            query = String.format("ytsearch:%s", input);
+            query = String.format("%s:%s", provider, input);
         }
         if (manager.getConnectedChannel() == null) {
             scheduler.setupScheduler(event.getChannel().getIdLong()); // Cursed
