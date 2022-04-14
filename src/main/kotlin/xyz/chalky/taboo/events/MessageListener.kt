@@ -5,10 +5,7 @@ import net.dv8tion.jda.api.events.message.MessageDeleteEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
-import xyz.chalky.taboo.database.Config
-import java.sql.SQLException
+import xyz.chalky.taboo.util.getActionLogId
 import java.time.Instant
 
 class MessageListener : ListenerAdapter() {
@@ -31,46 +28,35 @@ class MessageListener : ListenerAdapter() {
         val message = event.message
         if (message.author.isBot) return
         val guild = event.guild
-        try {
-            var channelId: Long? = null
-            transaction {
-                channelId = Config.select {
-                    Config.guildId eq guild.idLong
-                }.firstOrNull()?.getOrNull(Config.actionLog)
+        val msgId = message.idLong
+        val msgContent = message.contentRaw
+        val originalContent = messages[msgId]
+        val actionLogId = getActionLogId(guild) ?: return
+        val actionLog = guild.getTextChannelById(actionLogId) ?: return
+        actionLog.sendMessageEmbeds(
+            Embed {
+                title = "Message Edited"
+                field {
+                    name = "Original Message"
+                    value = originalContent!!
+                    inline = false
+                }
+                field {
+                    name = "New Message"
+                    value = msgContent
+                    inline = false
+                }
+                author {
+                    name = message.author.asTag
+                    iconUrl = message.author.effectiveAvatarUrl
+                }
+                color = 0x9F90CF
+                footer {
+                    name = "Message ID: $msgId"
+                }
+                timestamp = Instant.now()
             }
-            val msgId = message.idLong
-            val msgContent = message.contentRaw
-            val originalContent = messages[msgId]
-            if (channelId != null) {
-                val channel = guild.getTextChannelById(channelId!!)
-                channel!!.sendMessageEmbeds(
-                    Embed {
-                        title = "Message Edited"
-                        field {
-                            name = "Original Message"
-                            value = originalContent!!
-                            inline = false
-                        }
-                        field {
-                            name = "New Message"
-                            value = msgContent
-                            inline = false
-                        }
-                        author {
-                            name = message.author.asTag
-                            iconUrl = message.author.effectiveAvatarUrl
-                        }
-                        color = 0x9F90CF
-                        footer {
-                            name = "Message ID: $msgId"
-                        }
-                        timestamp = Instant.now()
-                    }
-                ).queue()
-            }
-        } catch (e: SQLException) {
-            e.printStackTrace()
-        }
+        ).queue()
     }
 
     override fun onMessageDelete(event: MessageDeleteEvent) {
@@ -78,29 +64,22 @@ class MessageListener : ListenerAdapter() {
         val msgId = event.messageIdLong
         val guild = event.guild
         val msgContent = messages[msgId] ?: return
-        var channelId: Long? = null
-        transaction {
-            channelId = Config.select {
-                Config.guildId eq guild.idLong
-            }.firstOrNull()?.getOrNull(Config.actionLog)
-        }
-        if (channelId != null) {
-            val channel = guild.getTextChannelById(channelId!!)
-            channel!!.sendMessageEmbeds(
-                Embed {
-                    title = "Message Deleted"
-                    field {
-                        name = "Message"
-                        value = msgContent
-                        inline = false
-                    }
-                    color = 0x9F90CF
-                    footer {
-                        name = "Message ID: $msgId"
-                    }
-                    timestamp = Instant.now()
+        val actionLogId = getActionLogId(guild) ?: return
+        val actionLog = guild.getTextChannelById(actionLogId) ?: return
+        actionLog.sendMessageEmbeds(
+            Embed {
+                title = "Message Deleted"
+                field {
+                    name = "Message"
+                    value = msgContent
+                    inline = false
                 }
-            ).queue()
-        }
+                color = 0x9F90CF
+                footer {
+                    name = "Message ID: $msgId"
+                }
+                timestamp = Instant.now()
+            }
+        ).queue()
     }
 }

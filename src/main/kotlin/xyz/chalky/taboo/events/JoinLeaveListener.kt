@@ -4,9 +4,7 @@ import dev.minn.jda.ktx.Embed
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
-import xyz.chalky.taboo.database.Config
+import xyz.chalky.taboo.util.getJoinLeaveLogId
 import java.awt.Color
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -17,15 +15,9 @@ class JoinLeaveListener : ListenerAdapter() {
         val guild = event.guild
         val member = event.member
         val user = event.user
-        var channelId: Long? = null
-        transaction {
-            channelId = Config.select {
-                Config.guildId eq guild.idLong
-            }.firstOrNull()?.getOrNull(Config.joinLeaveLog)
-        }
-        if (channelId == null) return
-        val channel = guild.getTextChannelById(channelId!!)
-        channel!!.sendMessageEmbeds(
+        val joinLeaveLogId = getJoinLeaveLogId(guild) ?: return
+        val joinLeaveLog = guild.getTextChannelById(joinLeaveLogId) ?: return
+        joinLeaveLog.sendMessageEmbeds(
             Embed {
                 title = "Member Joined"
                 description = "${member.asMention} ${user.asTag}"
@@ -48,15 +40,9 @@ class JoinLeaveListener : ListenerAdapter() {
         val guild = event.guild
         val member = event.member
         val user = event.user
-        var channelId: Long? = null
-        transaction {
-            channelId = Config.select {
-                Config.guildId eq guild.idLong
-            }.firstOrNull()?.getOrNull(Config.joinLeaveLog)
-        }
-        if (channelId == null) return
-        val channel = guild.getTextChannelById(channelId!!)
-        channel!!.sendMessageEmbeds(
+        val joinLeaveLogId = getJoinLeaveLogId(guild) ?: return
+        val joinLeaveLog = guild.getTextChannelById(joinLeaveLogId) ?: return
+        joinLeaveLog.sendMessageEmbeds(
             Embed {
                 title = "Member Left"
                 description = "${member!!.asMention} ${user.asTag}"
