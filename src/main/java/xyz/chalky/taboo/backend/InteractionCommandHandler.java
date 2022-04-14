@@ -17,10 +17,10 @@ import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.slf4j.Logger;
 import xyz.chalky.taboo.Taboo;
 import xyz.chalky.taboo.commands.ConfigSlashCommand;
-import xyz.chalky.taboo.commands.context.BookmarkContextMenuMessageCommand;
-import xyz.chalky.taboo.commands.misc.InfoSlashCommand;
 import xyz.chalky.taboo.commands.misc.PingSlashCommand;
-import xyz.chalky.taboo.commands.moderation.*;
+import xyz.chalky.taboo.commands.misc.ShardsSlashCommand;
+import xyz.chalky.taboo.commands.moderation.BanSlashCommand;
+import xyz.chalky.taboo.commands.moderation.KickSlashCommand;
 import xyz.chalky.taboo.commands.music.*;
 import xyz.chalky.taboo.util.PropertiesManager;
 import xyz.chalky.taboo.util.ResponseHelper;
@@ -43,8 +43,8 @@ public class InteractionCommandHandler {
 
     public InteractionCommandHandler(PropertiesManager propertiesManager) {
         this.propertiesManager = propertiesManager;
-        registeredCommands = Collections.synchronizedList(new ArrayList<>());
-        registeredGuildCommands = new ConcurrentHashMap<>();
+        this.registeredCommands = Collections.synchronizedList(new ArrayList<>());
+        this.registeredGuildCommands = new ConcurrentHashMap<>();
     }
 
     public void initialize() {
@@ -64,15 +64,12 @@ public class InteractionCommandHandler {
 
         // misc commands
         registerCommand(new PingSlashCommand());
-        registerCommand(new InfoSlashCommand());
+        registerCommand(new ShardsSlashCommand());
 
         // moderation commands
         registerCommand(new BanSlashCommand());
         registerCommand(new KickSlashCommand());
         registerCommand(new ConfigSlashCommand());
-
-        // context
-        registerCommand(new BookmarkContextMenuMessageCommand());
     }
 
     public void updateCommands(Consumer<List<Command>> success, Consumer<Throwable> failure) {
