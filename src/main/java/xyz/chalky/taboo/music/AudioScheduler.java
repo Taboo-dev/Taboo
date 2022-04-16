@@ -1,5 +1,6 @@
 package xyz.chalky.taboo.music;
 
+import kotlin.Pair;
 import lavalink.client.io.jda.JdaLink;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavalinkPlayer;
@@ -10,6 +11,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import xyz.chalky.taboo.Taboo;
+import xyz.chalky.taboo.util.ExtensionsKt;
 
 import java.awt.*;
 import java.time.Instant;
@@ -99,14 +101,13 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     public void onTrackStart(IPlayer player, AudioTrack track) {
         TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
         long length = track.getInfo().getLength();
-        long minutes = length / 60000;
-        long seconds = length % 60;
+        Pair<Long, Long> parseLength = ExtensionsKt.parseLength(length);
         if (!repeat) {
             MessageEmbed embed = new EmbedBuilder()
                     .setTitle("Now Playing:")
                     .setDescription(String.format("[%s](%s) by %s", track.getInfo().getTitle(),
                             track.getInfo().getUri(), track.getInfo().getAuthor()))
-                    .addField("Duration:", String.format("%02d:%02d", minutes, seconds), false)
+                    .addField("Duration:", String.format("%02d:%02d", parseLength.getFirst(), parseLength.getSecond()), false)
                     .setColor(0x9F90CF)
                     .setTimestamp(Instant.now())
                     .build();

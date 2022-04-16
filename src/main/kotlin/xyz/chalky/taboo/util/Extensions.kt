@@ -63,3 +63,9 @@ fun getJoinLeaveLogId(guild: Guild) : Long? {
     }
     return channelId
 }
+
+fun parseLength(length: Long) : Pair<Long, Long> {
+    val minutes = length / 60000
+    val seconds = length % 60
+    return Pair(minutes, seconds)
+}
