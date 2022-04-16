@@ -44,7 +44,7 @@ public class VoiceListener extends ListenerAdapter {
                 scheduler.destroy();
                 jda.getDirectAudioController().disconnect(guild);
                 channel.sendMessageEmbeds(embed).queue();
-            }, 2, TimeUnit.SECONDS);
+            }, 2, TimeUnit.MINUTES);
         }
     }
 
