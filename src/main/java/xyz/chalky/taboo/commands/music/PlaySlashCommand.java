@@ -24,12 +24,11 @@ import xyz.chalky.taboo.backend.CommandFlag;
 import xyz.chalky.taboo.backend.SlashCommand;
 import xyz.chalky.taboo.music.AudioScheduler;
 import xyz.chalky.taboo.music.GuildAudioPlayer;
+import xyz.chalky.taboo.util.ExtensionsKt;
 
 import java.awt.*;
 import java.time.Instant;
 import java.util.List;
-
-import static xyz.chalky.taboo.util.ExtensionsKt.isUrl;
 
 public class PlaySlashCommand extends SlashCommand {
 
@@ -61,7 +60,7 @@ public class PlaySlashCommand extends SlashCommand {
         } else {
             provider = providerOption.getAsString();
         }
-        if (isUrl(input)) {
+        if (ExtensionsKt.isUrl(input)) {
             query = input;
         } else {
             query = String.format("%s:%s", provider, input);
