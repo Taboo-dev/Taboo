@@ -3,6 +3,7 @@ package xyz.chalky.taboo.events;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +20,14 @@ import java.util.concurrent.TimeUnit;
 public class VoiceListener extends ListenerAdapter {
 
     private final ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
+
+    @Override
+    public void onGuildVoiceJoin(@NotNull GuildVoiceJoinEvent event) {
+        Guild guild = event.getGuild();
+        if (!guild.getSelfMember().getVoiceState().isGuildDeafened()) {
+            guild.deafen(guild.getSelfMember(), true).queue();
+        }
+    }
 
     @Override
     public void onGuildVoiceLeave(@NotNull GuildVoiceLeaveEvent event) {
