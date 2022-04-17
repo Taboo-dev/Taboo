@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import org.jetbrains.annotations.NotNull;
 import xyz.chalky.taboo.Taboo;
 import xyz.chalky.taboo.backend.SlashCommand;
 import xyz.chalky.taboo.music.GuildAudioPlayer;
@@ -22,7 +23,7 @@ public class NowPlayingSlashCommand extends SlashCommand {
     }
 
     @Override
-    public void executeCommand(SlashCommandInteractionEvent event) {
+    public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
         GuildAudioPlayer guildAudioPlayer = Taboo.getInstance().getAudioManager().getAudioPlayer(event.getGuild().getIdLong());
         LavalinkPlayer player = guildAudioPlayer.getScheduler().getPlayer();
         AudioTrack playingTrack = player.getPlayingTrack();

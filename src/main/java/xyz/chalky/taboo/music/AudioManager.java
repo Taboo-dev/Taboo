@@ -1,5 +1,7 @@
 package xyz.chalky.taboo.music;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +27,7 @@ public class AudioManager {
         return Set.copyOf(audioPlayers.values());
     }
 
-    public void removePlayer(GuildAudioPlayer player) {
+    public void removePlayer(@NotNull GuildAudioPlayer player) {
         audioPlayers.remove(player.getGuildId());
     }
 

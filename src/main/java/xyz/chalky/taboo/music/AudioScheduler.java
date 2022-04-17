@@ -10,6 +10,7 @@ import lavalink.client.player.track.AudioTrackEndReason;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
+import org.jetbrains.annotations.NotNull;
 import xyz.chalky.taboo.Taboo;
 import xyz.chalky.taboo.util.ExtensionsKt;
 
@@ -30,7 +31,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     private long channelId;
     private boolean repeat = false;
 
-    public AudioScheduler(LavalinkPlayer player, GuildAudioPlayer guildAudioPlayer, long guildId) {
+    public AudioScheduler(@NotNull LavalinkPlayer player, GuildAudioPlayer guildAudioPlayer, long guildId) {
         this.guildId = guildId;
         this.guildAudioPlayer = guildAudioPlayer;
         this.queue = new LinkedBlockingQueue<>();
@@ -98,7 +99,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     }
 
     @Override
-    public void onTrackStart(IPlayer player, AudioTrack track) {
+    public void onTrackStart(IPlayer player, @NotNull AudioTrack track) {
         TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
         long length = track.getInfo().getLength();
         Pair<Long, Long> parseLength = ExtensionsKt.parseLength(length);
@@ -118,7 +119,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     }
 
     @Override
-    public void onTrackEnd(IPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+    public void onTrackEnd(IPlayer player, AudioTrack track, @NotNull AudioTrackEndReason endReason) {
         TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
         if (endReason.mayStartNext) {
             if (repeat) {
@@ -146,7 +147,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     }
 
     @Override
-    public void onTrackException(IPlayer player, AudioTrack track, Exception exception) {
+    public void onTrackException(IPlayer player, @NotNull AudioTrack track, Exception exception) {
         TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
         MessageEmbed embed = new EmbedBuilder()
                 .setTitle("An error occurred while playing the track:")

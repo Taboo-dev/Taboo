@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import org.jetbrains.annotations.NotNull;
 import xyz.chalky.taboo.backend.SlashCommand;
 
 import java.time.Instant;
@@ -16,7 +17,7 @@ public class PingSlashCommand extends SlashCommand {
     }
 
     @Override
-    public void executeCommand(SlashCommandInteractionEvent event) {
+    public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
         JDA jda = event.getJDA();
         User user = event.getUser();
         EmbedBuilder embed = new EmbedBuilder()

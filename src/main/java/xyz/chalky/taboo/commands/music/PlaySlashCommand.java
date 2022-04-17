@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.managers.AudioManager;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import xyz.chalky.taboo.Taboo;
 import xyz.chalky.taboo.backend.CommandFlag;
@@ -44,7 +45,7 @@ public class PlaySlashCommand extends SlashCommand {
     }
 
     @Override
-    public void executeCommand(SlashCommandInteractionEvent event) {
+    public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
         GuildAudioPlayer guildAudioPlayer = Taboo.getInstance().getAudioManager().getAudioPlayer(event.getGuild().getIdLong());
         AudioScheduler scheduler = guildAudioPlayer.getScheduler();
         JdaLink link = guildAudioPlayer.getScheduler().getLink();
