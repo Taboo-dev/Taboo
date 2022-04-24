@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    implementation("net.dv8tion:JDA:5.0.0-alpha.9")
+    implementation("net.dv8tion:JDA:5.0.0-alpha.10")
     implementation("pw.chew:jda-chewtils:2.0-SNAPSHOT")
     implementation("com.github.MinnDevelopment:jda-ktx:master-SNAPSHOT")
     implementation("com.github.KittyBot-Org:Lavalink-Client:ba5094f880") {
