@@ -25,7 +25,9 @@ public class VoiceListener extends ListenerAdapter {
     public void onGuildVoiceJoin(@NotNull GuildVoiceJoinEvent event) {
         Guild guild = event.getGuild();
         if (!guild.getSelfMember().getVoiceState().isGuildDeafened()) {
-            guild.deafen(guild.getSelfMember(), true).queue();
+            try {
+                guild.deafen(guild.getSelfMember(), true).queue();
+            } catch (IllegalStateException ignored) {}
         }
     }
 
