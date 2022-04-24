@@ -9,6 +9,7 @@ import mu.KotlinLogging;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.awt.*;
@@ -34,7 +35,7 @@ public class AudioResultHandler implements LoadResultHandler {
     }
 
     @Override
-    public void searchResultLoaded(List<AudioTrack> tracks) {
+    public void searchResultLoaded(@NotNull List<AudioTrack> tracks) {
         AudioTrack track = tracks.get(0);
         scheduler.queue(track);
         handle(track);
@@ -42,7 +43,7 @@ public class AudioResultHandler implements LoadResultHandler {
     }
 
     @Override
-    public void playlistLoaded(AudioPlaylist playlist) {
+    public void playlistLoaded(@NotNull AudioPlaylist playlist) {
         playlist.getTracks().forEach(scheduler::queue);
         handlePlaylist(playlist);
         LOGGER.debug("Playlist loaded: {}", playlist.getName());
@@ -60,7 +61,7 @@ public class AudioResultHandler implements LoadResultHandler {
     }
 
     @Override
-    public void loadFailed(FriendlyException exception) {
+    public void loadFailed(@NotNull FriendlyException exception) {
         MessageEmbed embed = new EmbedBuilder()
                 .setTitle("An error occurred while loading the track")
                 .setColor(Color.RED)
