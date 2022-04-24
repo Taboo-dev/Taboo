@@ -4,7 +4,7 @@ import dev.minn.jda.ktx.Embed
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import xyz.chalky.taboo.util.getJoinLeaveLogId
+import xyz.chalky.taboo.util.getLogId
 import java.awt.Color
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -15,9 +15,9 @@ class JoinLeaveListener : ListenerAdapter() {
         val guild = event.guild
         val member = event.member
         val user = event.user
-        val joinLeaveLogId = getJoinLeaveLogId(guild) ?: return
-        val joinLeaveLog = guild.getTextChannelById(joinLeaveLogId) ?: return
-        joinLeaveLog.sendMessageEmbeds(
+        val logId = getLogId(guild) ?: return
+        val log = guild.getTextChannelById(logId) ?: return
+        log.sendMessageEmbeds(
             Embed {
                 title = "Member Joined"
                 description = "${member.asMention} ${user.asTag}"
@@ -40,9 +40,9 @@ class JoinLeaveListener : ListenerAdapter() {
         val guild = event.guild
         val member = event.member
         val user = event.user
-        val joinLeaveLogId = getJoinLeaveLogId(guild) ?: return
-        val joinLeaveLog = guild.getTextChannelById(joinLeaveLogId) ?: return
-        joinLeaveLog.sendMessageEmbeds(
+        val logId = getLogId(guild) ?: return
+        val log = guild.getTextChannelById(logId) ?: return
+        log.sendMessageEmbeds(
             Embed {
                 title = "Member Left"
                 description = "${member!!.asMention} ${user.asTag}"

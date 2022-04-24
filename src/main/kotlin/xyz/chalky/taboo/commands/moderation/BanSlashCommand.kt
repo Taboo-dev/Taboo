@@ -35,10 +35,10 @@ class BanSlashCommand : SlashCommand() {
         try {
             event.guild!!.ban(target!!, delDays!!, reason).queue({ // Success
                 transaction {
-                    val actionLogId = Config.select {
+                    val logId = Config.select {
                         Config.guildId eq event.guild!!.idLong
-                    }.firstOrNull()?.getOrNull(Config.actionLog) ?: return@transaction
-                    val actionLog = event.guild!!.getTextChannelById(actionLogId)
+                    }.firstOrNull()?.getOrNull(Config.log) ?: return@transaction
+                    val log = event.guild!!.getTextChannelById(logId)
                     val embed = Embed {
                         title = "Banned a member"
                         color = Color.CYAN.hashCode()
@@ -67,7 +67,7 @@ class BanSlashCommand : SlashCommand() {
                         timestamp = Instant.now()
                     }
                     event._reply(embed).setEphemeral(true)
-                        .flatMap { actionLog!!.sendMessageEmbeds(embed) }
+                        .flatMap { log!!.sendMessageEmbeds(embed) }
                         .queue()
                 }
             }, { // Failure

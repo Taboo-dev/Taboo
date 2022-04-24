@@ -29,9 +29,7 @@ class ConfigSlashCommand : SlashCommand() {
                     SubcommandData(
                         "set", "Sets this server's config."
                     ).addOption(
-                        OptionType.CHANNEL, "action-log", "Set the channel to log actions to.", true
-                    ).addOption(
-                        OptionType.CHANNEL, "join-leave-log", "Set the channel to log join/leave messages to.", true
+                        OptionType.CHANNEL, "log", "Set the channel to log actions to.", true
                     ), SubcommandData(
                         "clear", "Clear this server's config."
                     ), SubcommandData(
@@ -44,14 +42,12 @@ class ConfigSlashCommand : SlashCommand() {
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
         event.onSubCommand("set") {
-            val actionLogChannel = event.getOption<TextChannel>("action-log")
-            val joinLeaveLogChannel = event.getOption<TextChannel>("join-leave-log")
+            val logChannel = event.getOption<TextChannel>("log")
             val runCatching = runCatching {
                 transaction {
                     Config.insert {
                         it[guildId] = event.guild!!.idLong
-                        it[actionLog] = actionLogChannel!!.idLong
-                        it[joinLeaveLog] = joinLeaveLogChannel!!.idLong
+                        it[log] = logChannel!!.idLong
                     }
                 }
             }
@@ -72,9 +68,8 @@ class ConfigSlashCommand : SlashCommand() {
                     Embed {
                         title = "Config set!"
                         description = """
-                        Action log channel set to ${actionLogChannel!!.asMention}
-                        Join/leave log channel set to ${joinLeaveLogChannel!!.asMention}
-                    """.trimIndent()
+                            Action log channel set to ${logChannel!!.asMention}
+                        """.trimIndent()
                         color = 0x9F90CF
                         timestamp = Instant.now()
                     }
@@ -119,8 +114,8 @@ class ConfigSlashCommand : SlashCommand() {
                         Embed {
                             title = "Config for ${event.guild!!.name}"
                             description = """
-                            Action log channel: ${event.guild!!.getTextChannelById(it[Config.actionLog])!!.asMention}
-                            Join/leave log channel: ${event.guild!!.getTextChannelById(it[Config.joinLeaveLog])!!.asMention}
+                            Action log channel: ${event.guild!!.getTextChannelById(it[Config.log])!!.asMention}
+                            Join/leave log channel: ${event.guild!!.getTextChannelById(it[Config.log])!!.asMention}
                             """.trimIndent()
                             color = 0x9F90CF
                             timestamp = Instant.now()

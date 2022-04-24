@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.channel.update.GenericChannelUpdateEvent
 import net.dv8tion.jda.api.events.role.RoleCreateEvent
 import net.dv8tion.jda.api.events.role.RoleDeleteEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import xyz.chalky.taboo.util.getActionLogId
+import xyz.chalky.taboo.util.getLogId
 import java.awt.Color
 import java.time.Instant
 
@@ -18,9 +18,9 @@ class GuildEvents : ListenerAdapter() {
     override fun onRoleCreate(event: RoleCreateEvent) {
         val role = event.role
         val guild = event.guild
-        val actionLogId = getActionLogId(guild) ?: return
-        val actionLog = guild.getTextChannelById(actionLogId) ?: return
-        actionLog.sendMessageEmbeds(
+        val logId = getLogId(guild) ?: return
+        val log = guild.getTextChannelById(logId) ?: return
+        log.sendMessageEmbeds(
             Embed {
                 title = "Role Created"
                 description = "Role: ${role.asMention}"
@@ -36,9 +36,9 @@ class GuildEvents : ListenerAdapter() {
     override fun onRoleDelete(event: RoleDeleteEvent) {
         val role = event.role
         val guild = event.guild
-        val actionLogId = getActionLogId(guild) ?: return
-        val actionLog = guild.getTextChannelById(actionLogId) ?: return
-        actionLog.sendMessageEmbeds(
+        val logId = getLogId(guild) ?: return
+        val log = guild.getTextChannelById(logId) ?: return
+        log.sendMessageEmbeds(
             Embed {
                 title = "Role Deleted"
                 description = "Role: ${role.asMention}"
@@ -56,9 +56,9 @@ class GuildEvents : ListenerAdapter() {
     override fun onChannelCreate(event: ChannelCreateEvent) {
         val channel = event.channel
         val guild = event.guild
-        val actionLogId = getActionLogId(guild) ?: return
-        val actionLog = guild.getTextChannelById(actionLogId) ?: return
-        actionLog.sendMessageEmbeds(
+        val logId = getLogId(guild) ?: return
+        val log = guild.getTextChannelById(logId) ?: return
+        log.sendMessageEmbeds(
             Embed {
                 title = "Channel Created"
                 description = "Channel: ${channel.asMention}"
@@ -74,9 +74,9 @@ class GuildEvents : ListenerAdapter() {
     override fun onChannelDelete(event: ChannelDeleteEvent) {
         val channel = event.channel
         val guild = event.guild
-        val actionLogId = getActionLogId(guild) ?: return
-        val actionLog = guild.getTextChannelById(actionLogId) ?: return
-        actionLog.sendMessageEmbeds(
+        val logId = getLogId(guild) ?: return
+        val log = guild.getTextChannelById(logId) ?: return
+        log.sendMessageEmbeds(
             Embed {
                 title = "Channel Deleted"
                 description = "Channel: ${channel.asMention}"
@@ -92,9 +92,9 @@ class GuildEvents : ListenerAdapter() {
     override fun onGenericChannelUpdate(event: GenericChannelUpdateEvent<*>) {
         val channel = event.channel
         val guild = event.guild
-        val actionLogId = getActionLogId(guild) ?: return
-        val actionLog = guild.getTextChannelById(actionLogId) ?: return
-        actionLog.sendMessageEmbeds(
+        val logId = getLogId(guild) ?: return
+        val log = guild.getTextChannelById(logId) ?: return
+        log.sendMessageEmbeds(
             Embed {
                 title = "Channel Updated"
                 description = "Channel: ${channel.asMention}"

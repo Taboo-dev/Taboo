@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.events.message.MessageDeleteEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import xyz.chalky.taboo.util.getActionLogId
+import xyz.chalky.taboo.util.getLogId
 import java.time.Instant
 
 class MessageListener : ListenerAdapter() {
@@ -31,9 +31,9 @@ class MessageListener : ListenerAdapter() {
         val msgId = message.idLong
         val msgContent = message.contentRaw
         val originalContent = messages[msgId]
-        val actionLogId = getActionLogId(guild) ?: return
-        val actionLog = guild.getTextChannelById(actionLogId) ?: return
-        actionLog.sendMessageEmbeds(
+        val logId = getLogId(guild) ?: return
+        val log = guild.getTextChannelById(logId) ?: return
+        log.sendMessageEmbeds(
             Embed {
                 title = "Message Edited"
                 field {
@@ -64,9 +64,9 @@ class MessageListener : ListenerAdapter() {
         val msgId = event.messageIdLong
         val guild = event.guild
         val msgContent = messages[msgId] ?: return
-        val actionLogId = getActionLogId(guild) ?: return
-        val actionLog = guild.getTextChannelById(actionLogId) ?: return
-        actionLog.sendMessageEmbeds(
+        val logId = getLogId(guild) ?: return
+        val log = guild.getTextChannelById(logId) ?: return
+        log.sendMessageEmbeds(
             Embed {
                 title = "Message Deleted"
                 field {

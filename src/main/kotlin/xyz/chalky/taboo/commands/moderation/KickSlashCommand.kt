@@ -29,10 +29,10 @@ class KickSlashCommand : SlashCommand() {
         try {
             target!!.kick(reason).queue ({
                 transaction {
-                    val actionLogId = Config.select {
+                    val logId = Config.select {
                         Config.guildId eq event.guild!!.idLong
-                    }.firstOrNull()?.getOrNull(Config.actionLog) ?: return@transaction
-                    val actionLog = event.guild!!.getTextChannelById(actionLogId)
+                    }.firstOrNull()?.getOrNull(Config.log) ?: return@transaction
+                    val log = event.guild!!.getTextChannelById(logId)
                     val embed = Embed {
                         title = "Kicked a member"
                         author {
@@ -55,7 +55,7 @@ class KickSlashCommand : SlashCommand() {
                         timestamp = Instant.now()
                     }
                     event._reply(embed).setEphemeral(true).queue {
-                        actionLog!!.sendMessageEmbeds(embed).queue()
+                        log!!.sendMessageEmbeds(embed).queue()
                     }
                 }
             }, {

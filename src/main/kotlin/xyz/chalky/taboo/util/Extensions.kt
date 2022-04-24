@@ -44,22 +44,12 @@ fun isUrl(input: String) : Boolean {
     }
 }
 
-fun getActionLogId(guild: Guild) : Long? {
+fun getLogId(guild: Guild) : Long? {
     var channelId: Long? = null
     transaction {
         channelId = Config.select {
             Config.guildId eq guild.idLong
-        }.firstOrNull()?.getOrNull(Config.actionLog) ?: return@transaction null
-    }
-    return channelId
-}
-
-fun getJoinLeaveLogId(guild: Guild) : Long? {
-    var channelId: Long? = null
-    transaction {
-        channelId = Config.select {
-            Config.guildId eq guild.idLong
-        }.firstOrNull()?.getOrNull(Config.joinLeaveLog) ?: return@transaction null
+        }.firstOrNull()?.getOrNull(Config.log) ?: return@transaction null
     }
     return channelId
 }
