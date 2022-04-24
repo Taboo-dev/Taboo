@@ -54,6 +54,16 @@ fun getLogId(guild: Guild) : Long? {
     return channelId
 }
 
+fun getMusicChannelId(guild: Guild) : Long? {
+    var channelId: Long? = null
+    transaction {
+        channelId = Config.select {
+            Config.guildId eq guild.idLong
+        }.firstOrNull()?.getOrNull(Config.music) ?: return@transaction null
+    }
+    return channelId
+}
+
 fun parseLength(length: Long) : Pair<Long, Long> {
     val minutes = length / 60000
     val seconds = length % 60

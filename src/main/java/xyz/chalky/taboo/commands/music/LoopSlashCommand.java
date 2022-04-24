@@ -22,7 +22,7 @@ public class LoopSlashCommand extends SlashCommand {
                         .addOption(OptionType.BOOLEAN, "loop",
                                 "Whether to loop the current song.", true)
         );
-        addCommandFlags(CommandFlag.MUST_BE_IN_VC, CommandFlag.MUST_BE_IN_SAME_VC);
+        addCommandFlags(CommandFlag.MUSIC);
     }
 
     @Override

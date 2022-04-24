@@ -22,6 +22,7 @@ import xyz.chalky.taboo.commands.misc.ShardsSlashCommand;
 import xyz.chalky.taboo.commands.moderation.BanSlashCommand;
 import xyz.chalky.taboo.commands.moderation.KickSlashCommand;
 import xyz.chalky.taboo.commands.music.*;
+import xyz.chalky.taboo.util.ExtensionsKt;
 import xyz.chalky.taboo.util.PropertiesManager;
 import xyz.chalky.taboo.util.ResponseHelper;
 
@@ -210,7 +211,20 @@ public class InteractionCommandHandler {
             event.getHook().sendMessageEmbeds(embed.build()).queue();
             return;
         }
-        if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
+        if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
+            Long musicChannelId = ExtensionsKt.getMusicChannelId(guild);
+            if (musicChannelId == null) {
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
+                        Color.RED, null);
+                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                return;
+            }
+            if (event.getChannel().getIdLong() != musicChannelId) {
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You can only execute this command in the music channel.",
+                        Color.RED, null);
+                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                return;
+            }
             GuildVoiceState guildVoiceState = member.getVoiceState();
             if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in a voice channel to execute this command.",
@@ -218,9 +232,6 @@ public class InteractionCommandHandler {
                 event.getHook().sendMessageEmbeds(embed.build()).queue();
                 return;
             }
-        }
-        if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_SAME_VC)) {
-            GuildVoiceState guildVoiceState = member.getVoiceState();
             AudioManager manager = event.getGuild().getAudioManager();
             if (manager.isConnected()) {
                 if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
@@ -317,7 +328,20 @@ public class InteractionCommandHandler {
             event.getHook().sendMessageEmbeds(embed.build()).queue();
             return;
         }
-        if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
+        if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
+            Long musicChannelId = ExtensionsKt.getMusicChannelId(guild);
+            if (musicChannelId == null) {
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
+                        Color.RED, null);
+                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                return;
+            }
+            if (event.getChannel().getIdLong() != musicChannelId) {
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You can only execute this command in the music channel.",
+                        Color.RED, null);
+                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                return;
+            }
             GuildVoiceState guildVoiceState = member.getVoiceState();
             if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in a voice channel to execute this command.",
@@ -325,9 +349,6 @@ public class InteractionCommandHandler {
                 event.getHook().sendMessageEmbeds(embed.build()).queue();
                 return;
             }
-        }
-        if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_SAME_VC)) {
-            GuildVoiceState guildVoiceState = member.getVoiceState();
             AudioManager manager = event.getGuild().getAudioManager();
             if (manager.isConnected()) {
                 if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
@@ -425,7 +446,20 @@ public class InteractionCommandHandler {
                         event.getHook().sendMessageEmbeds(embed.build()).queue();
                         return;
                     }
-                    if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_VC)) {
+                    if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
+                        Long musicChannelId = ExtensionsKt.getMusicChannelId(guild);
+                        if (musicChannelId == null) {
+                            EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
+                                    Color.RED, null);
+                            event.getHook().sendMessageEmbeds(embed.build()).queue();
+                            return;
+                        }
+                        if (event.getChannel().getIdLong() != musicChannelId) {
+                            EmbedBuilder embed = ResponseHelper.createEmbed(null, "You can only execute this command in the music channel.",
+                                    Color.RED, null);
+                            event.getHook().sendMessageEmbeds(embed.build()).queue();
+                            return;
+                        }
                         GuildVoiceState guildVoiceState = member.getVoiceState();
                         if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
                             EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in a voice channel to execute this command.",
@@ -433,12 +467,9 @@ public class InteractionCommandHandler {
                             event.getHook().sendMessageEmbeds(embed.build()).queue();
                             return;
                         }
-                    }
-                    if (command.getCommandFlags().contains(CommandFlag.MUST_BE_IN_SAME_VC)) {
-                        GuildVoiceState voiceState = member.getVoiceState();
                         AudioManager manager = event.getGuild().getAudioManager();
                         if (manager.isConnected()) {
-                            if (!manager.getConnectedChannel().equals(voiceState.getChannel())) {
+                            if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
                                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in the same voice channel as me to execute this command.",
                                         Color.RED, null);
                                 event.getHook().sendMessageEmbeds(embed.build()).queue();

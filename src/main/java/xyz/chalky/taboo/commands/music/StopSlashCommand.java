@@ -17,7 +17,7 @@ public class StopSlashCommand extends SlashCommand {
 
     public StopSlashCommand() {
         setCommandData(Commands.slash("stop", "Stops playing."));
-        addCommandFlags(CommandFlag.MUST_BE_IN_VC, CommandFlag.MUST_BE_IN_SAME_VC);
+        addCommandFlags(CommandFlag.MUSIC);
     }
 
     @Override

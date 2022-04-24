@@ -5,5 +5,6 @@ import org.jetbrains.exposed.sql.Table
 object Config : Table("config") {
     val guildId = long("guild_id").uniqueIndex()
     val log = long("log_id")
+    val music = long("music_id")
     override val primaryKey = PrimaryKey(guildId)
 }

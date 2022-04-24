@@ -28,7 +28,7 @@ public class PlaySlashCommand extends SlashCommand {
                         .addChoice("Spotify", "spsearch")
                         .addChoice("SoundCloud", "scsearch")
                         .addChoice("YouTube Music", "ytmsearch")));
-        addCommandFlags(CommandFlag.MUST_BE_IN_VC, CommandFlag.MUST_BE_IN_SAME_VC);
+        addCommandFlags(CommandFlag.MUSIC);
     }
 
     @Override

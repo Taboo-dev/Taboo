@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
+import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
@@ -28,8 +29,9 @@ class ConfigSlashCommand : SlashCommand() {
                 .addSubcommands(
                     SubcommandData(
                         "set", "Sets this server's config."
-                    ).addOption(
-                        OptionType.CHANNEL, "log", "Set the channel to log actions to.", true
+                    ).addOptions(
+                        OptionData(OptionType.CHANNEL, "log", "Set the channel to log actions to.", true),
+                        OptionData(OptionType.CHANNEL, "music", "Sets the music channel.", true)
                     ), SubcommandData(
                         "clear", "Clear this server's config."
                     ), SubcommandData(
@@ -43,11 +45,13 @@ class ConfigSlashCommand : SlashCommand() {
     override fun executeCommand(event: SlashCommandInteractionEvent) {
         event.onSubCommand("set") {
             val logChannel = event.getOption<TextChannel>("log")
+            val musicChannel = event.getOption<TextChannel>("music")
             val runCatching = runCatching {
                 transaction {
                     Config.insert {
                         it[guildId] = event.guild!!.idLong
                         it[log] = logChannel!!.idLong
+                        it[music] = musicChannel!!.idLong
                     }
                 }
             }
@@ -68,7 +72,8 @@ class ConfigSlashCommand : SlashCommand() {
                     Embed {
                         title = "Config set!"
                         description = """
-                            Action log channel set to ${logChannel!!.asMention}
+                            Log channel set to ${logChannel!!.asMention}
+                            Music channel set to ${musicChannel!!.asMention}
                         """.trimIndent()
                         color = 0x9F90CF
                         timestamp = Instant.now()
@@ -114,7 +119,7 @@ class ConfigSlashCommand : SlashCommand() {
                         Embed {
                             title = "Config for ${event.guild!!.name}"
                             description = """
-                            Action log channel: ${event.guild!!.getTextChannelById(it[Config.log])!!.asMention}
+                            Log channel: ${event.guild!!.getTextChannelById(it[Config.log])!!.asMention}
                             Join/leave log channel: ${event.guild!!.getTextChannelById(it[Config.log])!!.asMention}
                             """.trimIndent()
                             color = 0x9F90CF

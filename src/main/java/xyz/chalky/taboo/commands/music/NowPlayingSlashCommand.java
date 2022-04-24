@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 import xyz.chalky.taboo.Taboo;
+import xyz.chalky.taboo.backend.CommandFlag;
 import xyz.chalky.taboo.backend.SlashCommand;
 import xyz.chalky.taboo.music.GuildAudioPlayer;
 import xyz.chalky.taboo.util.ExtensionsKt;
@@ -22,6 +23,7 @@ public class NowPlayingSlashCommand extends SlashCommand {
 
     public NowPlayingSlashCommand() {
         setCommandData(Commands.slash("now-playing", "Queries the current song playing."));
+        addCommandFlags(CommandFlag.MUSIC);
     }
 
     @Override

@@ -17,7 +17,7 @@ public class SkipSlashCommand extends SlashCommand {
 
     public SkipSlashCommand() {
         setCommandData(Commands.slash("skip", "Skips the current song."));
-        addCommandFlags(CommandFlag.MUST_BE_IN_VC, CommandFlag.MUST_BE_IN_SAME_VC);
+        addCommandFlags(CommandFlag.MUSIC);
     }
 
     @Override

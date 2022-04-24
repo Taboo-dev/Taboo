@@ -17,7 +17,7 @@ public class ShuffleSlashCommand extends SlashCommand {
 
     public ShuffleSlashCommand() {
         setCommandData(Commands.slash("shuffle", "Shuffle the current queue."));
-        addCommandFlags(CommandFlag.MUST_BE_IN_VC, CommandFlag.MUST_BE_IN_SAME_VC);
+        addCommandFlags(CommandFlag.MUSIC);
     }
 
     @Override
