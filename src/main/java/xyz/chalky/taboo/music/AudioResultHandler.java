@@ -1,5 +1,6 @@
 package xyz.chalky.taboo.music;
 
+import com.github.topislavalinkplugins.topissourcemanagers.ISRCAudioTrack;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -12,7 +13,6 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
-import xyz.chalky.taboo.music.spotify.SpotifyTrack;
 
 import java.awt.*;
 import java.time.Instant;
@@ -80,8 +80,8 @@ public class AudioResultHandler implements AudioLoadResultHandler {
                 .setTimestamp(Instant.now());
         if (track instanceof YoutubeAudioTrack) {
             embed.setImage(String.format("https://img.youtube.com/vi/%s/mqdefault.jpg", track.getInfo().identifier));
-        } else if (track instanceof SpotifyTrack spotifyTrack) {
-            embed.setImage(spotifyTrack.getArtworkURL());
+        } else if (track instanceof ISRCAudioTrack isrcAudioTrack) {
+            embed.setImage(isrcAudioTrack.getArtworkURL());
         }
         event.getHook().sendMessageEmbeds(embed.build()).queue();
     }

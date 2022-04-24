@@ -73,7 +73,7 @@ public class Taboo {
         isDebug = propertiesManager.getDebugState();
         eventWaiter = new EventWaiter();
         lavalink = new JdaLavalink(null, 1, null);
-        audioManager = new AudioManager();
+        audioManager = new AudioManager(propertiesManager);
         EventManager eventManager = new EventManager(propertiesManager);
         eventManager.init();
         DatabaseManager.INSTANCE.startDatabase();

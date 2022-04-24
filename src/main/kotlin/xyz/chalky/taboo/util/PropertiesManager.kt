@@ -26,4 +26,10 @@ data class PropertiesManager(val properties: Properties) {
     val lavalinkPassword: String
         get() = properties.getProperty("lavalinkPassword")
 
+    val spotifyClientId: String
+        get() = properties.getProperty("spotifyClientId")
+
+    val spotifyClientSecret: String
+        get() = properties.getProperty("spotifyClientSecret")
+
 }

@@ -1,5 +1,6 @@
 package xyz.chalky.taboo.commands.music;
 
+import com.github.topislavalinkplugins.topissourcemanagers.ISRCAudioTrack;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
@@ -13,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import xyz.chalky.taboo.Taboo;
 import xyz.chalky.taboo.backend.SlashCommand;
 import xyz.chalky.taboo.music.GuildAudioPlayer;
-import xyz.chalky.taboo.music.spotify.SpotifyTrack;
 import xyz.chalky.taboo.util.ExtensionsKt;
 
 import java.time.Instant;
@@ -55,8 +55,8 @@ public class NowPlayingSlashCommand extends SlashCommand {
                     .setTimestamp(Instant.now());
             if (playingTrack instanceof YoutubeAudioTrack) {
                 embed.setImage(String.format("https://img.youtube.com/vi/%s/mqdefault.jpg", playingTrack.getIdentifier()));
-            } else if (playingTrack instanceof SpotifyTrack spotifyTrack) {
-                embed.setImage(spotifyTrack.getArtworkURL());
+            } else if (playingTrack instanceof ISRCAudioTrack isrcAudioTrack) {
+                embed.setImage(isrcAudioTrack.getArtworkURL());
             }
             event.getHook().sendMessageEmbeds(embed.build()).queue();
         }
