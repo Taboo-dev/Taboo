@@ -30,7 +30,7 @@ public class ReadyHandler extends ListenerAdapter {
             lavalink.setUserId(event.getJDA().getSelfUser().getId());
             lavalink.addNode("node-1", propertiesManager.getLavalinkHost(), propertiesManager.getLavalinkPassword());
             Guild guild = Taboo.getInstance().getShardManager().getGuildById(propertiesManager.getGuildId());
-            TextChannel channel = guild.getTextChannelById(propertiesManager.getActionLogId());
+            TextChannel channel = guild.getTextChannelById(propertiesManager.getLogId());
             channel.sendMessageEmbeds(ResponseHelper.createEmbed("Taboo is ready!", null, "0x9F90CF", null).build()).queue();
         });
     }

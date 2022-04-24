@@ -17,8 +17,8 @@ data class PropertiesManager(val properties: Properties) {
     val ownerId: Long
         get() = properties.getProperty("ownerId").toLong()
 
-    val actionLogId: Long
-        get() = properties.getProperty("actionLogId").toLong()
+    val logId: Long
+        get() = properties.getProperty("logId").toLong()
 
     val lavalinkHost: URI
         get() = URI(properties.getProperty("lavalinkHost"))
