@@ -79,9 +79,9 @@ public class AudioResultHandler implements AudioLoadResultHandler {
                 .setColor(0x9F90CF)
                 .setTimestamp(Instant.now());
         if (track instanceof YoutubeAudioTrack) {
-            embed.setImage(String.format("https://img.youtube.com/vi/%s/mqdefault.jpg", track.getInfo().identifier));
+            embed.setThumbnail(String.format("https://img.youtube.com/vi/%s/mqdefault.jpg", track.getInfo().identifier));
         } else if (track instanceof ISRCAudioTrack isrcAudioTrack) {
-            embed.setImage(isrcAudioTrack.getArtworkURL());
+            embed.setThumbnail(isrcAudioTrack.getArtworkURL());
         }
         event.getHook().sendMessageEmbeds(embed.build()).queue();
     }
