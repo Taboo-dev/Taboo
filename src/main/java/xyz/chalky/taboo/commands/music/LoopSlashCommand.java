@@ -23,11 +23,11 @@ public class LoopSlashCommand extends SlashCommand {
                                 "Whether to loop the current song.", true)
         );
         addCommandFlags(CommandFlag.MUSIC);
+        setEphemeral(false);
     }
 
     @Override
     public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
-        event.deferReply().queue();
         GuildAudioPlayer guildAudioPlayer = Taboo.getInstance().getAudioManager().getAudioPlayer(event.getGuild().getIdLong());
         AudioScheduler scheduler = guildAudioPlayer.getScheduler();
         boolean loop = event.getOption("loop").getAsBoolean();

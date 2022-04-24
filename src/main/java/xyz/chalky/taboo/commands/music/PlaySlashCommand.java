@@ -29,11 +29,11 @@ public class PlaySlashCommand extends SlashCommand {
                         .addChoice("SoundCloud", "scsearch")
                         .addChoice("YouTube Music", "ytmsearch")));
         addCommandFlags(CommandFlag.MUSIC);
+        setEphemeral(false);
     }
 
     @Override
     public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
-        event.deferReply().queue();
         GuildAudioPlayer guildAudioPlayer = Taboo.getInstance().getAudioManager().getAudioPlayer(event.getGuild().getIdLong());
         AudioScheduler scheduler = guildAudioPlayer.getScheduler();
         JdaLink link = guildAudioPlayer.getScheduler().getLink();

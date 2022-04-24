@@ -21,10 +21,10 @@ class KickSlashCommand : SlashCommand() {
         setCommandData(Commands.slash("kick", "Kick a user from the server.")
             .addOption(OptionType.USER, "user", "The user to kick.", true)
             .addOption(OptionType.STRING, "reason", "The reason for kicking the user.", false))
+        isEphemeral = true
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
-        event.deferReply(true).queue()
         val target = event.getOption<Member>("user")
         val reason = if (event.getOption<String>("reason") == null) "No reason provided." else event.getOption<String>("reason")
         try {

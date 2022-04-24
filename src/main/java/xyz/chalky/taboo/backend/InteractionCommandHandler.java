@@ -498,6 +498,7 @@ public class InteractionCommandHandler {
                             return;
                         }
                     }
+                    event.deferReply(command.isEphemeral()).queue();
                     command.executeCommand(event);
                 }
             } catch (Exception e) {

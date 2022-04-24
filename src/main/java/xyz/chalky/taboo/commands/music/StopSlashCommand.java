@@ -18,11 +18,11 @@ public class StopSlashCommand extends SlashCommand {
     public StopSlashCommand() {
         setCommandData(Commands.slash("stop", "Stops playing."));
         addCommandFlags(CommandFlag.MUSIC);
+        setEphemeral(false);
     }
 
     @Override
     public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
-        event.deferReply().queue();
         GuildAudioPlayer guildAudioPlayer = Taboo.getInstance().getAudioManager().getAudioPlayer(event.getGuild().getIdLong());
         AudioScheduler scheduler = guildAudioPlayer.getScheduler();
         scheduler.destroy();

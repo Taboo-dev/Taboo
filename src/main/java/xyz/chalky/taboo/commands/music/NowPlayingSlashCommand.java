@@ -24,11 +24,11 @@ public class NowPlayingSlashCommand extends SlashCommand {
     public NowPlayingSlashCommand() {
         setCommandData(Commands.slash("now-playing", "Queries the current song playing."));
         addCommandFlags(CommandFlag.MUSIC);
+        setEphemeral(false);
     }
 
     @Override
     public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
-        event.deferReply().queue();
         GuildAudioPlayer guildAudioPlayer = Taboo.getInstance().getAudioManager().getAudioPlayer(event.getGuild().getIdLong());
         LavalinkPlayer player = guildAudioPlayer.getScheduler().getPlayer();
         AudioTrack playingTrack = player.getPlayingTrack();

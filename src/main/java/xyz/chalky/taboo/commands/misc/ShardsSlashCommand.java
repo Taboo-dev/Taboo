@@ -14,11 +14,11 @@ public class ShardsSlashCommand extends SlashCommand {
 
     public ShardsSlashCommand() {
         setCommandData(Commands.slash("shards", "Checks the shard you are on."));
+        setEphemeral(true);
     }
 
     @Override
     public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
-        event.deferReply(true).queue();
         JDA.ShardInfo shardInfo = event.getJDA().getShardInfo();
         String shardId = shardInfo.getShardString();
         long guildId = event.getGuild().getIdLong();

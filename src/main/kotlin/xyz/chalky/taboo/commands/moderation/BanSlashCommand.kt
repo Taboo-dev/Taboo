@@ -26,10 +26,10 @@ class BanSlashCommand : SlashCommand() {
                 .addOption(OptionType.STRING, "reason", "The reason for the ban.", false)
         )
         addCommandFlags(CommandFlag.MODERATOR_ONLY)
+        isEphemeral = true
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
-        event.deferReply(true).queue()
         val target = event.getOption<User>("user")
         val delDays = if (event.getOption<Int>("del-days") == null) 0 else event.getOption<Int>("del-days")
         val reason = if (event.getOption<String>("reason") == null) "No reason provided." else event.getOption<String>("reason")
