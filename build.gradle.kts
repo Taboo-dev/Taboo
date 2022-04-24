@@ -12,6 +12,7 @@ version = "1.0-SNAPSHOT"
 repositories {
     mavenCentral()
     maven("https://m2.dv8tion.net/releases")
+    maven("https://m2.duncte123.dev/releases")
     maven("https://m2.chew.pro/snapshots")
     maven("https://jcenter.bintray.com")
     maven("https://jitpack.io")
@@ -21,9 +22,9 @@ dependencies {
     implementation("net.dv8tion:JDA:5.0.0-alpha.10")
     implementation("pw.chew:jda-chewtils:2.0-SNAPSHOT")
     implementation("com.github.MinnDevelopment:jda-ktx:master-SNAPSHOT")
-    implementation("com.github.KittyBot-Org:Lavalink-Client:ba5094f880") {
-        exclude("net.dv8tion", "JDA")
-    }
+    implementation("com.github.Xirado:Lavalink-Client:041082f")
+    implementation("com.github.Topis-Lavalink-Plugins:Topis-Source-Managers:2.0.6")
+    implementation("com.dunctebot:sourcemanagers:1.8.0")
     implementation("ch.qos.logback:logback-classic:1.2.11")
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("org.xerial:sqlite-jdbc:3.36.0.3")

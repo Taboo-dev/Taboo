@@ -3,7 +3,6 @@ package xyz.chalky.taboo.commands.music;
 import lavalink.client.io.jda.JdaLink;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -56,7 +55,7 @@ public class PlaySlashCommand extends SlashCommand {
         }
         if (manager.getConnectedChannel() == null) {
             scheduler.setChannelId(event.getChannel().getIdLong()); // Cursed
-            link.connect((VoiceChannel) voiceState.getChannel());
+            link.connect(voiceState.getChannel());
             link.getRestClient().loadItem(query, new AudioResultHandler(event, scheduler));
         }
     }

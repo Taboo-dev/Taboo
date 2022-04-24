@@ -1,22 +1,23 @@
 package xyz.chalky.taboo.music;
 
-import lavalink.client.io.FriendlyException;
-import lavalink.client.io.LoadResultHandler;
-import lavalink.client.player.track.AudioPlaylist;
-import lavalink.client.player.track.AudioTrack;
-import lavalink.client.player.track.AudioTrackInfo;
+import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
+import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
+import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import mu.KotlinLogging;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+import xyz.chalky.taboo.music.spotify.SpotifyTrack;
 
 import java.awt.*;
 import java.time.Instant;
-import java.util.List;
 
-public class AudioResultHandler implements LoadResultHandler {
+public class AudioResultHandler implements AudioLoadResultHandler {
 
     private final Logger LOGGER = KotlinLogging.INSTANCE.logger("AudioLoadResultHandler");
     private final SlashCommandInteractionEvent event;
@@ -31,22 +32,21 @@ public class AudioResultHandler implements LoadResultHandler {
     public void trackLoaded(AudioTrack track) {
         scheduler.queue(track);
         handle(track);
-        LOGGER.debug("Track loaded: {}", track.getInfo().getTitle());
-    }
-
-    @Override
-    public void searchResultLoaded(@NotNull List<AudioTrack> tracks) {
-        AudioTrack track = tracks.get(0);
-        scheduler.queue(track);
-        handle(track);
-        LOGGER.debug("Track loaded: {}", track.getInfo().getTitle());
+        LOGGER.debug("Track loaded: {}", track.getInfo().title);
     }
 
     @Override
     public void playlistLoaded(@NotNull AudioPlaylist playlist) {
-        playlist.getTracks().forEach(scheduler::queue);
-        handlePlaylist(playlist);
-        LOGGER.debug("Playlist loaded: {}", playlist.getName());
+        if (playlist.isSearchResult()) {
+            AudioTrack track = playlist.getTracks().get(0);
+            scheduler.queue(track);
+            handle(track);
+            LOGGER.debug("Track loaded: {}", track.getInfo().title);
+        } else {
+            playlist.getTracks().forEach(scheduler::queue);
+            handlePlaylist(playlist);
+            LOGGER.debug("Playlist loaded: {}", playlist.getName());
+        }
     }
 
     @Override
@@ -72,14 +72,18 @@ public class AudioResultHandler implements LoadResultHandler {
     }
 
     private void handle(@NotNull AudioTrack track) {
-        MessageEmbed embed = new EmbedBuilder()
+        EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("Added to queue:")
-                .setDescription(String.format("[%s](%s) by %s", track.getInfo().getTitle(),
-                        track.getInfo().getUri(), track.getInfo().getAuthor()))
+                .setDescription(String.format("[%s](%s) by %s", track.getInfo().title,
+                        track.getInfo().uri, track.getInfo().author))
                 .setColor(0x9F90CF)
-                .setTimestamp(Instant.now())
-                .build();
-        event.getHook().sendMessageEmbeds(embed).queue();
+                .setTimestamp(Instant.now());
+        if (track instanceof YoutubeAudioTrack) {
+            embed.setImage(String.format("https://img.youtube.com/vi/%s/mqdefault.jpg", track.getInfo().identifier));
+        } else if (track instanceof SpotifyTrack spotifyTrack) {
+            embed.setImage(spotifyTrack.getArtworkURL());
+        }
+        event.getHook().sendMessageEmbeds(embed.build()).queue();
     }
 
     private void handlePlaylist(@NotNull AudioPlaylist playlist) {
@@ -92,9 +96,9 @@ public class AudioResultHandler implements LoadResultHandler {
             description.append("`#")
                     .append(i + 1)
                     .append("` ")
-                    .append(info.getTitle())
+                    .append(info.title)
                     .append(" [")
-                    .append(info.getAuthor())
+                    .append(info.author)
                     .append("]\n");
         }
         if (trackList > trackCount) {

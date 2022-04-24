@@ -1,8 +1,8 @@
 package xyz.chalky.taboo.commands.music
 
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.minn.jda.ktx.Embed
 import dev.minn.jda.ktx.EmbedBuilder
-import lavalink.client.player.track.AudioTrack
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData

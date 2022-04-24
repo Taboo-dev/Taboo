@@ -1,12 +1,12 @@
 package xyz.chalky.taboo.music;
 
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import kotlin.Pair;
 import lavalink.client.io.jda.JdaLink;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavalinkPlayer;
 import lavalink.client.player.event.PlayerEventListenerAdapter;
-import lavalink.client.player.track.AudioTrack;
-import lavalink.client.player.track.AudioTrackEndReason;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -35,7 +35,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
         this.guildId = guildId;
         this.guildAudioPlayer = guildAudioPlayer;
         this.queue = new LinkedBlockingQueue<>();
-        this.link = Taboo.getInstance().getLavalink().getLink(guildId);
+        this.link = Taboo.getInstance().getLavalink().getLink(String.valueOf(guildId));
         this.player = link.getPlayer();
         player.addListener(this);
     }
@@ -101,13 +101,13 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     @Override
     public void onTrackStart(IPlayer player, @NotNull AudioTrack track) {
         TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
-        long length = track.getInfo().getLength();
+        long length = track.getInfo().length;
         Pair<Long, Long> parseLength = ExtensionsKt.parseLength(length);
         if (!repeat) {
             MessageEmbed embed = new EmbedBuilder()
                     .setTitle("Now Playing:")
-                    .setDescription(String.format("[%s](%s) by %s", track.getInfo().getTitle(),
-                            track.getInfo().getUri(), track.getInfo().getAuthor()))
+                    .setDescription(String.format("[%s](%s) by %s", track.getInfo().title,
+                            track.getInfo().uri, track.getInfo().author))
                     .addField("Duration:", String.format("%02d:%02d", parseLength.getFirst(), parseLength.getSecond()), false)
                     .setColor(0x9F90CF)
                     .setTimestamp(Instant.now())
@@ -126,8 +126,8 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
                 player.playTrack(track);
                 MessageEmbed embed = new EmbedBuilder()
                         .setTitle("Looping:")
-                        .setDescription(String.format("[%s](%s) by %s", track.getInfo().getTitle(),
-                                track.getInfo().getUri(), track.getInfo().getAuthor()))
+                        .setDescription(String.format("[%s](%s) by %s", track.getInfo().title,
+                                track.getInfo().uri, track.getInfo().author))
                         .setColor(0x9F90CF)
                         .setTimestamp(Instant.now())
                         .build();
@@ -135,8 +135,8 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
             } else {
                 MessageEmbed embed = new EmbedBuilder()
                         .setTitle("Track Ended:")
-                        .setDescription(String.format("[%s](%s) by %s", track.getInfo().getTitle(),
-                                track.getInfo().getUri(), track.getInfo().getAuthor()))
+                        .setDescription(String.format("[%s](%s) by %s", track.getInfo().title,
+                                track.getInfo().uri, track.getInfo().author))
                         .setColor(0x9F90CF)
                         .setTimestamp(Instant.now())
                         .build();
@@ -151,7 +151,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
         TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
         MessageEmbed embed = new EmbedBuilder()
                 .setTitle("An error occurred while playing the track:")
-                .setDescription(track.getInfo().getTitle())
+                .setDescription(track.getInfo().title)
                 .setColor(Color.RED)
                 .setTimestamp(Instant.now())
                 .build();
