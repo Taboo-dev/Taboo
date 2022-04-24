@@ -24,6 +24,7 @@ class KickSlashCommand : SlashCommand() {
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
+        event.deferReply(true).queue()
         val target = event.getOption<Member>("user")
         val reason = if (event.getOption<String>("reason") == null) "No reason provided." else event.getOption<String>("reason")
         try {

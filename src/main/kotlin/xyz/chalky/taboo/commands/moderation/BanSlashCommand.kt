@@ -29,6 +29,7 @@ class BanSlashCommand : SlashCommand() {
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
+        event.deferReply(true).queue()
         val target = event.getOption<User>("user")
         val delDays = if (event.getOption<Int>("del-days") == null) 0 else event.getOption<Int>("del-days")
         val reason = if (event.getOption<String>("reason") == null) "No reason provided." else event.getOption<String>("reason")

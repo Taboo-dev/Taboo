@@ -22,6 +22,7 @@ public class ShuffleSlashCommand extends SlashCommand {
 
     @Override
     public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
+        event.deferReply().queue();
         GuildAudioPlayer guildAudioPlayer = Taboo.getInstance().getAudioManager().getAudioPlayer(event.getGuild().getIdLong());
         AudioScheduler scheduler = guildAudioPlayer.getScheduler();
         scheduler.shuffle();

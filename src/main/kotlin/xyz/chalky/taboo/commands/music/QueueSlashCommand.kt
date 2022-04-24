@@ -31,6 +31,7 @@ class QueueSlashCommand : SlashCommand() {
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
+        event.deferReply().queue()
         val guildAudioPlayer = Taboo.getInstance().audioManager.getAudioPlayer(event.guild!!.idLong)
         val queue = guildAudioPlayer.scheduler.queue
         event.onSubCommand("list") {

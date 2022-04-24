@@ -27,6 +27,7 @@ public class LoopSlashCommand extends SlashCommand {
 
     @Override
     public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
+        event.deferReply().queue();
         GuildAudioPlayer guildAudioPlayer = Taboo.getInstance().getAudioManager().getAudioPlayer(event.getGuild().getIdLong());
         AudioScheduler scheduler = guildAudioPlayer.getScheduler();
         boolean loop = event.getOption("loop").getAsBoolean();

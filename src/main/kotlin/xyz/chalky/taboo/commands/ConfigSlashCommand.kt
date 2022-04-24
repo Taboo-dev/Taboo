@@ -43,6 +43,7 @@ class ConfigSlashCommand : SlashCommand() {
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
+        event.deferReply(true).queue()
         event.onSubCommand("set") {
             val logChannel = event.getOption<TextChannel>("log")
             val musicChannel = event.getOption<TextChannel>("music")

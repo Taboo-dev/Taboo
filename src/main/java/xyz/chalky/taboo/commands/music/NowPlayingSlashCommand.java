@@ -28,6 +28,7 @@ public class NowPlayingSlashCommand extends SlashCommand {
 
     @Override
     public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
+        event.deferReply().queue();
         GuildAudioPlayer guildAudioPlayer = Taboo.getInstance().getAudioManager().getAudioPlayer(event.getGuild().getIdLong());
         LavalinkPlayer player = guildAudioPlayer.getScheduler().getPlayer();
         AudioTrack playingTrack = player.getPlayingTrack();

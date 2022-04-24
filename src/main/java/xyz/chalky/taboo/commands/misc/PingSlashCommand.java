@@ -18,6 +18,7 @@ public class PingSlashCommand extends SlashCommand {
 
     @Override
     public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
+        event.deferReply(true).queue();
         JDA jda = event.getJDA();
         User user = event.getUser();
         EmbedBuilder embed = new EmbedBuilder()

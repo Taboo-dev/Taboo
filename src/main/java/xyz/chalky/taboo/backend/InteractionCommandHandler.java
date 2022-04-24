@@ -3,10 +3,7 @@ package xyz.chalky.taboo.backend;
 import mu.KotlinLogging;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
-import net.dv8tion.jda.api.entities.GuildVoiceState;
-import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -202,13 +199,13 @@ public class InteractionCommandHandler {
         if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
             EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
                     Color.RED, null);
-            event.getHook().sendMessageEmbeds(embed.build()).queue();
+            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
         }
         if (neededBotPermissions != null && !event.getGuild().getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
             EmbedBuilder embed = ResponseHelper.createEmbed(null, "I don't have the required permissions to execute this command.",
                     Color.RED, null);
-            event.getHook().sendMessageEmbeds(embed.build()).queue();
+            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
@@ -216,20 +213,21 @@ public class InteractionCommandHandler {
             if (musicChannelId == null) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
                         Color.RED, null);
-                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                 return;
             }
+            TextChannel musicChannel = guild.getTextChannelById(musicChannelId);
             if (event.getChannel().getIdLong() != musicChannelId) {
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You can only execute this command in the music channel.",
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, String.format("You can only execute this command in the music channel %s.", musicChannel.getAsMention()),
                         Color.RED, null);
-                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                 return;
             }
             GuildVoiceState guildVoiceState = member.getVoiceState();
             if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in a voice channel to execute this command.",
                         Color.RED, null);
-                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                 return;
             }
             AudioManager manager = event.getGuild().getAudioManager();
@@ -237,7 +235,7 @@ public class InteractionCommandHandler {
                 if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
                     EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in the same voice channel as me to execute this command.",
                             Color.RED, null);
-                    event.getHook().sendMessageEmbeds(embed.build()).queue();
+                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                     return;
                 }
             }
@@ -247,21 +245,21 @@ public class InteractionCommandHandler {
             if (idLong != propertiesManager.getOwnerId()) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is only available for the developer.",
                         Color.RED, null);
-                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                 return;
             }
         }
         if (command.getCommandFlags().contains(CommandFlag.DISABLED)) {
             EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is currently disabled.",
                     Color.RED, null);
-            event.getHook().sendMessageEmbeds(embed.build()).queue();
+            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MODERATOR_ONLY)) {
             if (!member.hasPermission(List.of(Permission.KICK_MEMBERS, Permission.MANAGE_ROLES, Permission.MANAGE_SERVER))) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
                         Color.RED, null);
-                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                 return;
             }
         }
@@ -274,13 +272,12 @@ public class InteractionCommandHandler {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command.",
                         Color.RED, null);
                 if (event.isAcknowledged()) {
-                    event.getHook().sendMessageEmbeds(embed.build()).queue();
+                    event.getHook().sendMessageEmbeds(embed.build()).setEphemeral(true).queue();
                 } else {
-                    event.replyEmbeds(embed.build()).queue();
+                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                 }
             }
         };
-        event.deferReply().queue();
         Taboo.getInstance().getCommandExecutor().submit(r);
     }
 
@@ -319,13 +316,13 @@ public class InteractionCommandHandler {
         if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
             EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
                     Color.RED, null);
-            event.getHook().sendMessageEmbeds(embed.build()).queue();
+            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
         }
         if (neededBotPermissions != null && !event.getGuild().getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
             EmbedBuilder embed = ResponseHelper.createEmbed(null, "I don't have the required permissions to execute this command.",
                     Color.RED, null);
-            event.getHook().sendMessageEmbeds(embed.build()).queue();
+            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
@@ -333,20 +330,21 @@ public class InteractionCommandHandler {
             if (musicChannelId == null) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
                         Color.RED, null);
-                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                 return;
             }
+            TextChannel musicChannel = guild.getTextChannelById(musicChannelId);
             if (event.getChannel().getIdLong() != musicChannelId) {
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You can only execute this command in the music channel.",
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, String.format("You can only execute this command in the music channel %s.", musicChannel.getAsMention()),
                         Color.RED, null);
-                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                 return;
             }
             GuildVoiceState guildVoiceState = member.getVoiceState();
             if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in a voice channel to execute this command.",
                         Color.RED, null);
-                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                 return;
             }
             AudioManager manager = event.getGuild().getAudioManager();
@@ -354,7 +352,7 @@ public class InteractionCommandHandler {
                 if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
                     EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in the same voice channel as me to execute this command.",
                             Color.RED, null);
-                    event.getHook().sendMessageEmbeds(embed.build()).queue();
+                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                     return;
                 }
             }
@@ -364,21 +362,21 @@ public class InteractionCommandHandler {
             if (idLong != propertiesManager.getOwnerId()) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is only available for the developer.",
                         Color.RED, null);
-                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                 return;
             }
         }
         if (command.getCommandFlags().contains(CommandFlag.DISABLED)) {
             EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is currently disabled.",
                     Color.RED, null);
-            event.getHook().sendMessageEmbeds(embed.build()).queue();
+            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MODERATOR_ONLY)) {
             if (!member.hasPermission(List.of(Permission.KICK_MEMBERS, Permission.MANAGE_ROLES, Permission.MANAGE_SERVER))) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
                         Color.RED, null);
-                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                 return;
             }
         }
@@ -391,13 +389,12 @@ public class InteractionCommandHandler {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command.",
                         Color.RED, null);
                 if (event.isAcknowledged()) {
-                    event.getHook().sendMessageEmbeds(embed.build()).queue();
+                    event.getHook().sendMessageEmbeds(embed.build()).setEphemeral(true).queue();
                 } else {
-                    event.replyEmbeds(embed.build()).queue();
+                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                 }
             }
         };
-        event.deferReply().queue();
         Taboo.getInstance().getCommandExecutor().submit(r);
     }
 
@@ -437,13 +434,13 @@ public class InteractionCommandHandler {
                     if (neededPermissions != null && !member.hasPermission((GuildChannel) event.getChannel(), neededPermissions)) {
                         EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
                                 Color.RED, null);
-                        event.getHook().sendMessageEmbeds(embed.build()).queue();
+                        event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                         return;
                     }
                     if (neededBotPermissions != null && !event.getGuild().getSelfMember().hasPermission((GuildChannel) event.getChannel(), neededBotPermissions)) {
                         EmbedBuilder embed = ResponseHelper.createEmbed(null, "I don't have the required permissions to execute this command.",
                                 Color.RED, null);
-                        event.getHook().sendMessageEmbeds(embed.build()).queue();
+                        event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                         return;
                     }
                     if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
@@ -451,20 +448,21 @@ public class InteractionCommandHandler {
                         if (musicChannelId == null) {
                             EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
                                     Color.RED, null);
-                            event.getHook().sendMessageEmbeds(embed.build()).queue();
+                            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                             return;
                         }
+                        TextChannel musicChannel = guild.getTextChannelById(musicChannelId);
                         if (event.getChannel().getIdLong() != musicChannelId) {
-                            EmbedBuilder embed = ResponseHelper.createEmbed(null, "You can only execute this command in the music channel.",
+                            EmbedBuilder embed = ResponseHelper.createEmbed(null, String.format("You can only execute this command in the music channel %s.", musicChannel.getAsMention()),
                                     Color.RED, null);
-                            event.getHook().sendMessageEmbeds(embed.build()).queue();
+                            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                             return;
                         }
                         GuildVoiceState guildVoiceState = member.getVoiceState();
                         if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
                             EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in a voice channel to execute this command.",
                                     Color.RED, null);
-                            event.getHook().sendMessageEmbeds(embed.build()).queue();
+                            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                             return;
                         }
                         AudioManager manager = event.getGuild().getAudioManager();
@@ -472,7 +470,7 @@ public class InteractionCommandHandler {
                             if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
                                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in the same voice channel as me to execute this command.",
                                         Color.RED, null);
-                                event.getHook().sendMessageEmbeds(embed.build()).queue();
+                                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                                 return;
                             }
                         }
@@ -482,21 +480,21 @@ public class InteractionCommandHandler {
                         if (idLong != propertiesManager.getOwnerId()) {
                             EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is only available for the developer.",
                                     Color.RED, null);
-                            event.getHook().sendMessageEmbeds(embed.build()).queue();
+                            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                             return;
                         }
                     }
                     if (command.getCommandFlags().contains(CommandFlag.DISABLED)) {
                         EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is currently disabled.",
                                 Color.RED, null);
-                        event.getHook().sendMessageEmbeds(embed.build()).queue();
+                        event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                         return;
                     }
                     if (command.getCommandFlags().contains(CommandFlag.MODERATOR_ONLY)) {
                         if (!member.hasPermission(List.of(Permission.KICK_MEMBERS, Permission.MANAGE_ROLES, Permission.MANAGE_SERVER))) {
                             EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
                                     Color.RED, null);
-                            event.getHook().sendMessageEmbeds(embed.build()).queue();
+                            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                             return;
                         }
                     }
@@ -507,13 +505,12 @@ public class InteractionCommandHandler {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command.",
                         Color.RED, null);
                 if (event.isAcknowledged()) {
-                    event.getHook().sendMessageEmbeds(embed.build()).queue();
+                    event.getHook().sendMessageEmbeds(embed.build()).setEphemeral(true).queue();
                 } else {
-                    event.replyEmbeds(embed.build()).queue();
+                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                 }
             }
         };
-        event.deferReply().queue();
         Taboo.getInstance().getCommandExecutor().execute(r);
     }
 

@@ -18,6 +18,7 @@ public class ShardsSlashCommand extends SlashCommand {
 
     @Override
     public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
+        event.deferReply(true).queue();
         JDA.ShardInfo shardInfo = event.getJDA().getShardInfo();
         String shardId = shardInfo.getShardString();
         long guildId = event.getGuild().getIdLong();
