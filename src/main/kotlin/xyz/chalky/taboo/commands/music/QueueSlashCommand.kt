@@ -27,7 +27,7 @@ class QueueSlashCommand : SlashCommand() {
                     )
                 )
         )
-        addCommandFlags(CommandFlag.MUST_BE_IN_VC, CommandFlag.MUST_BE_IN_SAME_VC)
+        addCommandFlags(CommandFlag.MUSIC)
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
