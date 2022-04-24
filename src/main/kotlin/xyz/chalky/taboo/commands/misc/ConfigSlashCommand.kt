@@ -1,4 +1,4 @@
-package xyz.chalky.taboo.commands
+package xyz.chalky.taboo.commands.misc
 
 import dev.minn.jda.ktx.Embed
 import dev.minn.jda.ktx.interactions.getOption

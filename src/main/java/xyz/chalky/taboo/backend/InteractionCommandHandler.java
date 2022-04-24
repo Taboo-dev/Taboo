@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.slf4j.Logger;
 import xyz.chalky.taboo.Taboo;
-import xyz.chalky.taboo.commands.ConfigSlashCommand;
+import xyz.chalky.taboo.commands.misc.ConfigSlashCommand;
 import xyz.chalky.taboo.commands.misc.PingSlashCommand;
 import xyz.chalky.taboo.commands.misc.ShardsSlashCommand;
 import xyz.chalky.taboo.commands.moderation.BanSlashCommand;
