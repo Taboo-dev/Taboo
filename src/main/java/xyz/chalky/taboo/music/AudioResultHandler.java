@@ -71,7 +71,7 @@ public class AudioResultHandler implements LoadResultHandler {
         LOGGER.debug("An error occurred while loading the track: {}", exception.getMessage());
     }
 
-    public void handle(@NotNull AudioTrack track) {
+    private void handle(@NotNull AudioTrack track) {
         MessageEmbed embed = new EmbedBuilder()
                 .setTitle("Added to queue:")
                 .setDescription(String.format("[%s](%s) by %s", track.getInfo().getTitle(),
@@ -82,7 +82,7 @@ public class AudioResultHandler implements LoadResultHandler {
         event.getHook().sendMessageEmbeds(embed).queue();
     }
 
-    public void handlePlaylist(@NotNull AudioPlaylist playlist) {
+    private void handlePlaylist(@NotNull AudioPlaylist playlist) {
         StringBuilder description = new StringBuilder("Tracks:\n");
         int trackList = playlist.getTracks().size();
         int trackCount = Math.min(trackList, 10);
