@@ -34,7 +34,7 @@ public class InteractionsListener extends ListenerAdapter {
     public void onMessageContextInteraction(@NotNull MessageContextInteractionEvent event) {
         if (!event.isFromGuild()) return;
         if (Taboo.getInstance().isDebug() && !(propertiesManager.getOwnerId() == (event.getUser().getIdLong()))) {
-            event.replyEmbeds(ResponseHelper.createEmbed(null, "I am in debug mode! Only my owner can use commands!", Color.RED, event.getUser()).build()).queue();
+            event.replyEmbeds(ResponseHelper.createEmbed(null, "I am in debug mode! Only my owner can use commands!", Color.RED, event.getUser()).build()).setEphemeral(true).queue();
         } else {
             Taboo.getInstance().getInteractionCommandHandler().handleMessageContextCommand(event);
         }
@@ -44,7 +44,7 @@ public class InteractionsListener extends ListenerAdapter {
     public void onUserContextInteraction(@NotNull UserContextInteractionEvent event) {
         if (!event.isFromGuild()) return;
         if (Taboo.getInstance().isDebug() && !(propertiesManager.getOwnerId() == (event.getUser().getIdLong()))) {
-            event.replyEmbeds(ResponseHelper.createEmbed(null, "I am in debug mode! Only my owner can use commands!", Color.RED, event.getUser()).build()).queue();
+            event.replyEmbeds(ResponseHelper.createEmbed(null, "I am in debug mode! Only my owner can use commands!", Color.RED, event.getUser()).build()).setEphemeral(true).queue();
         } else {
             Taboo.getInstance().getInteractionCommandHandler().handleUserContextCommand(event);
         }
