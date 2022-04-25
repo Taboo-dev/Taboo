@@ -266,6 +266,7 @@ public class InteractionCommandHandler {
         MessageContextCommand finalCommand = command;
         Runnable r = () -> {
             try {
+                event.deferReply(finalCommand.isEphemeral()).queue();
                 finalCommand.executeCommand(event);
             } catch (Exception e) {
                 LOGGER.warn("Error while executing command", e);
@@ -383,6 +384,7 @@ public class InteractionCommandHandler {
         UserContextCommand finalCommand = command;
         Runnable r = () -> {
             try {
+                event.deferReply(finalCommand.isEphemeral()).queue();
                 finalCommand.executeCommand(event);
             } catch (Exception e) {
                 LOGGER.warn("An error occurred while executing a user context command.", e);

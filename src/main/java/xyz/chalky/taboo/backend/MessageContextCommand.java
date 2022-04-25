@@ -13,6 +13,7 @@ public abstract class MessageContextCommand implements GenericCommand {
     private final List<Permission> requiredUserPermissions;
     private final List<Permission> requiredBotPermissions;
     private boolean isGlobal;
+    private boolean isEphemeral;
     private final List<Long> enabledGuilds;
     private final Set<CommandFlag> commandFlags;
 
@@ -61,6 +62,14 @@ public abstract class MessageContextCommand implements GenericCommand {
         isGlobal = global;
     }
 
+    public boolean isEphemeral() {
+        return isEphemeral;
+    }
+
+    public void setEphemeral(boolean ephemeral) {
+        isEphemeral = ephemeral;
+    }
+
     @Override
     public List<Long> getEnabledGuilds() {
         return enabledGuilds;
@@ -79,6 +88,7 @@ public abstract class MessageContextCommand implements GenericCommand {
         this.requiredUserPermissions = new ArrayList<>();
         this.commandData = null;
         this.isGlobal = true;
+        this.isEphemeral = false;
         this.enabledGuilds = new ArrayList<>();
         this.commandFlags = new HashSet<>();
     }
