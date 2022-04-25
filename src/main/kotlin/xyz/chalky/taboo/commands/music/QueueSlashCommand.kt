@@ -44,11 +44,13 @@ class QueueSlashCommand : SlashCommand() {
                 val info = track.info
                 description.append("`#")
                     .append(i + 1)
-                    .append("` ")
+                    .append("` [")
                     .append(info.title)
-                    .append(" [")
+                    .append("](")
+                    .append(info.uri)
+                    .append(") by ")
                     .append(info.author)
-                    .append("]\n")
+                    .append("\n")
             }
             if (trackSize > trackCount) {
                 description.append("And ")

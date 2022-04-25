@@ -95,11 +95,13 @@ public class AudioResultHandler implements AudioLoadResultHandler {
             AudioTrackInfo info = track.getInfo();
             description.append("`#")
                     .append(i + 1)
-                    .append("` ")
+                    .append("` [")
                     .append(info.title)
-                    .append(" [")
+                    .append("](")
+                    .append(info.uri)
+                    .append(") by ")
                     .append(info.author)
-                    .append("]\n");
+                    .append("\n");
         }
         if (trackList > trackCount) {
             description.append("And ")
