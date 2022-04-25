@@ -140,7 +140,9 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
                         .setColor(0x9F90CF)
                         .setTimestamp(Instant.now())
                         .build();
-                channel.sendMessageEmbeds(embed).queue();
+                channel.sendMessageEmbeds(embed).queue(message -> {
+                    message.delete().queueAfter(10, TimeUnit.SECONDS);
+                });
                 nextTrack();
             }
         }
