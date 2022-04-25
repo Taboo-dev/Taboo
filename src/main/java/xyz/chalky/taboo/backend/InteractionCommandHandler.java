@@ -57,6 +57,7 @@ public class InteractionCommandHandler {
         registerCommand(new QueueSlashCommand());
         registerCommand(new NowPlayingSlashCommand());
         registerCommand(new SkipSlashCommand());
+        registerCommand(new SkipToSlashCommand());
         registerCommand(new ShuffleSlashCommand());
         registerCommand(new StopSlashCommand());
 

@@ -41,7 +41,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
 
     public void queue(AudioTrack track) {
         if (player.getPlayingTrack() != null) {
-            queue.add(track);
+            queue.offer(track);
         } else {
             player.playTrack(track);
         }
@@ -53,6 +53,17 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
             player.playTrack(track);
         } else {
             player.stopTrack();
+        }
+    }
+
+    public void skipTo(int index) {
+        AudioTrack[] tracks = queue.toArray(new AudioTrack[0]);
+        AudioTrack track = tracks[index];
+        for (int i = 0; i < index; i++) {
+            queue.poll();
+        }
+        if (track != null) {
+            player.playTrack(track);
         }
     }
 
