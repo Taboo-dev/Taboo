@@ -64,8 +64,8 @@ fun getMusicChannelId(guild: Guild) : Long? {
     return channelId
 }
 
-fun parseLength(length: Long) : Pair<Long, Long> {
-    val minutes = length / 60000
-    val seconds = length % 60
-    return Pair(minutes, seconds)
+fun Long.toMinutesAndSeconds() : String {
+    val minutes = this / 60000
+    val seconds = (this % 60000) / 1000
+    return String.format("%02d:%02d", minutes, seconds)
 }

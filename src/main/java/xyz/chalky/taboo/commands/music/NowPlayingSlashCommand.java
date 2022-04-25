@@ -4,7 +4,6 @@ import com.github.topislavalinkplugins.topissourcemanagers.ISRCAudioTrack;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
-import kotlin.Pair;
 import lavalink.client.player.LavalinkPlayer;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -41,19 +40,14 @@ public class NowPlayingSlashCommand extends SlashCommand {
             event.getHook().sendMessageEmbeds(embed).queue();
         } else {
             AudioTrackInfo info = playingTrack.getInfo();
-            long trackPosition = player.getTrackPosition();
+            long position = player.getTrackPosition();
             long length = info.length;
-            Pair<Long, Long> parseTrackPosition = ExtensionsKt.parseLength(trackPosition);
-            Pair<Long, Long> parseLength = ExtensionsKt.parseLength(length);
-            String durationString = String.format(
-                    "%02d:%02d / %02d:%02d",
-                    parseTrackPosition.getFirst(), parseTrackPosition.getSecond(),
-                    parseLength.getFirst(), parseLength.getSecond()
-            );
+            String trackPosition = ExtensionsKt.toMinutesAndSeconds(position);
+            String duration = ExtensionsKt.toMinutesAndSeconds(length);
             EmbedBuilder embed = new EmbedBuilder()
                     .setTitle("Now Playing:")
                     .setDescription(String.format("[%s](%s) by %s", info.title, info.uri, info.author))
-                    .addField("Duration:", durationString, false)
+                    .addField("Duration:", String.format("%s / %s", trackPosition, duration), false)
                     .setColor(0x9F90CF)
                     .setTimestamp(Instant.now());
             if (playingTrack instanceof YoutubeAudioTrack) {

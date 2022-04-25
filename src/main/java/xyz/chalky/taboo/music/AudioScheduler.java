@@ -2,7 +2,6 @@ package xyz.chalky.taboo.music;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
-import kotlin.Pair;
 import lavalink.client.io.jda.JdaLink;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavalinkPlayer;
@@ -102,13 +101,13 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     public void onTrackStart(IPlayer player, @NotNull AudioTrack track) {
         TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
         long length = track.getInfo().length;
-        Pair<Long, Long> parseLength = ExtensionsKt.parseLength(length);
+        String duration = ExtensionsKt.toMinutesAndSeconds(length);
         if (!repeat) {
             MessageEmbed embed = new EmbedBuilder()
                     .setTitle("Now Playing:")
                     .setDescription(String.format("[%s](%s) by %s", track.getInfo().title,
                             track.getInfo().uri, track.getInfo().author))
-                    .addField("Duration:", String.format("%02d:%02d", parseLength.getFirst(), parseLength.getSecond()), false)
+                    .addField("Duration:", duration, false)
                     .setColor(0x9F90CF)
                     .setTimestamp(Instant.now())
                     .build();
