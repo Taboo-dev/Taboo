@@ -59,7 +59,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     public void skipTo(int index) {
         AudioTrack[] tracks = queue.toArray(new AudioTrack[0]);
         AudioTrack track = tracks[index];
-        for (int i = 0; i < index; i++) {
+        for (int i = -1; i < index; i++) { // send help
             queue.poll();
         }
         if (track != null) {
