@@ -52,7 +52,15 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
         if (track != null) {
             player.playTrack(track);
         } else {
-            player.stopTrack();
+            if (queue.size() == 0) {
+                TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
+                MessageEmbed embed = new EmbedBuilder()
+                        .setDescription("There are no more tracks in the queue.")
+                        .setColor(Color.RED)
+                        .setTimestamp(Instant.now())
+                        .build();
+                channel.sendMessageEmbeds(embed).queue();
+            }
         }
     }
 
