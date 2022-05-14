@@ -2,15 +2,11 @@
 
 package xyz.chalky.taboo.util
 
-import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.requests.restaction.MessageAction
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
-import xyz.chalky.taboo.database.Config
 import java.net.URL
 
 fun SlashCommandInteractionEvent.onSubCommand(name: String, function: (SlashCommandInteractionEvent) -> Unit) {
@@ -35,33 +31,13 @@ fun Message._edit(embed: MessageEmbed, vararg embeds: MessageEmbed) : MessageAct
     return this.editMessageEmbeds(embed, *embeds)
 }
 
-fun isUrl(input: String) : Boolean {
+fun String.isUrl() : Boolean {
     return try {
-        URL(input)
+        URL(this)
         true
     } catch (e: Exception) {
         false
     }
-}
-
-fun getLogId(guild: Guild) : Long? {
-    var channelId: Long? = null
-    transaction {
-        channelId = Config.select {
-            Config.guildId eq guild.idLong
-        }.firstOrNull()?.getOrNull(Config.log) ?: return@transaction null
-    }
-    return channelId
-}
-
-fun getMusicChannelId(guild: Guild) : Long? {
-    var channelId: Long? = null
-    transaction {
-        channelId = Config.select {
-            Config.guildId eq guild.idLong
-        }.firstOrNull()?.getOrNull(Config.music) ?: return@transaction null
-    }
-    return channelId
 }
 
 fun Long.toMinutesAndSeconds() : String {

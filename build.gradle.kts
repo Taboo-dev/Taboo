@@ -27,12 +27,12 @@ dependencies {
     implementation("com.dunctebot:sourcemanagers:1.8.0")
     implementation("ch.qos.logback:logback-classic:1.2.11")
     implementation("com.zaxxer:HikariCP:5.0.1")
-    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
-    implementation("org.jetbrains.exposed:exposed-core:0.37.3")
-    implementation("org.jetbrains.exposed:exposed-dao:0.37.3")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.37.3")
+    implementation("org.postgresql:postgresql:42.3.4")
+    implementation("org.jetbrains.exposed:exposed-core:0.38.2")
+    implementation("org.jetbrains.exposed:exposed-dao:0.38.2")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.38.2")
     implementation("com.google.guava:guava:31.1-jre")
-    implementation("io.github.microutils:kotlin-logging:2.1.21")
+    implementation("io.javalin:javalin:4.5.0")
     implementation(kotlin("stdlib-jdk8"))
 }
 

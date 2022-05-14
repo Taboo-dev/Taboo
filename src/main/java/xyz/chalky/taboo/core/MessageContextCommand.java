@@ -1,51 +1,35 @@
-package xyz.chalky.taboo.backend;
+package xyz.chalky.taboo.core;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.internal.utils.Checks;
+import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
 import java.util.*;
 
-public abstract class SlashCommand implements GenericCommand {
+public abstract class MessageContextCommand implements GenericCommand {
 
-    private SlashCommandData commandData;
+    private CommandData commandData;
     private final List<Permission> requiredUserPermissions;
     private final List<Permission> requiredBotPermissions;
     private boolean isGlobal;
     private boolean isEphemeral;
     private final List<Long> enabledGuilds;
-    private boolean runnableInDM;
     private final Set<CommandFlag> commandFlags;
-
-    public boolean isRunnableInDM() {
-        return runnableInDM;
-    }
-
-    public void setRunnableInDM(boolean runnableInDM) {
-        this.runnableInDM = runnableInDM;
-    }
 
     public String getCommandName() {
         return commandData.getName();
     }
 
-    public String getCommandDescription() {
-        return commandData.getDescription();
-    }
-
-    public List<OptionData> getOptions() {
-        return commandData.getOptions();
-    }
-
     @Override
-    public SlashCommandData getData() {
+    public CommandData getData() {
         return commandData;
     }
 
-    public void setCommandData(SlashCommandData commandData) {
+    public void setCommandData(CommandData commandData) {
+        if (commandData.getType() != Command.Type.MESSAGE) {
+            throw new IllegalArgumentException("CommandData must be of type MESSAGE");
+        }
         this.commandData = commandData;
     }
 
@@ -53,12 +37,12 @@ public abstract class SlashCommand implements GenericCommand {
         return requiredUserPermissions;
     }
 
-    public Set<CommandFlag> getCommandFlags() {
-        return commandFlags;
-    }
-
     public void setRequiredUserPermissions(Permission... permissions) {
         this.requiredUserPermissions.addAll(Arrays.asList(permissions));
+    }
+
+    public Set<CommandFlag> getCommandFlags() {
+        return commandFlags;
     }
 
     public List<Permission> getRequiredBotPermissions() {
@@ -69,6 +53,7 @@ public abstract class SlashCommand implements GenericCommand {
         this.requiredBotPermissions.addAll(Arrays.asList(permissions));
     }
 
+    @Override
     public boolean isGlobal() {
         return isGlobal;
     }
@@ -85,6 +70,7 @@ public abstract class SlashCommand implements GenericCommand {
         isEphemeral = ephemeral;
     }
 
+    @Override
     public List<Long> getEnabledGuilds() {
         return enabledGuilds;
     }
@@ -94,27 +80,23 @@ public abstract class SlashCommand implements GenericCommand {
     }
 
     public void addCommandFlags(CommandFlag... flags) {
-        Checks.notEmpty(flags, "Flags");
         commandFlags.addAll(Set.of(flags));
     }
 
-    public SlashCommand() {
+    public MessageContextCommand() {
         this.requiredBotPermissions = new ArrayList<>();
         this.requiredUserPermissions = new ArrayList<>();
         this.commandData = null;
         this.isGlobal = true;
         this.isEphemeral = false;
         this.enabledGuilds = new ArrayList<>();
-        this.runnableInDM = false;
         this.commandFlags = new HashSet<>();
     }
 
     /**
-     * Executes requested slash command
-     * @param event  The SlashCommandInteractionEvent
+     * Executes the requested context menu command
+     * @param event The MessageContextInteractionEvent
      */
-    public abstract void executeCommand(SlashCommandInteractionEvent event);
-
-    public void handleAutoComplete(CommandAutoCompleteInteractionEvent event) {}
+    public abstract void executeCommand(MessageContextInteractionEvent event);
 
 }

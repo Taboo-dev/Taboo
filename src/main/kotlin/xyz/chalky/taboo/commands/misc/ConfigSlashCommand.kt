@@ -1,7 +1,7 @@
 package xyz.chalky.taboo.commands.misc
 
-import dev.minn.jda.ktx.Embed
-import dev.minn.jda.ktx.interactions.getOption
+import dev.minn.jda.ktx.interactions.components.getOption
+import dev.minn.jda.ktx.messages.Embed
 import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
@@ -12,10 +12,10 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
-import xyz.chalky.taboo.backend.CommandFlag
-import xyz.chalky.taboo.backend.SlashCommand
+import xyz.chalky.taboo.Taboo
+import xyz.chalky.taboo.core.CommandFlag
+import xyz.chalky.taboo.core.SlashCommand
 import xyz.chalky.taboo.database.Config
-import xyz.chalky.taboo.database.DatabaseManager
 import xyz.chalky.taboo.util._reply
 import xyz.chalky.taboo.util.onSubCommand
 import java.awt.Color
@@ -44,6 +44,7 @@ class ConfigSlashCommand : SlashCommand() {
     }
 
     override fun executeCommand(event: SlashCommandInteractionEvent) {
+        val databaseManager = Taboo.getInstance().databaseManager
         event.onSubCommand("set") {
             val logChannel = event.getOption<TextChannel>("log")
             val musicChannel = event.getOption<TextChannel>("music")
@@ -57,7 +58,7 @@ class ConfigSlashCommand : SlashCommand() {
                 }
             }
             runCatching.onFailure {
-                DatabaseManager.logger.warn { "Failed to set config for guild ${event.guild!!.name}" }
+                databaseManager.logger.warn("Failed to set config for guild ${event.guild!!.name}")
                 event._reply(
                     Embed {
                         title = "Failed to set config!"
@@ -91,7 +92,7 @@ class ConfigSlashCommand : SlashCommand() {
                 }
             }
             runCatching.onFailure {
-                DatabaseManager.logger.warn { "Failed to clear config for guild ${event.guild!!.name}" }
+                databaseManager.logger.warn("Failed to clear config for guild ${event.guild!!.name}")
                 event._reply(
                     Embed {
                         title = "Failed to clear config!"
@@ -113,20 +114,32 @@ class ConfigSlashCommand : SlashCommand() {
         }
         event.onSubCommand("view") {
             transaction {
-                Config.select {
+                val select = Config.select {
                     Config.guildId eq event.guild!!.idLong
-                }.forEach {
+                }
+                if (select.count() == 0L) {
                     event._reply(
                         Embed {
-                            title = "Config for ${event.guild!!.name}"
-                            description = """
-                            Log channel: ${event.guild!!.getTextChannelById(it[Config.log])!!.asMention}
-                            Join/leave log channel: ${event.guild!!.getTextChannelById(it[Config.log])!!.asMention}
-                            """.trimIndent()
-                            color = 0x9F90CF
+                            title = "No config set!"
+                            description = "You do not have a config set!"
+                            color = Color.RED.hashCode()
                             timestamp = Instant.now()
                         }
                     ).queue()
+                } else {
+                    select.forEach {
+                        event._reply(
+                            Embed {
+                                title = "Config for ${event.guild!!.name}"
+                                description = """
+                                Log channel: ${event.guild!!.getTextChannelById(it[Config.log])!!.asMention}
+                                Join/leave log channel: ${event.guild!!.getTextChannelById(it[Config.log])!!.asMention}
+                                """.trimIndent()
+                                color = 0x9F90CF
+                                timestamp = Instant.now()
+                            }
+                        ).queue()
+                    }
                 }
             }
         }

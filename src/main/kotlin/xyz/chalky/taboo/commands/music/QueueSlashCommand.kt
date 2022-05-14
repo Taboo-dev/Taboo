@@ -1,14 +1,14 @@
 package xyz.chalky.taboo.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import dev.minn.jda.ktx.Embed
-import dev.minn.jda.ktx.EmbedBuilder
+import dev.minn.jda.ktx.messages.Embed
+import dev.minn.jda.ktx.messages.EmbedBuilder
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import xyz.chalky.taboo.Taboo
-import xyz.chalky.taboo.backend.CommandFlag
-import xyz.chalky.taboo.backend.SlashCommand
+import xyz.chalky.taboo.core.CommandFlag
+import xyz.chalky.taboo.core.SlashCommand
 import xyz.chalky.taboo.util._reply
 import xyz.chalky.taboo.util.onSubCommand
 import java.time.Instant

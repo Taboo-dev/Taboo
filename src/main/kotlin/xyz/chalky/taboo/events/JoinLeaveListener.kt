@@ -1,10 +1,10 @@
 package xyz.chalky.taboo.events
 
-import dev.minn.jda.ktx.Embed
+import dev.minn.jda.ktx.messages.Embed
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import xyz.chalky.taboo.util.getLogId
+import xyz.chalky.taboo.database.getLogChannelId
 import java.awt.Color
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -15,7 +15,7 @@ class JoinLeaveListener : ListenerAdapter() {
         val guild = event.guild
         val member = event.member
         val user = event.user
-        val logId = getLogId(guild) ?: return
+        val logId = guild.getLogChannelId() ?: return
         val log = guild.getTextChannelById(logId) ?: return
         log.sendMessageEmbeds(
             Embed {
@@ -40,7 +40,7 @@ class JoinLeaveListener : ListenerAdapter() {
         val guild = event.guild
         val member = event.member
         val user = event.user
-        val logId = getLogId(guild) ?: return
+        val logId = guild.getLogChannelId() ?: return
         val log = guild.getTextChannelById(logId) ?: return
         log.sendMessageEmbeds(
             Embed {

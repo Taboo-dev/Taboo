@@ -1,6 +1,5 @@
-package xyz.chalky.taboo.backend;
+package xyz.chalky.taboo.core;
 
-import mu.KotlinLogging;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -12,6 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.chalky.taboo.Taboo;
 import xyz.chalky.taboo.commands.misc.ConfigSlashCommand;
 import xyz.chalky.taboo.commands.misc.PingSlashCommand;
@@ -19,7 +19,7 @@ import xyz.chalky.taboo.commands.misc.ShardsSlashCommand;
 import xyz.chalky.taboo.commands.moderation.BanSlashCommand;
 import xyz.chalky.taboo.commands.moderation.KickSlashCommand;
 import xyz.chalky.taboo.commands.music.*;
-import xyz.chalky.taboo.util.ExtensionsKt;
+import xyz.chalky.taboo.database.DatabaseHelperKt;
 import xyz.chalky.taboo.util.PropertiesManager;
 import xyz.chalky.taboo.util.ResponseHelper;
 
@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 
 public class InteractionCommandHandler {
 
-    private static final Logger LOGGER = KotlinLogging.INSTANCE.logger("InteractionCommandHandler");
+    private static final Logger LOGGER = LoggerFactory.getLogger(InteractionCommandHandler.class);
     private final List<GenericCommand> registeredCommands;
     private final ConcurrentHashMap<Long, List<GenericCommand>> registeredGuildCommands;
     private CommandListUpdateAction commandUpdateAction;
@@ -210,7 +210,7 @@ public class InteractionCommandHandler {
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
-            Long musicChannelId = ExtensionsKt.getMusicChannelId(guild);
+            Long musicChannelId = DatabaseHelperKt.getMusicChannelId(guild);
             if (musicChannelId == null) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
                         Color.RED, null);
@@ -328,7 +328,7 @@ public class InteractionCommandHandler {
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
-            Long musicChannelId = ExtensionsKt.getMusicChannelId(guild);
+            Long musicChannelId = DatabaseHelperKt.getMusicChannelId(guild);
             if (musicChannelId == null) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
                         Color.RED, null);
@@ -447,7 +447,7 @@ public class InteractionCommandHandler {
                         return;
                     }
                     if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
-                        Long musicChannelId = ExtensionsKt.getMusicChannelId(guild);
+                        Long musicChannelId = DatabaseHelperKt.getMusicChannelId(guild);
                         if (musicChannelId == null) {
                             EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
                                     Color.RED, null);

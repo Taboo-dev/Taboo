@@ -1,7 +1,7 @@
 package xyz.chalky.taboo.commands.moderation
 
-import dev.minn.jda.ktx.Embed
-import dev.minn.jda.ktx.interactions.getOption
+import dev.minn.jda.ktx.interactions.components.getOption
+import dev.minn.jda.ktx.messages.Embed
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.exceptions.HierarchyException
@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
-import xyz.chalky.taboo.backend.SlashCommand
+import xyz.chalky.taboo.core.SlashCommand
 import xyz.chalky.taboo.database.Config
 import xyz.chalky.taboo.util._reply
 import java.awt.Color

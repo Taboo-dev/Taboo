@@ -1,4 +1,4 @@
-package xyz.chalky.taboo.backend;
+package xyz.chalky.taboo.core;
 
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 

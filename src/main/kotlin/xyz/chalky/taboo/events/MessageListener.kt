@@ -1,11 +1,11 @@
 package xyz.chalky.taboo.events
 
-import dev.minn.jda.ktx.Embed
+import dev.minn.jda.ktx.messages.Embed
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import xyz.chalky.taboo.util.getLogId
+import xyz.chalky.taboo.database.getLogChannelId
 import java.time.Instant
 
 class MessageListener : ListenerAdapter() {
@@ -31,7 +31,7 @@ class MessageListener : ListenerAdapter() {
         val msgId = message.idLong
         val msgContent = message.contentRaw
         val originalContent = messages[msgId]
-        val logId = getLogId(guild) ?: return
+        val logId = guild.getLogChannelId() ?: return
         val log = guild.getTextChannelById(logId) ?: return
         log.sendMessageEmbeds(
             Embed {
@@ -64,7 +64,7 @@ class MessageListener : ListenerAdapter() {
         val msgId = event.messageIdLong
         val guild = event.guild
         val msgContent = messages[msgId] ?: return
-        val logId = getLogId(guild) ?: return
+        val logId = guild.getLogChannelId() ?: return
         val log = guild.getTextChannelById(logId) ?: return
         log.sendMessageEmbeds(
             Embed {

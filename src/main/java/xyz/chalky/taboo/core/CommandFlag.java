@@ -1,4 +1,4 @@
-package xyz.chalky.taboo.backend;
+package xyz.chalky.taboo.core;
 
 public enum CommandFlag {
     DEVELOPER_ONLY(),

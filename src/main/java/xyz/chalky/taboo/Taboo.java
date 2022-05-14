@@ -3,7 +3,6 @@ package xyz.chalky.taboo;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import lavalink.client.io.jda.JdaLavalink;
-import mu.KotlinLogging;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -15,8 +14,10 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
-import xyz.chalky.taboo.backend.GenericCommand;
-import xyz.chalky.taboo.backend.InteractionCommandHandler;
+import org.slf4j.LoggerFactory;
+import xyz.chalky.taboo.backend.Backend;
+import xyz.chalky.taboo.core.GenericCommand;
+import xyz.chalky.taboo.core.InteractionCommandHandler;
 import xyz.chalky.taboo.database.DatabaseManager;
 import xyz.chalky.taboo.events.EventManager;
 import xyz.chalky.taboo.music.AudioManager;
@@ -32,7 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class Taboo {
 
-    private static final Logger LOGGER = KotlinLogging.INSTANCE.logger("Taboo");
+    private static final Logger LOGGER = LoggerFactory.getLogger(Taboo.class);
     private static Taboo instance;
     private final ShardManager shardManager;
     private final boolean isDebug;
@@ -63,6 +64,8 @@ public class Taboo {
     private final EventWaiter eventWaiter;
     private final JdaLavalink lavalink;
     private final AudioManager audioManager;
+    private final DatabaseManager databaseManager;
+    private final Backend backend;
 
     Taboo() throws Exception {
         instance = this;
@@ -76,7 +79,10 @@ public class Taboo {
         audioManager = new AudioManager(propertiesManager);
         EventManager eventManager = new EventManager(propertiesManager);
         eventManager.init();
-        DatabaseManager.INSTANCE.startDatabase();
+        databaseManager = new DatabaseManager(propertiesManager);
+        databaseManager.startDatabase();
+        backend = new Backend();
+        backend.init();
         shardManager = DefaultShardManagerBuilder.createDefault(propertiesManager.getToken())
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.GUILD_MEMBERS)
                 .enableCache(CacheFlag.VOICE_STATE)
@@ -128,6 +134,10 @@ public class Taboo {
 
     public AudioManager getAudioManager() {
         return audioManager;
+    }
+
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
     }
 
     public static Logger getLogger() {

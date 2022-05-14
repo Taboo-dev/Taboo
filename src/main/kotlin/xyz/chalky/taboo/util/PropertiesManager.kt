@@ -32,4 +32,10 @@ data class PropertiesManager(val properties: Properties) {
     val spotifyClientSecret: String
         get() = properties.getProperty("spotifyClientSecret")
 
+    val jdbcUrl: String
+        get() = properties.getProperty("jdbcUrl")
+
+    val jdbcUsername: String
+        get() = properties.getProperty("jdbcUsername")
+
 }

@@ -1,13 +1,13 @@
 package xyz.chalky.taboo.events
 
-import dev.minn.jda.ktx.Embed
+import dev.minn.jda.ktx.messages.Embed
 import net.dv8tion.jda.api.events.channel.ChannelCreateEvent
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent
 import net.dv8tion.jda.api.events.channel.update.GenericChannelUpdateEvent
 import net.dv8tion.jda.api.events.role.RoleCreateEvent
 import net.dv8tion.jda.api.events.role.RoleDeleteEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import xyz.chalky.taboo.util.getLogId
+import xyz.chalky.taboo.database.getLogChannelId
 import java.awt.Color
 import java.time.Instant
 
@@ -18,7 +18,7 @@ class GuildEvents : ListenerAdapter() {
     override fun onRoleCreate(event: RoleCreateEvent) {
         val role = event.role
         val guild = event.guild
-        val logId = getLogId(guild) ?: return
+        val logId = guild.getLogChannelId() ?: return
         val log = guild.getTextChannelById(logId) ?: return
         log.sendMessageEmbeds(
             Embed {
@@ -36,7 +36,7 @@ class GuildEvents : ListenerAdapter() {
     override fun onRoleDelete(event: RoleDeleteEvent) {
         val role = event.role
         val guild = event.guild
-        val logId = getLogId(guild) ?: return
+        val logId = guild.getLogChannelId() ?: return
         val log = guild.getTextChannelById(logId) ?: return
         log.sendMessageEmbeds(
             Embed {
@@ -56,7 +56,7 @@ class GuildEvents : ListenerAdapter() {
     override fun onChannelCreate(event: ChannelCreateEvent) {
         val channel = event.channel
         val guild = event.guild
-        val logId = getLogId(guild) ?: return
+        val logId = guild.getLogChannelId() ?: return
         val log = guild.getTextChannelById(logId) ?: return
         log.sendMessageEmbeds(
             Embed {
@@ -74,7 +74,7 @@ class GuildEvents : ListenerAdapter() {
     override fun onChannelDelete(event: ChannelDeleteEvent) {
         val channel = event.channel
         val guild = event.guild
-        val logId = getLogId(guild) ?: return
+        val logId = guild.getLogChannelId() ?: return
         val log = guild.getTextChannelById(logId) ?: return
         log.sendMessageEmbeds(
             Embed {
@@ -92,7 +92,7 @@ class GuildEvents : ListenerAdapter() {
     override fun onGenericChannelUpdate(event: GenericChannelUpdateEvent<*>) {
         val channel = event.channel
         val guild = event.guild
-        val logId = getLogId(guild) ?: return
+        val logId = guild.getLogChannelId() ?: return
         val log = guild.getTextChannelById(logId) ?: return
         log.sendMessageEmbeds(
             Embed {

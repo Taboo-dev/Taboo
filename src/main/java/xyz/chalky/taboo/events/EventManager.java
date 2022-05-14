@@ -1,11 +1,11 @@
 package xyz.chalky.taboo.events;
 
-import mu.KotlinLogging;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.IEventManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.chalky.taboo.Taboo;
 import xyz.chalky.taboo.util.PropertiesManager;
 
@@ -17,7 +17,7 @@ public class EventManager implements IEventManager {
 
     private final PropertiesManager propertiesManager;
     private final ArrayList<EventListener> listeners = new ArrayList<>();
-    private final Logger LOGGER = KotlinLogging.INSTANCE.logger("EventManager");
+    private final Logger LOGGER = LoggerFactory.getLogger(EventManager.class);
 
     public EventManager(PropertiesManager propertiesManager) {
         this.propertiesManager = propertiesManager;
@@ -35,6 +35,7 @@ public class EventManager implements IEventManager {
         register(new GuildJoinListener());
         register(new GuildEvents());
         register(new VoiceListener());
+        register(new MusicEvents());
         register(Taboo.getInstance().getEventWaiter());
     }
 

@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
-import xyz.chalky.taboo.backend.SlashCommand;
+import xyz.chalky.taboo.core.SlashCommand;
 
 import java.time.Instant;
 
