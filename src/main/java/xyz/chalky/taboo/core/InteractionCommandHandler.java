@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.chalky.taboo.Taboo;
+import xyz.chalky.taboo.commands.misc.BookmarkContextCommand;
 import xyz.chalky.taboo.commands.misc.ConfigSlashCommand;
 import xyz.chalky.taboo.commands.misc.PingSlashCommand;
 import xyz.chalky.taboo.commands.misc.ShardsSlashCommand;
@@ -69,6 +70,9 @@ public class InteractionCommandHandler {
         registerCommand(new BanSlashCommand());
         registerCommand(new KickSlashCommand());
         registerCommand(new ConfigSlashCommand());
+
+        // context commands
+        registerCommand(new BookmarkContextCommand());
     }
 
     public void updateCommands(Consumer<List<Command>> success, Consumer<Throwable> failure) {

@@ -11,7 +11,7 @@ public class Launcher {
         } catch (Exception e) {
             if (e instanceof LoginException) {
                 Taboo.getLogger().error("Failed to login to Discord!", e);
-			   // TODO: music buttons, bookmark, music bookmark and autocomplete, play pause embed ses
+			   // TODO: music buttons, music bookmark and autocomplete, play pause embed ses
             } else {
                 Taboo.getLogger().error("Failed to start Taboo!", e);
             }
