@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    implementation("net.dv8tion:JDA:5.0.0-alpha.11")
+    implementation("net.dv8tion:JDA:5.0.0-alpha.12")
     implementation("pw.chew:jda-chewtils:2.0-SNAPSHOT")
     implementation("com.github.MinnDevelopment:jda-ktx:master-SNAPSHOT")
     implementation("com.github.Xirado:Lavalink-Client:041082f")
@@ -32,7 +32,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-dao:0.38.2")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.38.2")
     implementation("com.google.guava:guava:31.1-jre")
-    implementation("io.javalin:javalin:4.5.0")
+    implementation("io.javalin:javalin:4.6.0")
     implementation(kotlin("stdlib-jdk8"))
 }
 
