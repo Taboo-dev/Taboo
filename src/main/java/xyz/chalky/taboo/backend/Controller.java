@@ -22,8 +22,8 @@ public class Controller {
     }
 
     @PostMapping("/config/{id}")
-    public ResponseEntity<Config> setConfig(@PathVariable("id") long guildId, @RequestParam("logId") long logId, @RequestParam("musicId") long musicIc) {
-        Config config = new Config(guildId, logId, musicIc);
+    public ResponseEntity<Config> setConfig(@PathVariable("id") long guildId, @RequestParam("logId") long logId, @RequestParam("musicId") long musicId) {
+        Config config = new Config(guildId, logId, musicId);
         try {
             configRepository.save(config);
             return new ResponseEntity<>(config, HttpStatus.OK);
