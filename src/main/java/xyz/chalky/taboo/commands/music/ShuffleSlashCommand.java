@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
-import xyz.chalky.taboo.Taboo;
+import xyz.chalky.taboo.central.Taboo;
 import xyz.chalky.taboo.core.CommandFlag;
 import xyz.chalky.taboo.core.SlashCommand;
 import xyz.chalky.taboo.music.AudioScheduler;

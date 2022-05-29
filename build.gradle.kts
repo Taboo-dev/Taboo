@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.1.0"
+    id("org.springframework.boot") version "2.7.0"
     kotlin("jvm") version "1.6.20"
 }
 
@@ -20,6 +21,7 @@ repositories {
 
 dependencies {
     implementation("net.dv8tion:JDA:5.0.0-alpha.12")
+    implementation("club.minnced:discord-webhooks:0.8.0")
     implementation("pw.chew:jda-chewtils:2.0-SNAPSHOT")
     implementation("com.github.MinnDevelopment:jda-ktx:master-SNAPSHOT")
     implementation("com.github.Xirado:Lavalink-Client:041082f")
@@ -33,6 +35,9 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:0.38.2")
     implementation("com.google.guava:guava:31.1-jre")
     implementation("io.javalin:javalin:4.6.0")
+    implementation("org.springframework.boot:spring-boot-starter-web:2.7.0")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa:2.7.0")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:2.7.0")
     implementation(kotlin("stdlib-jdk8"))
 }
 
@@ -44,5 +49,5 @@ tasks {
 
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
-    jvmTarget = "17"
+    jvmTarget = "18"
 }

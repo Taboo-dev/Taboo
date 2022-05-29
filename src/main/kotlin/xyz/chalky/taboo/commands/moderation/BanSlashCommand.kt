@@ -1,3 +1,4 @@
+/*
 package xyz.chalky.taboo.commands.moderation
 
 import dev.minn.jda.ktx.interactions.components.getOption
@@ -90,4 +91,4 @@ class BanSlashCommand : SlashCommand() {
         ).setEphemeral(true).queue()
     }
 
-}
+}*/

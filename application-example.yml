@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    hikari:
+      pool-name:
+    url:
+    username:
+  jpa:
+    properties:
+      hibernate:
+        dialact:
+        show_sql:
+    hibernate:
+      ddl-auto:
+
+
+taboo:
+  token:
+  debugState:
+  guildId:
+  ownerId:
+  lavalink:
+    hostUrl:
+    password:
+  spotify:
+    id:
+    secret:
+  webhookUrl:
+  prefix:

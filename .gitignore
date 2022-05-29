@@ -1,7 +1,5 @@
-database.db
-config.properties
-config.properties.dev
-config.properties.prod
+*.yml
+!application-example.yml
 .idea/
 build/
 /.gradle

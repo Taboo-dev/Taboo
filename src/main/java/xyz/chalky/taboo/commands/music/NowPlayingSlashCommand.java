@@ -10,13 +10,14 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
-import xyz.chalky.taboo.Taboo;
+import xyz.chalky.taboo.central.Taboo;
 import xyz.chalky.taboo.core.CommandFlag;
 import xyz.chalky.taboo.core.SlashCommand;
 import xyz.chalky.taboo.music.GuildAudioPlayer;
-import xyz.chalky.taboo.util.ExtensionsKt;
 
 import java.time.Instant;
+
+import static xyz.chalky.taboo.util.MiscUtil.toMinutesAndSeconds;
 
 public class NowPlayingSlashCommand extends SlashCommand {
 
@@ -42,12 +43,12 @@ public class NowPlayingSlashCommand extends SlashCommand {
             AudioTrackInfo info = playingTrack.getInfo();
             long position = player.getTrackPosition();
             long length = info.length;
-            String trackPosition = ExtensionsKt.toMinutesAndSeconds(position);
-            String duration = ExtensionsKt.toMinutesAndSeconds(length);
+            String trackPosition = toMinutesAndSeconds(position);
+            String duration = toMinutesAndSeconds(length);
             EmbedBuilder embed = new EmbedBuilder()
                     .setTitle("Now Playing:")
                     .setDescription(String.format("[%s](%s) by %s", info.title, info.uri, info.author))
-                    .addField("Duration:", String.format("%s / %s", trackPosition, duration), false)
+                    .addField("Duration:", String.format("%s / %s", trackPosition, duration), true)
                     .setColor(0x9F90CF)
                     .setTimestamp(Instant.now());
             if (playingTrack instanceof YoutubeAudioTrack) {

@@ -6,8 +6,7 @@ import net.dv8tion.jda.api.hooks.IEventManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.chalky.taboo.Taboo;
-import xyz.chalky.taboo.util.PropertiesManager;
+import xyz.chalky.taboo.central.Taboo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,21 +14,17 @@ import java.util.List;
 
 public class EventManager implements IEventManager {
 
-    private final PropertiesManager propertiesManager;
     private final ArrayList<EventListener> listeners = new ArrayList<>();
     private final Logger LOGGER = LoggerFactory.getLogger(EventManager.class);
-
-    public EventManager(PropertiesManager propertiesManager) {
-        this.propertiesManager = propertiesManager;
-    }
 
     public void init() {
         registerEvents();
     }
 
     private void registerEvents() {
-        register(new ReadyHandler(propertiesManager));
-        register(new InteractionsListener(propertiesManager));
+        register(new ReadyHandler());
+        register(new InteractionsListener());
+        register(new CommandsListener());
         register(new MessageListener());
         register(new JoinLeaveListener());
         register(new GuildJoinListener());

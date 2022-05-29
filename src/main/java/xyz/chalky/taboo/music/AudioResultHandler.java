@@ -1,8 +1,6 @@
 package xyz.chalky.taboo.music;
 
-import com.github.topislavalinkplugins.topissourcemanagers.ISRCAudioTrack;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -72,18 +70,15 @@ public class AudioResultHandler implements AudioLoadResultHandler {
     }
 
     private void handle(@NotNull AudioTrack track) {
-        EmbedBuilder embed = new EmbedBuilder()
+        MessageEmbed embed = new EmbedBuilder()
                 .setTitle("Added to queue:")
                 .setDescription(String.format("[%s](%s) by %s", track.getInfo().title,
                         track.getInfo().uri, track.getInfo().author))
                 .setColor(0x9F90CF)
-                .setTimestamp(Instant.now());
-        if (track instanceof YoutubeAudioTrack) {
-            embed.setThumbnail(String.format("https://img.youtube.com/vi/%s/mqdefault.jpg", track.getInfo().identifier));
-        } else if (track instanceof ISRCAudioTrack isrcAudioTrack) {
-            embed.setThumbnail(isrcAudioTrack.getArtworkURL());
-        }
-        event.getHook().sendMessageEmbeds(embed.build()).queue();
+                .setTimestamp(Instant.now())
+                .build();
+        event.getHook().sendMessageEmbeds(embed).queue();
+        // DatabaseHelperKt.insertMusicSearchEntries(event.getUser(), track.getInfo().title, track.getInfo().uri);
     }
 
     private void handlePlaylist(@NotNull AudioPlaylist playlist) {
@@ -121,6 +116,10 @@ public class AudioResultHandler implements AudioLoadResultHandler {
             embed.setDescription(description);
         }
         event.getHook().sendMessageEmbeds(embed.build()).queue();
+        playlist.getTracks().forEach(audioTrack -> {
+            AudioTrackInfo info = audioTrack.getInfo();
+            // DatabaseHelperKt.insertMusicSearchEntries(event.getUser(), info.title, info.uri);
+        });
     }
 
 }

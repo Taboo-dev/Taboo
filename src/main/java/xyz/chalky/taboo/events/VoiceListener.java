@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import xyz.chalky.taboo.Taboo;
+import xyz.chalky.taboo.central.Taboo;
 import xyz.chalky.taboo.music.AudioScheduler;
 import xyz.chalky.taboo.music.GuildAudioPlayer;
 

@@ -10,13 +10,14 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.managers.AudioManager;
 import org.jetbrains.annotations.NotNull;
-import xyz.chalky.taboo.Taboo;
+import xyz.chalky.taboo.central.Taboo;
 import xyz.chalky.taboo.core.CommandFlag;
 import xyz.chalky.taboo.core.SlashCommand;
 import xyz.chalky.taboo.music.AudioResultHandler;
 import xyz.chalky.taboo.music.AudioScheduler;
 import xyz.chalky.taboo.music.GuildAudioPlayer;
-import xyz.chalky.taboo.util.ExtensionsKt;
+
+import static xyz.chalky.taboo.util.MiscUtil.isUrl;
 
 public class PlaySlashCommand extends SlashCommand {
 
@@ -49,16 +50,31 @@ public class PlaySlashCommand extends SlashCommand {
         } else {
             provider = providerOption.getAsString();
         }
-        if (ExtensionsKt.isUrl(input)) {
+        if (isUrl(input)) {
             query = input;
         } else {
             query = String.format("%s:%s", provider, input);
         }
         if (manager.getConnectedChannel() == null) {
-            scheduler.setChannelId(event.getChannel().getIdLong()); // Cursed
+            scheduler.setChannelId(event.getChannel().getIdLong());
             link.connect(voiceState.getChannel());
             link.getRestClient().loadItem(query, new AudioResultHandler(event, scheduler));
         }
     }
+
+    /*@Override
+    public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event) {
+        AutoCompleteQuery query = event.getFocusedOption();
+        String value = query.getValue();
+        if (query.getName().equals("song")) {
+            if (value.isEmpty()) {
+                Set<Command.Choice> searchEntries = DatabaseHelperKt.getMusicSearchEntries(event.getUser());
+                event.replyChoices(searchEntries).queue();
+            } else {
+                Set<Command.Choice> searchEntries = DatabaseHelperKt.getMusicSearchEntries(event.getUser(), value);
+                event.replyChoices(searchEntries).queue();
+            }
+        }
+    }*/
 
 }

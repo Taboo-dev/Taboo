@@ -3,7 +3,7 @@ package xyz.chalky.taboo.music;
 import lavalink.client.io.jda.JdaLink;
 import lavalink.client.player.LavalinkPlayer;
 import net.dv8tion.jda.api.entities.Guild;
-import xyz.chalky.taboo.Taboo;
+import xyz.chalky.taboo.central.Taboo;
 
 public class GuildAudioPlayer {
 
@@ -17,7 +17,7 @@ public class GuildAudioPlayer {
         this.guildId = guild.getIdLong();
         this.link = Taboo.getInstance().getLavalink().getLink(guild);
         this.player = link.getPlayer();
-        this.scheduler = new AudioScheduler(player, this, guildId);
+        this.scheduler = new AudioScheduler(player, guildId);
     }
 
     public AudioScheduler getScheduler() {
