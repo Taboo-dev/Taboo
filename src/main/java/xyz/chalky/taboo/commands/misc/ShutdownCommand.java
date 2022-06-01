@@ -32,9 +32,7 @@ public class ShutdownCommand extends Command {
     public void executeCommand(@NotNull MessageReceivedEvent event, CommandContext ctx) {
         ScheduledExecutorService executor = Taboo.getInstance().getScheduledExecutor();
         event.getMessage().replyEmbeds(shutdownEmbed).queue();
-        Taboo.getLogger().info("Shutting down Taboo...");
         Taboo.getInstance().getShardManager().shutdown();
-        Taboo.getLogger().info("Goodbye!");
         executor.schedule(() -> {
             System.exit(0);
         }, 10, TimeUnit.SECONDS);

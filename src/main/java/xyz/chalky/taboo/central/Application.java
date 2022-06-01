@@ -39,7 +39,9 @@ public class Application {
                     """);
         });
         application.addListeners((ApplicationListener<ContextClosedEvent>) event -> {
+            Taboo.getLogger().info("Shutting down Taboo...");
             Taboo.getInstance().getWebhookClient().send(ShutdownCommand.shutdownEmbed);
+            Taboo.getLogger().info("Goodbye!");
         });
         application.run(args);
     }
