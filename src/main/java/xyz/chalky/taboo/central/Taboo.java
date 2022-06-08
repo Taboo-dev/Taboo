@@ -71,11 +71,10 @@ public class Taboo implements CommandLineRunner {
     private JdaLavalink lavalink;
     private AudioManager audioManager;
     private JDAWebhookClient webhookClient;
-
     private TabooConfig config;
 
 
-    Taboo() throws Exception {
+    Taboo() {
         instance = this;
         this.config = Application.getInstance().getProvider().getApplicationContext().getBean(TabooConfig.class);
     }
