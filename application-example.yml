@@ -7,7 +7,7 @@ spring:
   jpa:
     properties:
       hibernate:
-        dialact:
+        dialect:
         show_sql:
     hibernate:
       ddl-auto:
