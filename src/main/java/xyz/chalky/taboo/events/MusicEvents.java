@@ -56,6 +56,10 @@ public class MusicEvents extends ListenerAdapter {
             } else if (track instanceof ISRCAudioTrack isrcAudioTrack) {
                 embed.setThumbnail(isrcAudioTrack.getArtworkURL());
             }
+            if (!info.identifier.equals(trackIdentifier)) {
+                event.getHook().sendMessage("That track is currently not playing!").setEphemeral(true).queue();
+                return;
+            }
             if (lavalinkPlayer.isPaused()) {
                 lavalinkPlayer.setPaused(false);
                 embed.addField("Paused", "False", true);
@@ -70,16 +74,11 @@ public class MusicEvents extends ListenerAdapter {
             String[] split = componentId.split(":");
             long channelId = Long.parseLong(split[2]);
             if (!(event.getChannel().getIdLong() == channelId)) return;
-            String trackIdentifier = split[3];
             GuildAudioPlayer guildAudioPlayer = Taboo.getInstance().getAudioManager().getAudioPlayer(guild.getIdLong());
             AudioScheduler scheduler = guildAudioPlayer.getScheduler();
             LavalinkPlayer lavalinkPlayer = scheduler.getPlayer();
             AudioTrack track = lavalinkPlayer.getPlayingTrack();
             AudioTrackInfo info = track.getInfo();
-            if (!info.identifier.equals(trackIdentifier)) {
-                event.getHook().sendMessage("That track is currently not playing!").setEphemeral(true).queue();
-                return;
-            }
             SearchHistory history = new SearchHistory(event.getUser().getIdLong(), info.title, info.uri, track.getIdentifier());
             searchHistoryRepository.save(history);
         }
