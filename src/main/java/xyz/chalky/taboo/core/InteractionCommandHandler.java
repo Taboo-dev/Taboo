@@ -10,17 +10,22 @@ import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEven
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.central.Application;
 import xyz.chalky.taboo.central.Taboo;
 import xyz.chalky.taboo.central.TabooConfig;
 import xyz.chalky.taboo.commands.database.ConfigSlashCommand;
+import xyz.chalky.taboo.commands.database.TagSlashCommand;
 import xyz.chalky.taboo.commands.misc.BookmarkContextCommand;
 import xyz.chalky.taboo.commands.misc.PingSlashCommand;
 import xyz.chalky.taboo.commands.misc.ShardsSlashCommand;
 import xyz.chalky.taboo.commands.music.*;
-import xyz.chalky.taboo.database.util.DatabaseHelper;
+import xyz.chalky.taboo.database.model.Config;
+import xyz.chalky.taboo.database.repository.ConfigRepository;
 import xyz.chalky.taboo.util.ResponseHelper;
 
 import java.awt.*;
@@ -31,18 +36,23 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+@Component
 public class InteractionCommandHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InteractionCommandHandler.class);
     private final List<GenericCommand> registeredCommands;
     private final ConcurrentHashMap<Long, List<GenericCommand>> registeredGuildCommands;
     private CommandListUpdateAction commandUpdateAction;
-    private TabooConfig config;
+    private final TabooConfig config;
+    private final ApplicationContext context;
+    private final ConfigRepository configRepository;
 
     public InteractionCommandHandler() {
         this.registeredCommands = Collections.synchronizedList(new ArrayList<>());
         this.registeredGuildCommands = new ConcurrentHashMap<>();
         this.config = Taboo.getInstance().getConfig();
+        this.context = Application.getInstance().getProvider().getApplicationContext();
+        this.configRepository = context.getBean(ConfigRepository.class);
     }
 
     public void initialize() {
@@ -52,7 +62,7 @@ public class InteractionCommandHandler {
 
     public void registerAllCommands() {
         // music commands
-        registerCommand(new PlaySlashCommand());
+        registerCommand(context.getBean(PlaySlashCommand.class));
         registerCommand(new LoopSlashCommand());
         registerCommand(new QueueSlashCommand());
         registerCommand(new NowPlayingSlashCommand());
@@ -68,7 +78,8 @@ public class InteractionCommandHandler {
         // moderation commands
         /*registerCommand(new BanSlashCommand());
         registerCommand(new KickSlashCommand());*/
-        registerCommand(Application.getInstance().getProvider().getApplicationContext().getBean(ConfigSlashCommand.class));
+        registerCommand(context.getBean(ConfigSlashCommand.class));
+        registerCommand(context.getBean(TagSlashCommand.class));
 
         // context commands
         registerCommand(new BookmarkContextCommand());
@@ -103,7 +114,7 @@ public class InteractionCommandHandler {
         }
     }
 
-    private void registerCommand(GenericCommand command) {
+    private void registerCommand(@NotNull GenericCommand command) {
         if (!command.isGlobal() && !Taboo.getInstance().isDebug()) {
             if (command.getEnabledGuilds() == null || command.getEnabledGuilds().isEmpty()) return;
             for (Long guildId : command.getEnabledGuilds()) {
@@ -130,7 +141,7 @@ public class InteractionCommandHandler {
         registeredCommands.add(command);
     }
 
-    public void handleAutoComplete(CommandAutoCompleteInteractionEvent event) {
+    public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event) {
         if (event.getGuild() == null) return;
         Runnable r = () -> {
             try {
@@ -171,7 +182,7 @@ public class InteractionCommandHandler {
         Taboo.getInstance().getCommandExecutor().execute(r);
     }
 
-    public void handleMessageContextCommand(MessageContextInteractionEvent event) {
+    public void handleMessageContextCommand(@NotNull MessageContextInteractionEvent event) {
         if (!event.isFromGuild()) return;
         Guild guild = event.getGuild();
         Member member = event.getMember();
@@ -213,7 +224,7 @@ public class InteractionCommandHandler {
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
-            Long musicChannelId = DatabaseHelper.getInstance().getMusicChannelById(guild.getIdLong());
+            Long musicChannelId = configRepository.findById(guild.getIdLong()).map(Config::getMusicChannelId).orElse(null);
             if (musicChannelId == null) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
                         Color.RED, null);
@@ -286,7 +297,7 @@ public class InteractionCommandHandler {
         Taboo.getInstance().getCommandExecutor().submit(r);
     }
 
-    public void handleUserContextCommand(UserContextInteractionEvent event) {
+    public void handleUserContextCommand(@NotNull UserContextInteractionEvent event) {
         if (!event.isFromGuild()) return;
         Guild guild = event.getGuild();
         Member member = event.getMember();
@@ -331,7 +342,7 @@ public class InteractionCommandHandler {
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
-            Long musicChannelId = DatabaseHelper.getInstance().getMusicChannelById(guild.getIdLong());
+            Long musicChannelId = configRepository.findById(guild.getIdLong()).map(Config::getMusicChannelId).orElse(null);
             if (musicChannelId == null) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
                         Color.RED, null);
@@ -450,7 +461,7 @@ public class InteractionCommandHandler {
                         return;
                     }
                     if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
-                        Long musicChannelId = DatabaseHelper.getInstance().getMusicChannelById(guild.getIdLong());
+                        Long musicChannelId = configRepository.findById(guild.getIdLong()).map(Config::getMusicChannelId).orElse(null);
                         if (musicChannelId == null) {
                             EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
                                     Color.RED, null);

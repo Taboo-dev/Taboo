@@ -9,12 +9,18 @@ import net.dv8tion.jda.api.events.role.RoleCreateEvent;
 import net.dv8tion.jda.api.events.role.RoleDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import xyz.chalky.taboo.database.util.DatabaseHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import xyz.chalky.taboo.database.model.Config;
+import xyz.chalky.taboo.database.repository.ConfigRepository;
 
 import java.awt.*;
 import java.time.Instant;
 
+@Component
 public class GuildEvents extends ListenerAdapter {
+
+    @Autowired private ConfigRepository configRepository;
 
     // Role Events
 
@@ -22,7 +28,7 @@ public class GuildEvents extends ListenerAdapter {
     public void onRoleCreate(@NotNull RoleCreateEvent event) {
         Role role = event.getRole();
         Guild guild = event.getGuild();
-        Long logId = DatabaseHelper.getInstance().getLogChannelById(guild.getIdLong());
+        Long logId = configRepository.findById(guild.getIdLong()).map(Config::getLogChannelId).orElse(null);
         if (logId == null) return;
         TextChannel log = guild.getTextChannelById(logId);
         if (log == null) return;
@@ -40,7 +46,7 @@ public class GuildEvents extends ListenerAdapter {
     public void onRoleDelete(@NotNull RoleDeleteEvent event) {
         Role role = event.getRole();
         Guild guild = event.getGuild();
-        Long logId = DatabaseHelper.getInstance().getLogChannelById(guild.getIdLong());
+        Long logId = configRepository.findById(guild.getIdLong()).map(Config::getLogChannelId).orElse(null);
         if (logId == null) return;
         TextChannel log = guild.getTextChannelById(logId);
         if (log == null) return;
@@ -61,7 +67,7 @@ public class GuildEvents extends ListenerAdapter {
     public void onChannelCreate(@NotNull ChannelCreateEvent event) {
         Channel channel = event.getChannel();
         Guild guild = event.getGuild();
-        Long logId = DatabaseHelper.getInstance().getLogChannelById(guild.getIdLong());
+        Long logId = configRepository.findById(guild.getIdLong()).map(Config::getLogChannelId).orElse(null);
         if (logId == null) return;
         TextChannel log = guild.getTextChannelById(logId);
         if (log == null) return;
@@ -79,7 +85,7 @@ public class GuildEvents extends ListenerAdapter {
     public void onChannelDelete(@NotNull ChannelDeleteEvent event) {
         Channel channel = event.getChannel();
         Guild guild = event.getGuild();
-        Long logId = DatabaseHelper.getInstance().getLogChannelById(guild.getIdLong());
+        Long logId = configRepository.findById(guild.getIdLong()).map(Config::getLogChannelId).orElse(null);
         if (logId == null) return;
         TextChannel log = guild.getTextChannelById(logId);
         if (log == null) return;
@@ -97,7 +103,7 @@ public class GuildEvents extends ListenerAdapter {
     public void onGenericChannelUpdate(@NotNull GenericChannelUpdateEvent<?> event) {
         Channel channel = event.getChannel();
         Guild guild = event.getGuild();
-        Long logId = DatabaseHelper.getInstance().getLogChannelById(guild.getIdLong());
+        Long logId = configRepository.findById(guild.getIdLong()).map(Config::getLogChannelId).orElse(null);
         if (logId == null) return;
         TextChannel log = guild.getTextChannelById(logId);
         if (log == null) return;

@@ -6,6 +6,8 @@ import net.dv8tion.jda.api.hooks.IEventManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import xyz.chalky.taboo.central.Application;
 import xyz.chalky.taboo.central.Taboo;
 
 import java.util.ArrayList;
@@ -16,6 +18,11 @@ public class EventManager implements IEventManager {
 
     private final ArrayList<EventListener> listeners = new ArrayList<>();
     private final Logger LOGGER = LoggerFactory.getLogger(EventManager.class);
+    private final ApplicationContext context;
+
+    public EventManager() {
+        this.context = Application.getInstance().getProvider().getApplicationContext();
+    }
 
     public void init() {
         registerEvents();
@@ -25,10 +32,10 @@ public class EventManager implements IEventManager {
         register(new ReadyHandler());
         register(new InteractionsListener());
         register(new CommandsListener());
-        register(new MessageListener());
-        register(new JoinLeaveListener());
+        register(context.getBean(MessageListener.class));
+        register(context.getBean(JoinLeaveListener.class));
         register(new GuildJoinListener());
-        register(new GuildEvents());
+        register(context.getBean(GuildEvents.class));
         register(new VoiceListener());
         register(new MusicEvents());
         register(Taboo.getInstance().getEventWaiter());

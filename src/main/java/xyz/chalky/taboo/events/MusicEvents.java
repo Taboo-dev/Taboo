@@ -10,7 +10,11 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.central.Taboo;
+import xyz.chalky.taboo.database.model.SearchHistory;
+import xyz.chalky.taboo.database.repository.SearchHistoryRepository;
 import xyz.chalky.taboo.music.AudioScheduler;
 import xyz.chalky.taboo.music.GuildAudioPlayer;
 
@@ -18,7 +22,10 @@ import java.time.Instant;
 
 import static xyz.chalky.taboo.util.MiscUtil.toMinutesAndSeconds;
 
+@Component
 public class MusicEvents extends ListenerAdapter {
+
+    @Autowired private SearchHistoryRepository searchHistoryRepository;
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
@@ -58,6 +65,23 @@ public class MusicEvents extends ListenerAdapter {
                 embed.addField("Paused", "True", true);
                 event.getHook().editOriginalEmbeds(embed.build()).queue();
             }
+        } else if (componentId.startsWith("music:save")) {
+            // componentId = music:save:<channelId>:<trackIdentifier>
+            String[] split = componentId.split(":");
+            long channelId = Long.parseLong(split[2]);
+            if (!(event.getChannel().getIdLong() == channelId)) return;
+            String trackIdentifier = split[3];
+            GuildAudioPlayer guildAudioPlayer = Taboo.getInstance().getAudioManager().getAudioPlayer(guild.getIdLong());
+            AudioScheduler scheduler = guildAudioPlayer.getScheduler();
+            LavalinkPlayer lavalinkPlayer = scheduler.getPlayer();
+            AudioTrack track = lavalinkPlayer.getPlayingTrack();
+            AudioTrackInfo info = track.getInfo();
+            if (!info.identifier.equals(trackIdentifier)) {
+                event.getHook().sendMessage("That track is currently not playing!").setEphemeral(true).queue();
+                return;
+            }
+            SearchHistory history = new SearchHistory(event.getUser().getIdLong(), info.title, info.uri, track.getIdentifier());
+            searchHistoryRepository.save(history);
         }
     }
 

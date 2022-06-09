@@ -6,20 +6,26 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import xyz.chalky.taboo.database.util.DatabaseHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import xyz.chalky.taboo.database.model.Config;
+import xyz.chalky.taboo.database.repository.ConfigRepository;
 
 import java.awt.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+@Component
 public class JoinLeaveListener extends ListenerAdapter {
+
+    @Autowired private ConfigRepository configRepository;
 
     @Override
     public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
         Guild guild = event.getGuild();
         Member member = event.getMember();
         User user = event.getUser();
-        Long logId = DatabaseHelper.getInstance().getLogChannelById(guild.getIdLong());
+        Long logId = configRepository.findById(guild.getIdLong()).map(Config::getLogChannelId).orElse(null);
         if (logId == null) return;
         TextChannel log = guild.getTextChannelById(logId);
         if (log == null) return;
@@ -42,7 +48,7 @@ public class JoinLeaveListener extends ListenerAdapter {
         Guild guild = event.getGuild();
         Member member = event.getMember();
         User user = event.getUser();
-        Long logId = DatabaseHelper.getInstance().getLogChannelById(guild.getIdLong());
+        Long logId = configRepository.findById(guild.getIdLong()).map(Config::getLogChannelId).orElse(null);
         if (logId == null) return;
         TextChannel log = guild.getTextChannelById(logId);
         if (log == null) return;

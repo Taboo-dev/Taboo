@@ -14,7 +14,7 @@ import java.awt.*;
 
 public class InteractionsListener extends ListenerAdapter {
 
-    private TabooConfig config;
+    private final TabooConfig config;
 
     public InteractionsListener() {
         this.config = Taboo.getInstance().getConfig();

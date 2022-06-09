@@ -7,12 +7,18 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import xyz.chalky.taboo.database.util.DatabaseHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import xyz.chalky.taboo.database.model.Config;
+import xyz.chalky.taboo.database.repository.ConfigRepository;
 
 import java.time.Instant;
 import java.util.HashMap;
 
+@Component
 public class MessageListener extends ListenerAdapter {
+
+    @Autowired private ConfigRepository configRepository;
 
     private final HashMap<Long, String> messageMap = new HashMap<>();
 
@@ -37,7 +43,7 @@ public class MessageListener extends ListenerAdapter {
         long msgId = message.getIdLong();
         String originalContent = messageMap.get(msgId);
         String msgContent = message.getContentRaw();
-        Long logId = DatabaseHelper.getInstance().getLogChannelById(guild.getIdLong());
+        Long logId = configRepository.findById(guild.getIdLong()).map(Config::getLogChannelId).orElse(null);
         if (logId == null) return;
         TextChannel log = guild.getTextChannelById(logId);
         if (log == null) return;
@@ -60,7 +66,7 @@ public class MessageListener extends ListenerAdapter {
         long msgId = event.getMessageIdLong();
         String msgContent = messageMap.get(msgId);
         if (msgContent == null) return;
-        Long logId = DatabaseHelper.getInstance().getLogChannelById(guild.getIdLong());
+        Long logId = configRepository.findById(guild.getIdLong()).map(Config::getLogChannelId).orElse(null);
         if (logId == null) return;
         TextChannel log = guild.getTextChannelById(logId);
         if (log == null) return;
