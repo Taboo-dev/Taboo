@@ -20,6 +20,8 @@ import xyz.chalky.taboo.util.ResponseHelper;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class TagSlashCommand extends SlashCommand {
@@ -115,18 +117,18 @@ public class TagSlashCommand extends SlashCommand {
         AutoCompleteQuery focusedOption = event.getFocusedOption();
         String value = focusedOption.getValue();
         if (focusedOption.getName().equals("name")) {
-            List<Command.Choice> choices;
+            Set<Command.Choice> choices;
             if (value.isEmpty()) {
                 choices = tagRepository.findAll().stream()
                         .limit(25)
                         .map(tag -> new Command.Choice(tag.getName(), tag.getName()))
-                        .toList();
+                        .collect(Collectors.toSet());
             } else {
                 choices = tagRepository.findAll().stream()
                         .limit(25)
                         .filter(tag -> tag.getTitle().contains(value.toLowerCase()))
                         .map(tag -> new Command.Choice(tag.getName(), tag.getName()))
-                        .toList();
+                        .collect(Collectors.toSet());
             }
             event.replyChoices(choices).queue();
         }

@@ -208,7 +208,7 @@ public class PlaySlashCommand extends SlashCommand {
                         .filter(history -> history.getName().toLowerCase().contains(value.toLowerCase()))
                         .limit(25)
                         .map(history -> new Command.Choice(history.getName(), history.getUrl()))
-                        .collect(Collectors.toSet());;
+                        .collect(Collectors.toSet());
             }
             event.replyChoices(choices).queue();
         }
