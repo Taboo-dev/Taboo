@@ -1,6 +1,5 @@
 package xyz.chalky.taboo.central;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -17,11 +16,10 @@ import xyz.chalky.taboo.util.ApplicationContextProvider;
 @EnableJpaRepositories("xyz.chalky.taboo.database.repository")
 public class Application {
 
-    private static Application instance;
-    @Autowired private ApplicationContextProvider provider;
+    private static ApplicationContextProvider provider;
 
-    public Application() {
-        instance = this;
+    public Application(ApplicationContextProvider provider) {
+        Application.provider = provider;
     }
 
     public static void main(String... args) {
@@ -46,11 +44,7 @@ public class Application {
         application.run(args);
     }
 
-    public static Application getInstance() {
-        return instance;
-    }
-
-    public ApplicationContextProvider getProvider() {
+    public static ApplicationContextProvider getProvider() {
         return provider;
     }
 

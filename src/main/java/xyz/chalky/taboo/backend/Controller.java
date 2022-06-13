@@ -1,6 +1,5 @@
 package xyz.chalky.taboo.backend;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +12,11 @@ import java.util.Optional;
 @RequestMapping("/api")
 public class Controller {
 
-    @Autowired private ConfigRepository configRepository;
+    private final ConfigRepository configRepository;
+
+    public Controller(ConfigRepository configRepository) {
+        this.configRepository = configRepository;
+    }
 
     @GetMapping("/config/{id}")
     public ResponseEntity<Config> getConfigById(@PathVariable("id") long id) {

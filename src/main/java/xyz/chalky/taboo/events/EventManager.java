@@ -21,7 +21,7 @@ public class EventManager implements IEventManager {
     private final ApplicationContext context;
 
     public EventManager() {
-        this.context = Application.getInstance().getProvider().getApplicationContext();
+        this.context = Application.getProvider().getApplicationContext();
     }
 
     public void init() {
@@ -34,10 +34,10 @@ public class EventManager implements IEventManager {
         register(new CommandsListener());
         register(context.getBean(MessageListener.class));
         register(context.getBean(JoinLeaveListener.class));
-        register(new GuildJoinListener());
+        register(context.getBean(GuildJoinLeaveListener.class));
         register(context.getBean(GuildEvents.class));
         register(new VoiceListener());
-        register(new MusicEvents());
+        register(context.getBean(MusicEvents.class));
         register(Taboo.getInstance().getEventWaiter());
     }
 

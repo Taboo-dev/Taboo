@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.events.role.RoleCreateEvent;
 import net.dv8tion.jda.api.events.role.RoleDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.database.model.Config;
 import xyz.chalky.taboo.database.repository.ConfigRepository;
@@ -20,7 +19,11 @@ import java.time.Instant;
 @Component
 public class GuildEvents extends ListenerAdapter {
 
-    @Autowired private ConfigRepository configRepository;
+    private final ConfigRepository configRepository;
+
+    public GuildEvents(ConfigRepository configRepository) {
+        this.configRepository = configRepository;
+    }
 
     // Role Events
 

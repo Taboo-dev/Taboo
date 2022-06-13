@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.core.CommandFlag;
 import xyz.chalky.taboo.core.SlashCommand;
@@ -22,9 +21,9 @@ import java.util.Optional;
 @Component
 public class ConfigSlashCommand extends SlashCommand {
 
-    @Autowired private ConfigRepository configRepository;
+    private final ConfigRepository configRepository;
 
-    public ConfigSlashCommand() {
+    public ConfigSlashCommand(ConfigRepository configRepository) {
         setCommandData(
                 Commands.slash("config", "Server config")
                         .addSubcommands(
@@ -37,6 +36,7 @@ public class ConfigSlashCommand extends SlashCommand {
         );
         addCommandFlags(CommandFlag.MODERATOR_ONLY);
         setEphemeral(true);
+        this.configRepository = configRepository;
     }
 
     @Override

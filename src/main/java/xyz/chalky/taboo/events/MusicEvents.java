@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.central.Taboo;
 import xyz.chalky.taboo.database.model.SearchHistory;
@@ -25,14 +24,18 @@ import static xyz.chalky.taboo.util.MiscUtil.toMinutesAndSeconds;
 @Component
 public class MusicEvents extends ListenerAdapter {
 
-    @Autowired private SearchHistoryRepository searchHistoryRepository;
+    private final SearchHistoryRepository searchHistoryRepository;
+
+    public MusicEvents(SearchHistoryRepository searchHistoryRepository) {
+        this.searchHistoryRepository = searchHistoryRepository;
+    }
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        event.deferEdit().queue();
         String componentId = event.getComponentId();
         Guild guild = event.getGuild();
         if (componentId.startsWith("music:pause")) {
+            event.deferEdit().queue();
             // componentId = music:pause:<channelId>:<trackIdentifier>
             String[] split = componentId.split(":");
             long channelId = Long.parseLong(split[2]);
@@ -70,6 +73,7 @@ public class MusicEvents extends ListenerAdapter {
                 event.getHook().editOriginalEmbeds(embed.build()).queue();
             }
         } else if (componentId.startsWith("music:save")) {
+            event.deferEdit().queue();
             // componentId = music:save:<channelId>:<trackIdentifier>
             String[] split = componentId.split(":");
             long channelId = Long.parseLong(split[2]);

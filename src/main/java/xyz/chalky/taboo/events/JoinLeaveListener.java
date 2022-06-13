@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.database.model.Config;
 import xyz.chalky.taboo.database.repository.ConfigRepository;
@@ -18,7 +17,11 @@ import java.time.temporal.ChronoUnit;
 @Component
 public class JoinLeaveListener extends ListenerAdapter {
 
-    @Autowired private ConfigRepository configRepository;
+    private final ConfigRepository configRepository;
+
+    public JoinLeaveListener(ConfigRepository configRepository) {
+        this.configRepository = configRepository;
+    }
 
     @Override
     public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {

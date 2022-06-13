@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.core.SlashCommand;
 import xyz.chalky.taboo.database.model.Tag;
@@ -26,9 +25,9 @@ import java.util.stream.Collectors;
 @Component
 public class TagSlashCommand extends SlashCommand {
 
-    @Autowired private TagRepository tagRepository;
+    private final TagRepository tagRepository;
 
-    public TagSlashCommand() {
+    public TagSlashCommand(TagRepository tagRepository) {
         setCommandData(
                 Commands.slash("tag", "Tag commands")
                         .addSubcommands(
@@ -45,6 +44,7 @@ public class TagSlashCommand extends SlashCommand {
                         )
         );
         setEphemeral(false);
+        this.tagRepository = tagRepository;
     }
 
     @Override

@@ -22,7 +22,6 @@ import net.dv8tion.jda.api.managers.AudioManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.central.Taboo;
 import xyz.chalky.taboo.core.CommandFlag;
@@ -44,9 +43,9 @@ import static xyz.chalky.taboo.util.MiscUtil.isUrl;
 @Component
 public class PlaySlashCommand extends SlashCommand {
 
-    @Autowired private SearchHistoryRepository searchHistoryRepository;
+    private final SearchHistoryRepository searchHistoryRepository;
 
-    public PlaySlashCommand() {
+    public PlaySlashCommand(SearchHistoryRepository searchHistoryRepository) {
         setCommandData(Commands.slash("play", "Plays a song.").addOptions(
                 new OptionData(OptionType.STRING, "song", "The song to play.", true, true),
                 new OptionData(OptionType.STRING, "provider", "Provider to search in. (Ignore if link)", false)
@@ -56,6 +55,7 @@ public class PlaySlashCommand extends SlashCommand {
                         .addChoice("YouTube Music", "ytmsearch")));
         addCommandFlags(CommandFlag.MUSIC);
         setEphemeral(false);
+        this.searchHistoryRepository = searchHistoryRepository;
     }
 
     @Override

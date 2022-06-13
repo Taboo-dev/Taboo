@@ -51,7 +51,7 @@ public class InteractionCommandHandler {
         this.registeredCommands = Collections.synchronizedList(new ArrayList<>());
         this.registeredGuildCommands = new ConcurrentHashMap<>();
         this.config = Taboo.getInstance().getConfig();
-        this.context = Application.getInstance().getProvider().getApplicationContext();
+        this.context = Application.getProvider().getApplicationContext();
         this.configRepository = context.getBean(ConfigRepository.class);
     }
 
