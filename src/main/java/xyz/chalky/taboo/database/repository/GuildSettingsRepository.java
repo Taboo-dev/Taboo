@@ -7,4 +7,6 @@ import xyz.chalky.taboo.database.model.GuildSettings;
 
 @Repository
 @Component
-public interface GuildSettingsRepository extends JpaRepository<GuildSettings, Long> {}
+public interface GuildSettingsRepository extends JpaRepository<GuildSettings, Long> {
+
+}

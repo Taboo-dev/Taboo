@@ -63,13 +63,10 @@ public class InteractionCommandHandler {
     public void registerAllCommands() {
         // music commands
         registerCommand(context.getBean(PlaySlashCommand.class));
-        registerCommand(new LoopSlashCommand());
         registerCommand(new QueueSlashCommand());
         registerCommand(new NowPlayingSlashCommand());
         registerCommand(new SkipSlashCommand());
         registerCommand(new SkipToSlashCommand());
-        registerCommand(new ShuffleSlashCommand());
-        registerCommand(new StopSlashCommand());
 
         // misc commands
         registerCommand(new PingSlashCommand());

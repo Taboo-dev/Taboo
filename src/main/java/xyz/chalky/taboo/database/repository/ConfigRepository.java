@@ -7,4 +7,6 @@ import xyz.chalky.taboo.database.model.Config;
 
 @Repository
 @Component
-public interface ConfigRepository extends JpaRepository<Config, Long> {}
+public interface ConfigRepository extends JpaRepository<Config, Long> {
+
+}

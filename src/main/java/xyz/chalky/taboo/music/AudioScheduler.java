@@ -134,11 +134,18 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
             } else if (track instanceof ISRCAudioTrack isrcAudioTrack) {
                 embed.setThumbnail(isrcAudioTrack.getArtworkURL());
             }
+            String identifier = track.getIdentifier();
             channel.sendMessageEmbeds(embed.build()).setActionRow(
                         Button.secondary(String.format("music:pause:%s:%s",
-                                channelId, track.getIdentifier()), "Play/Pause"),
+                                channelId, identifier), "Play/Pause"),
                         Button.secondary(String.format("music:save:%s:%s",
-                                channelId, track.getIdentifier()), "Save to library")
+                                channelId, identifier), "Save to library"),
+                        Button.secondary(String.format("music:skip:%s:%s",
+                                channelId, identifier), "Skip"),
+                        Button.secondary(String.format("music:loop:%s:%s",
+                                channelId, identifier), "Loop"),
+                        Button.secondary(String.format("music:shuffle:%s:%s",
+                                channelId, identifier), "Shuffle")
                     ).queue();
         }
     }

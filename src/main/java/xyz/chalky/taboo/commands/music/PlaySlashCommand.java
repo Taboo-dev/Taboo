@@ -194,17 +194,16 @@ public class PlaySlashCommand extends SlashCommand {
         String value = focusedOption.getValue();
         if (focusedOption.getName().equals("song")) {
             Set<Command.Choice> choices;
+            long userId = event.getUser().getIdLong();
             if (value.isEmpty()) {
-                choices = searchHistoryRepository.findAll()
+                choices = searchHistoryRepository.findByUserId(userId)
                         .stream()
-                        .filter(history -> history.getUserId() == event.getUser().getIdLong())
                         .limit(25)
                         .map(history -> new Command.Choice(history.getName(), history.getUrl()))
                         .collect(Collectors.toSet());
             } else {
-                choices = searchHistoryRepository.findAll()
+                choices = searchHistoryRepository.findByUserId(userId)
                         .stream()
-                        .filter(history -> history.getUserId() == event.getUser().getIdLong())
                         .filter(history -> history.getName().toLowerCase().contains(value.toLowerCase()))
                         .limit(25)
                         .map(history -> new Command.Choice(history.getName(), history.getUrl()))

@@ -50,30 +50,29 @@ public class TagSlashCommand extends SlashCommand {
     @Override
     public void executeCommand(@NotNull SlashCommandInteractionEvent event) {
         String subcommandName = event.getSubcommandName();
+        long guildId = event.getGuild().getIdLong();
         switch (subcommandName) {
             case "create" -> {
                 String tagName = event.getOption("name").getAsString();
                 String tagTitle = event.getOption("title").getAsString();
                 String tagValue = event.getOption("value").getAsString();
-                tagRepository.findAll()
+                tagRepository.findByGuildId(guildId)
                         .stream()
-                        .filter(tag -> tag.getGuildId() == event.getGuild().getIdLong())
                         .filter(tag -> tag.getName().equals(tagName))
                         .findFirst()
                         .ifPresentOrElse(tag -> {
                             MessageEmbed tagAlreadyPresent = ResponseHelper.createEmbed(null, "Tag already present", Color.RED, event.getUser()).build();
                             event.getHook().sendMessageEmbeds(tagAlreadyPresent).queue();
                         }, () -> {
-                            tagRepository.save(new Tag(event.getGuild().getIdLong(), tagName, tagTitle, tagValue));
+                            tagRepository.save(new Tag(guildId, tagName, tagTitle, tagValue));
                             MessageEmbed tagSaved = ResponseHelper.createEmbed(null, "Tag saved", Color.GREEN, event.getUser()).build();
                             event.getHook().sendMessageEmbeds(tagSaved).queue();
                         });
             }
             case "delete" -> {
                 String tagName = event.getOption("name").getAsString();
-                tagRepository.findAll()
+                tagRepository.findByGuildId(guildId)
                         .stream()
-                        .filter(tag -> tag.getGuildId() == event.getGuild().getIdLong())
                         .filter(tag -> tag.getName().equals(tagName))
                         .findFirst()
                         .ifPresentOrElse(tag -> {
@@ -86,9 +85,8 @@ public class TagSlashCommand extends SlashCommand {
                         });
             }
             case "list" -> {
-                List<Tag> tags = tagRepository.findAll()
+                List<Tag> tags = tagRepository.findByGuildId(guildId)
                         .stream()
-                        .filter(tag -> tag.getGuildId() == event.getGuild().getIdLong())
                         .toList();
                 EmbedBuilder tagsList = ResponseHelper.createEmbed(null, "Tags", Color.GREEN, event.getUser());
                 tags.forEach(tag -> tagsList.addField(tag.getName(), tag.getTitle(), false));
@@ -96,9 +94,8 @@ public class TagSlashCommand extends SlashCommand {
             }
             case "get" -> {
                 String tagName = event.getOption("name").getAsString();
-                tagRepository.findAll()
+                tagRepository.findByGuildId(guildId)
                         .stream()
-                        .filter(tag -> tag.getGuildId() == event.getGuild().getIdLong())
                         .filter(tag -> tag.getName().equals(tagName))
                         .findFirst()
                         .ifPresentOrElse(tag -> {
@@ -115,16 +112,19 @@ public class TagSlashCommand extends SlashCommand {
     @Override
     public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event) {
         AutoCompleteQuery focusedOption = event.getFocusedOption();
+        long guildId = event.getGuild().getIdLong();
         String value = focusedOption.getValue();
         if (focusedOption.getName().equals("name")) {
             Set<Command.Choice> choices;
             if (value.isEmpty()) {
-                choices = tagRepository.findAll().stream()
+                choices = tagRepository.findByGuildId(guildId)
+                        .stream()
                         .limit(25)
                         .map(tag -> new Command.Choice(tag.getName(), tag.getName()))
                         .collect(Collectors.toSet());
             } else {
-                choices = tagRepository.findAll().stream()
+                choices = tagRepository.findByGuildId(guildId)
+                        .stream()
                         .limit(25)
                         .filter(tag -> tag.getTitle().contains(value.toLowerCase()))
                         .map(tag -> new Command.Choice(tag.getName(), tag.getName()))
