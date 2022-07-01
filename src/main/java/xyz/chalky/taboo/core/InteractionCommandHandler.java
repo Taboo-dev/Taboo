@@ -41,12 +41,12 @@ public class InteractionCommandHandler {
     private final ApplicationContext context;
     private final ConfigRepository configRepository;
 
-    public InteractionCommandHandler() {
+    public InteractionCommandHandler(ConfigRepository configRepository) {
         this.registeredCommands = Collections.synchronizedList(new ArrayList<>());
         this.registeredGuildCommands = new ConcurrentHashMap<>();
         this.config = Taboo.getInstance().getConfig();
         this.context = Application.getProvider().getApplicationContext();
-        this.configRepository = context.getBean(ConfigRepository.class);
+        this.configRepository = configRepository;
     }
 
     public void initialize() {

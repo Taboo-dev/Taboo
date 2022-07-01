@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.config.TabooConfigProperties;
 import xyz.chalky.taboo.core.CommandHandler;
@@ -73,15 +74,17 @@ public class Taboo implements CommandLineRunner {
     private AudioManager audioManager;
     private JDAWebhookClient webhookClient;
     private final TabooConfigProperties config;
+    private final ApplicationContext context;
 
 
     Taboo() {
         instance = this;
-        this.config = Application.getProvider().getApplicationContext().getBean(TabooConfigProperties.class);
+        this.context = Application.getProvider().getApplicationContext();
+        this.config = context.getBean(TabooConfigProperties.class);
     }
 
-    private void build() throws LoginException {
-        this.interactionCommandHandler = new InteractionCommandHandler();
+    private void init() throws LoginException {
+        this.interactionCommandHandler = context.getBean(InteractionCommandHandler.class);
         this.commandHandler = new CommandHandler();
         this.isDebug = config.isDebugState();
         this.eventWaiter = new EventWaiter();
@@ -114,7 +117,7 @@ public class Taboo implements CommandLineRunner {
     public void run(String... args) {
         try {
             Taboo taboo = new Taboo();
-            taboo.build();
+            taboo.init();
         } catch (Exception e) {
             if (e instanceof LoginException) {
                 Taboo.getLogger().error("Failed to login to Discord!", e);
