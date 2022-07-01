@@ -3,6 +3,7 @@ package xyz.chalky.taboo.central;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.event.ContextClosedEvent;
@@ -11,6 +12,7 @@ import xyz.chalky.taboo.commands.misc.ShutdownCommand;
 import xyz.chalky.taboo.util.ApplicationContextProvider;
 
 @SpringBootApplication
+@EnableConfigurationProperties
 @ComponentScan("xyz.chalky.taboo")
 @EntityScan("xyz.chalky.taboo.database.model")
 @EnableJpaRepositories("xyz.chalky.taboo.database.repository")

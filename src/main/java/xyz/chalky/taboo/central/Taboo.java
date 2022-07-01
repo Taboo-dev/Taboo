@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import xyz.chalky.taboo.config.TabooConfigProperties;
 import xyz.chalky.taboo.core.CommandHandler;
 import xyz.chalky.taboo.core.GenericCommand;
 import xyz.chalky.taboo.core.InteractionCommandHandler;
@@ -71,12 +72,12 @@ public class Taboo implements CommandLineRunner {
     private JdaLavalink lavalink;
     private AudioManager audioManager;
     private JDAWebhookClient webhookClient;
-    private final TabooConfig config;
+    private final TabooConfigProperties config;
 
 
     Taboo() {
         instance = this;
-        this.config = Application.getProvider().getApplicationContext().getBean(TabooConfig.class);
+        this.config = Application.getProvider().getApplicationContext().getBean(TabooConfigProperties.class);
     }
 
     private void build() throws LoginException {
@@ -156,7 +157,7 @@ public class Taboo implements CommandLineRunner {
         return commandHandler;
     }
 
-    public TabooConfig getConfig() {
+    public TabooConfigProperties getConfig() {
         return config;
     }
 

@@ -7,8 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.chalky.taboo.central.Taboo;
-import xyz.chalky.taboo.central.TabooConfig;
 import xyz.chalky.taboo.commands.misc.ShutdownCommand;
+import xyz.chalky.taboo.config.TabooConfigProperties;
 
 import java.awt.*;
 import java.util.List;
@@ -19,7 +19,7 @@ public class CommandHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandHandler.class);
     private final ConcurrentMap<String, Command> registeredCommands = new ConcurrentSkipListMap<>(String.CASE_INSENSITIVE_ORDER);
-    private TabooConfig config;
+    private TabooConfigProperties config;
 
     public CommandHandler() {
         this.config = Taboo.getInstance().getConfig();

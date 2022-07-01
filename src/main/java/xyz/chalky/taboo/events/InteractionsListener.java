@@ -7,14 +7,14 @@ import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEven
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import xyz.chalky.taboo.central.Taboo;
-import xyz.chalky.taboo.central.TabooConfig;
+import xyz.chalky.taboo.config.TabooConfigProperties;
 import xyz.chalky.taboo.util.ResponseHelper;
 
 import java.awt.*;
 
 public class InteractionsListener extends ListenerAdapter {
 
-    private final TabooConfig config;
+    private final TabooConfigProperties config;
 
     public InteractionsListener() {
         this.config = Taboo.getInstance().getConfig();

@@ -30,6 +30,8 @@ dependencies {
     implementation("org.postgresql:postgresql:42.3.4")
     implementation("com.google.guava:guava:31.1-jre")
     implementation("com.github.minndevelopment:emoji-java:master-SNAPSHOT")
+    implementation("io.sentry:sentry-spring-boot-starter:6.1.2")
+    implementation("io.sentry:sentry-logback:6.1.2")
     implementation("org.springframework.boot:spring-boot-starter-web:2.7.0")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa:2.7.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:2.7.0")

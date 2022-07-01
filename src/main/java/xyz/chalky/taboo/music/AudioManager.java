@@ -8,7 +8,7 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import lavalink.client.LavalinkUtil;
 import org.jetbrains.annotations.NotNull;
 import xyz.chalky.taboo.central.Taboo;
-import xyz.chalky.taboo.central.TabooConfig;
+import xyz.chalky.taboo.config.TabooConfigProperties;
 
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +19,7 @@ public class AudioManager {
     private final Map<Long, GuildAudioPlayer> audioPlayers;
 
     public AudioManager() {
-        TabooConfig config = Taboo.getInstance().getConfig();
+        TabooConfigProperties config = Taboo.getInstance().getConfig();
         this.audioPlayers = new ConcurrentHashMap<>();
         AudioPlayerManager playerManager = LavalinkUtil.getPlayerManager();
         SpotifyConfig spotifyConfig = new SpotifyConfig();

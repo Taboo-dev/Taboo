@@ -1,13 +1,11 @@
-package xyz.chalky.taboo.central;
+package xyz.chalky.taboo.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties
 @ConfigurationProperties("taboo")
-public class TabooConfig {
+public class TabooConfigProperties {
 
     private String token;
     private boolean debugState;
@@ -82,7 +80,7 @@ public class TabooConfig {
         this.prefix = prefix;
     }
 
-    public class Lavalink {
+    public static class Lavalink {
 
         private String hostUrl;
         private String password;
@@ -105,7 +103,7 @@ public class TabooConfig {
 
     }
 
-    public class Spotify {
+    public static class Spotify {
 
         private String id;
         private String secret;

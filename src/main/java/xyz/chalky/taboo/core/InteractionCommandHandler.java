@@ -17,13 +17,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.central.Application;
 import xyz.chalky.taboo.central.Taboo;
-import xyz.chalky.taboo.central.TabooConfig;
 import xyz.chalky.taboo.commands.database.ConfigSlashCommand;
 import xyz.chalky.taboo.commands.database.TagSlashCommand;
 import xyz.chalky.taboo.commands.misc.BookmarkContextCommand;
 import xyz.chalky.taboo.commands.misc.PingSlashCommand;
 import xyz.chalky.taboo.commands.misc.ShardsSlashCommand;
 import xyz.chalky.taboo.commands.music.*;
+import xyz.chalky.taboo.config.TabooConfigProperties;
 import xyz.chalky.taboo.database.model.Config;
 import xyz.chalky.taboo.database.repository.ConfigRepository;
 import xyz.chalky.taboo.util.ResponseHelper;
@@ -43,7 +43,7 @@ public class InteractionCommandHandler {
     private final List<GenericCommand> registeredCommands;
     private final ConcurrentHashMap<Long, List<GenericCommand>> registeredGuildCommands;
     private CommandListUpdateAction commandUpdateAction;
-    private final TabooConfig config;
+    private final TabooConfigProperties config;
     private final ApplicationContext context;
     private final ConfigRepository configRepository;
 

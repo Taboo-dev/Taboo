@@ -86,12 +86,12 @@ public class GuildJoinLeaveListener extends ListenerAdapter {
         if (event.getComponentId().equals(String.format("%s:configure", id))) {
             TextInput log = TextInput.create(String.format("%s:configure:modal:log", id), "Log Channel", TextInputStyle.SHORT)
                     .setPlaceholder("Enter your Log Channel ID")
-                    .setRequired(true)
+                    .setRequired(false)
                     .setRequiredRange(17, 20)
                     .build();
             TextInput music = TextInput.create(String.format("%s:configure:modal:music", id), "Music Channel", TextInputStyle.SHORT)
                     .setPlaceholder("Enter your Music Channel ID")
-                    .setRequired(true)
+                    .setRequired(false)
                     .setRequiredRange(17, 20)
                     .build();
             Modal modal = Modal.create(String.format("%s:configure:modal", id), "Configure Your Server")
@@ -106,8 +106,13 @@ public class GuildJoinLeaveListener extends ListenerAdapter {
         if (!event.isFromGuild()) return;
         Guild guild = event.getGuild();
         String id = guild.getId();
-        long log = Long.parseLong(event.getValue(String.format("%s:configure:modal:log", id)).getAsString());
-        long music = Long.parseLong(event.getValue(String.format("%s:configure:modal:music", id)).getAsString());
+        boolean logFilled, musicFilled;
+        String logInput = event.getValue(String.format("%s:configure:modal:log", id)).getAsString();
+        logFilled = !logInput.isEmpty();
+        String musicInput = event.getValue(String.format("%s:configure:modal:music", id)).getAsString();
+        musicFilled = !musicInput.isEmpty();
+        long log = Long.parseLong(logInput);
+        long music = Long.parseLong(musicInput);
         TextChannel logChannel = guild.getTextChannelById(log);
         TextChannel musicChannel = guild.getTextChannelById(music);
         boolean logCheck = checkChannel(guild, log);
@@ -131,7 +136,7 @@ public class GuildJoinLeaveListener extends ListenerAdapter {
                 message.editMessageEmbeds(embed).queue();
             });
         }
-        guildSettingsRepository.save(new GuildSettings( guild.getIdLong(), true, true, messageId));
+        guildSettingsRepository.save(new GuildSettings(guild.getIdLong(), logFilled, musicFilled, messageId));
         configRepository.save(new Config(guild.getIdLong(), log, music));
         String content = String.format("%s Your server has been configured!", TICK_EMOJI);
         event.replyEmbeds(
