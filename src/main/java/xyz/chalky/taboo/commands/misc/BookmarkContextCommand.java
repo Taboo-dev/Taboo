@@ -8,11 +8,13 @@ import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionE
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.core.MessageContextCommand;
 
 import java.awt.*;
 import java.time.Instant;
 
+@Component
 public class BookmarkContextCommand extends MessageContextCommand {
 
     public BookmarkContextCommand() {

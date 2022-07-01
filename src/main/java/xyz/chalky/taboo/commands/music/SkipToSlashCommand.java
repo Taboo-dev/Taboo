@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.central.Taboo;
 import xyz.chalky.taboo.core.CommandFlag;
 import xyz.chalky.taboo.core.SlashCommand;
@@ -17,6 +18,7 @@ import java.awt.*;
 import java.time.Instant;
 import java.util.concurrent.BlockingQueue;
 
+@Component
 public class SkipToSlashCommand extends SlashCommand {
 
     public SkipToSlashCommand() {

@@ -17,12 +17,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.central.Application;
 import xyz.chalky.taboo.central.Taboo;
-import xyz.chalky.taboo.commands.database.ConfigSlashCommand;
-import xyz.chalky.taboo.commands.database.TagSlashCommand;
-import xyz.chalky.taboo.commands.misc.BookmarkContextCommand;
-import xyz.chalky.taboo.commands.misc.PingSlashCommand;
-import xyz.chalky.taboo.commands.misc.ShardsSlashCommand;
-import xyz.chalky.taboo.commands.music.*;
 import xyz.chalky.taboo.config.TabooConfigProperties;
 import xyz.chalky.taboo.database.model.Config;
 import xyz.chalky.taboo.database.repository.ConfigRepository;
@@ -57,29 +51,11 @@ public class InteractionCommandHandler {
 
     public void initialize() {
         commandUpdateAction = Taboo.getInstance().getShardManager().getShards().get(0).updateCommands();
-        registerAllCommands();
+        registerAllCommands(this.context);
     }
 
-    public void registerAllCommands() {
-        // music commands
-        registerCommand(context.getBean(PlaySlashCommand.class));
-        registerCommand(new QueueSlashCommand());
-        registerCommand(new NowPlayingSlashCommand());
-        registerCommand(new SkipSlashCommand());
-        registerCommand(new SkipToSlashCommand());
-
-        // misc commands
-        registerCommand(new PingSlashCommand());
-        registerCommand(new ShardsSlashCommand());
-
-        // moderation commands
-        /*registerCommand(new BanSlashCommand());
-        registerCommand(new KickSlashCommand());*/
-        registerCommand(context.getBean(ConfigSlashCommand.class));
-        registerCommand(context.getBean(TagSlashCommand.class));
-
-        // context commands
-        registerCommand(new BookmarkContextCommand());
+    public void registerAllCommands(@NotNull ApplicationContext context) {
+        context.getBeansOfType(GenericCommand.class).values().forEach(this::registerCommand);
     }
 
     public void updateCommands(Consumer<List<Command>> success, Consumer<Throwable> failure) {
