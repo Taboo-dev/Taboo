@@ -58,11 +58,9 @@ public class GuildJoinLeaveListener extends ListenerAdapter {
                 .setColor(0x9F90CF)
                 .setTimestamp(Instant.now())
                 .build();
-        String botInvUrl = "https://discord.com/api/oauth2/authorize?client_id=963732351937044480&permissions=8&scope=bot%20applications.commands";
-        String supportInvUrl = "https://discord.gg/WnaDwug5tc";
         defaultChannel.sendMessageEmbeds(welcomeEmbed).setActionRow(
-                Button.link(supportInvUrl, "Support Server"),
-                Button.link(botInvUrl, "Invite Me")
+                Button.link(SUPPORT_SERVER_URL, "Support Server"),
+                Button.link(BOT_INVITE_URL, "Invite Me")
         ).queue();
         EmbedBuilder configEmbed = new EmbedBuilder()
                 .setTitle("Configure Your Server")

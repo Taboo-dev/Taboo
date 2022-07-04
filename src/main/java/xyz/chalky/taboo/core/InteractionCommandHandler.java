@@ -1,5 +1,7 @@
 package xyz.chalky.taboo.core;
 
+import io.sentry.Breadcrumb;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -8,6 +10,8 @@ import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionE
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+
+import static xyz.chalky.taboo.util.Constants.SUPPORT_SERVER_URL;
 
 @Component
 public class InteractionCommandHandler {
@@ -258,12 +264,14 @@ public class InteractionCommandHandler {
                 finalCommand.executeCommand(event);
             } catch (Exception e) {
                 LOGGER.warn("Error while executing command", e);
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command.",
-                        Color.RED, null);
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command. " +
+                                "This has automatically been reported to the developer.", Color.RED, null);
+                ActionRow row = ActionRow.of(Button.link(SUPPORT_SERVER_URL, "Support Server"));
+                Sentry.captureException(e, scope -> scope.addBreadcrumb(Breadcrumb.user("MessageContextCommand", "handleMessageContextCommand")));
                 if (event.isAcknowledged()) {
-                    event.getHook().sendMessageEmbeds(embed.build()).setEphemeral(true).queue();
+                    event.getHook().sendMessageEmbeds(embed.build()).addActionRows(row).setEphemeral(true).queue();
                 } else {
-                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+                    event.replyEmbeds(embed.build()).addActionRows(row).setEphemeral(true).queue();
                 }
             }
         };
@@ -376,12 +384,14 @@ public class InteractionCommandHandler {
                 finalCommand.executeCommand(event);
             } catch (Exception e) {
                 LOGGER.warn("An error occurred while executing a user context command.", e);
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command.",
-                        Color.RED, null);
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command. " +
+                        "This has automatically been reported to the developer.", Color.RED, null);
+                ActionRow row = ActionRow.of(Button.link(SUPPORT_SERVER_URL, "Support Server"));
+                Sentry.captureException(e, scope -> scope.addBreadcrumb(Breadcrumb.user("UserContextCommand", "handleUserContextCommand")));
                 if (event.isAcknowledged()) {
-                    event.getHook().sendMessageEmbeds(embed.build()).setEphemeral(true).queue();
+                    event.getHook().sendMessageEmbeds(embed.build()).addActionRows(row).setEphemeral(true).queue();
                 } else {
-                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+                    event.replyEmbeds(embed.build()).addActionRows(row).setEphemeral(true).queue();
                 }
             }
         };
@@ -493,12 +503,14 @@ public class InteractionCommandHandler {
                 }
             } catch (Exception e) {
                 LOGGER.warn("Error while executing slash command", e);
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command.",
-                        Color.RED, null);
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command. " +
+                        "This has automatically been reported to the developer.", Color.RED, null);
+                ActionRow row = ActionRow.of(Button.link(SUPPORT_SERVER_URL, "Support Server"));
+                Sentry.captureException(e, scope -> scope.addBreadcrumb(Breadcrumb.user("SlashCommand", "handleSlashCommand")));
                 if (event.isAcknowledged()) {
-                    event.getHook().sendMessageEmbeds(embed.build()).setEphemeral(true).queue();
+                    event.getHook().sendMessageEmbeds(embed.build()).addActionRows(row).setEphemeral(true).queue();
                 } else {
-                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+                    event.replyEmbeds(embed.build()).addActionRows(row).setEphemeral(true).queue();
                 }
             }
         };
