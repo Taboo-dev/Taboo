@@ -132,8 +132,7 @@ public class PlaySlashCommand extends SlashCommand {
                     AudioTrackInfo info = track.getInfo();
                     MessageEmbed embed = new EmbedBuilder()
                             .setTitle("Added to queue:")
-                            .setDescription(String.format("[%s](%s) by %s", info.title,
-                                    info.uri, info.author))
+                            .setDescription(String.format("[%s](%s) by %s", info.title, info.uri, info.author))
                             .setColor(0x9F90CF)
                             .setTimestamp(Instant.now())
                             .build();
