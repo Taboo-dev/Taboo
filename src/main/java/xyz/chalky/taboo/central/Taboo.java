@@ -1,5 +1,7 @@
-package xyz.chalky.taboo;
+package xyz.chalky.taboo.central;
 
+import club.minnced.discord.webhook.WebhookClientBuilder;
+import club.minnced.discord.webhook.external.JDAWebhookClient;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import lavalink.client.io.jda.JdaLavalink;
@@ -13,30 +15,33 @@ import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.chalky.taboo.backend.Backend;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+import xyz.chalky.taboo.config.TabooConfigProperties;
+import xyz.chalky.taboo.core.CommandHandler;
 import xyz.chalky.taboo.core.GenericCommand;
 import xyz.chalky.taboo.core.InteractionCommandHandler;
-import xyz.chalky.taboo.database.DatabaseManager;
 import xyz.chalky.taboo.events.EventManager;
 import xyz.chalky.taboo.music.AudioManager;
-import xyz.chalky.taboo.util.PropertiesManager;
 
-import java.io.FileInputStream;
+import javax.security.auth.login.LoginException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class Taboo {
+@Component
+public class Taboo implements CommandLineRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Taboo.class);
     private static Taboo instance;
-    private final ShardManager shardManager;
-    private final boolean isDebug;
+    private ShardManager shardManager;
+    private boolean isDebug;
 
     private final ExecutorService commandExecutor =
             Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
@@ -60,30 +65,33 @@ public class Taboo {
                         LOGGER.error("An uncaught error occurred on the executor!", throwable);
                     }).build());
 
-    private final InteractionCommandHandler interactionCommandHandler;
-    private final EventWaiter eventWaiter;
-    private final JdaLavalink lavalink;
-    private final AudioManager audioManager;
-    private final DatabaseManager databaseManager;
-    private final Backend backend;
 
-    Taboo() throws Exception {
+    private InteractionCommandHandler interactionCommandHandler;
+    private CommandHandler commandHandler;
+    private EventManager eventManager;
+    private EventWaiter eventWaiter;
+    private JdaLavalink lavalink;
+    private AudioManager audioManager;
+    private JDAWebhookClient webhookClient;
+    private final TabooConfigProperties config;
+    private final ApplicationContext context;
+
+
+    Taboo() {
         instance = this;
-        Properties properties = new Properties();
-        properties.load(new FileInputStream("config.properties"));
-        PropertiesManager propertiesManager = new PropertiesManager(properties);
-        interactionCommandHandler = new InteractionCommandHandler(propertiesManager);
-        isDebug = propertiesManager.getDebugState();
-        eventWaiter = new EventWaiter();
-        lavalink = new JdaLavalink(null, 1, null);
-        audioManager = new AudioManager(propertiesManager);
-        EventManager eventManager = new EventManager(propertiesManager);
-        eventManager.init();
-        databaseManager = new DatabaseManager(propertiesManager);
-        databaseManager.startDatabase();
-        backend = new Backend();
-        backend.init();
-        shardManager = DefaultShardManagerBuilder.createDefault(propertiesManager.getToken())
+        this.context = Application.getProvider().getApplicationContext();
+        this.config = context.getBean(TabooConfigProperties.class);
+    }
+
+    private void init() throws LoginException {
+        this.interactionCommandHandler = context.getBean(InteractionCommandHandler.class);
+        this.commandHandler = new CommandHandler();
+        this.isDebug = config.isDebugState();
+        this.eventWaiter = new EventWaiter();
+        this.lavalink = new JdaLavalink(null, 1, null);
+        this.audioManager = new AudioManager();
+        this.eventManager = new EventManager();
+        this.shardManager = DefaultShardManagerBuilder.createDefault(config.getToken())
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.GUILD_MEMBERS)
                 .enableCache(CacheFlag.VOICE_STATE)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
@@ -94,6 +102,30 @@ public class Taboo {
                 .setEventManagerProvider(i -> eventManager)
                 .addEventListeners(lavalink)
                 .build();
+        this.webhookClient = new WebhookClientBuilder(config.getWebhookUrl())
+                .setThreadFactory(r -> {
+                    Thread thread = new Thread(r);
+                    thread.setName("Taboo Webhook Thread");
+                    thread.setDaemon(true);
+                    return thread;
+                }).setWait(true)
+                .buildJDA();
+        eventManager.init();
+    }
+
+    @Override
+    public void run(String... args) {
+        try {
+            Taboo taboo = new Taboo();
+            taboo.init();
+        } catch (Exception e) {
+            if (e instanceof LoginException) {
+                Taboo.getLogger().error("Failed to login to Discord!", e);
+                // TODO: music buttons, music bookmark and autocomplete, play pause embed ses
+            } else {
+                Taboo.getLogger().error("Failed to start Taboo!", e);
+            }
+        }
     }
 
     public static Taboo getInstance() {
@@ -124,6 +156,14 @@ public class Taboo {
         return interactionCommandHandler;
     }
 
+    public CommandHandler getCommandHandler() {
+        return commandHandler;
+    }
+
+    public TabooConfigProperties getConfig() {
+        return config;
+    }
+
     public EventWaiter getEventWaiter() {
         return eventWaiter;
     }
@@ -136,19 +176,19 @@ public class Taboo {
         return audioManager;
     }
 
-    public DatabaseManager getDatabaseManager() {
-        return databaseManager;
+    public JDAWebhookClient getWebhookClient() {
+        return webhookClient;
     }
 
     public static Logger getLogger() {
         return LOGGER;
     }
 
-    public void initCommandCheck(PropertiesManager propertiesManager) {
+    public void initCommandCheck() {
         LOGGER.info("Checking for outdated command cache...");
         getCommandExecutor().submit(() -> {
             if (getInstance().isDebug()) {
-                Guild guild = getInstance().getShardManager().getGuildById(propertiesManager.getGuildId());
+                Guild guild = getInstance().getShardManager().getGuildById(config.getGuildId());
                 if (guild == null) {
                     LOGGER.error("Debug guild does not exist!");
                     return;
@@ -172,7 +212,7 @@ public class Taboo {
         });
     }
 
-    private static void handleCommandUpdates(Collection<? extends Command> discordCommands, Collection<? extends GenericCommand> localCommands) {
+    private static void handleCommandUpdates(@NotNull Collection<? extends Command> discordCommands, @NotNull Collection<? extends GenericCommand> localCommands) {
         boolean commandRemovedOrAdded = localCommands.size() != discordCommands.size();
         if (commandRemovedOrAdded) {
             if (localCommands.size() > discordCommands.size()) {

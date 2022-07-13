@@ -6,8 +6,9 @@ import net.dv8tion.jda.api.hooks.IEventManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.chalky.taboo.Taboo;
-import xyz.chalky.taboo.util.PropertiesManager;
+import org.springframework.context.ApplicationContext;
+import xyz.chalky.taboo.central.Application;
+import xyz.chalky.taboo.central.Taboo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,12 +16,12 @@ import java.util.List;
 
 public class EventManager implements IEventManager {
 
-    private final PropertiesManager propertiesManager;
     private final ArrayList<EventListener> listeners = new ArrayList<>();
     private final Logger LOGGER = LoggerFactory.getLogger(EventManager.class);
+    private final ApplicationContext context;
 
-    public EventManager(PropertiesManager propertiesManager) {
-        this.propertiesManager = propertiesManager;
+    public EventManager() {
+        this.context = Application.getProvider().getApplicationContext();
     }
 
     public void init() {
@@ -28,14 +29,15 @@ public class EventManager implements IEventManager {
     }
 
     private void registerEvents() {
-        register(new ReadyHandler(propertiesManager));
-        register(new InteractionsListener(propertiesManager));
-        register(new MessageListener());
-        register(new JoinLeaveListener());
-        register(new GuildJoinListener());
-        register(new GuildEvents());
+        register(new ReadyHandler());
+        register(new InteractionsListener());
+        register(new CommandsListener());
+        register(context.getBean(MessageListener.class));
+        register(context.getBean(JoinLeaveListener.class));
+        register(context.getBean(GuildJoinLeaveListener.class));
+        register(context.getBean(GuildEvents.class));
         register(new VoiceListener());
-        register(new MusicEvents());
+        register(context.getBean(MusicEvents.class));
         register(Taboo.getInstance().getEventWaiter());
     }
 

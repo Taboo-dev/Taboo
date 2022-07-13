@@ -1,3 +1,4 @@
+/*
 package xyz.chalky.taboo.commands.moderation
 
 import dev.minn.jda.ktx.interactions.components.getOption
@@ -78,4 +79,4 @@ class KickSlashCommand : SlashCommand() {
         ).setEphemeral(true).queue()
     }
 
-}
+}*/

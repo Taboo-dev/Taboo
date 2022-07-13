@@ -1,5 +1,7 @@
 package xyz.chalky.taboo.core;
 
+import io.sentry.Breadcrumb;
+import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -8,20 +10,20 @@ import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionE
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.chalky.taboo.Taboo;
-import xyz.chalky.taboo.commands.misc.BookmarkContextCommand;
-import xyz.chalky.taboo.commands.misc.ConfigSlashCommand;
-import xyz.chalky.taboo.commands.misc.PingSlashCommand;
-import xyz.chalky.taboo.commands.misc.ShardsSlashCommand;
-import xyz.chalky.taboo.commands.moderation.BanSlashCommand;
-import xyz.chalky.taboo.commands.moderation.KickSlashCommand;
-import xyz.chalky.taboo.commands.music.*;
-import xyz.chalky.taboo.database.DatabaseHelperKt;
-import xyz.chalky.taboo.util.PropertiesManager;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+import xyz.chalky.taboo.central.Application;
+import xyz.chalky.taboo.central.Taboo;
+import xyz.chalky.taboo.config.TabooConfigProperties;
+import xyz.chalky.taboo.database.model.Config;
+import xyz.chalky.taboo.database.repository.ConfigRepository;
 import xyz.chalky.taboo.util.ResponseHelper;
 
 import java.awt.*;
@@ -32,47 +34,34 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+import static xyz.chalky.taboo.util.Constants.SUPPORT_SERVER_URL;
+
+@Component
 public class InteractionCommandHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InteractionCommandHandler.class);
     private final List<GenericCommand> registeredCommands;
     private final ConcurrentHashMap<Long, List<GenericCommand>> registeredGuildCommands;
     private CommandListUpdateAction commandUpdateAction;
-    private final PropertiesManager propertiesManager;
+    private final TabooConfigProperties config;
+    private final ApplicationContext context;
+    private final ConfigRepository configRepository;
 
-    public InteractionCommandHandler(PropertiesManager propertiesManager) {
-        this.propertiesManager = propertiesManager;
+    public InteractionCommandHandler(ConfigRepository configRepository) {
         this.registeredCommands = Collections.synchronizedList(new ArrayList<>());
         this.registeredGuildCommands = new ConcurrentHashMap<>();
+        this.config = Taboo.getInstance().getConfig();
+        this.context = Application.getProvider().getApplicationContext();
+        this.configRepository = configRepository;
     }
 
     public void initialize() {
         commandUpdateAction = Taboo.getInstance().getShardManager().getShards().get(0).updateCommands();
-        registerAllCommands();
+        registerAllCommands(this.context);
     }
 
-    public void registerAllCommands() {
-        // music commands
-        registerCommand(new PlaySlashCommand());
-        registerCommand(new LoopSlashCommand());
-        registerCommand(new QueueSlashCommand());
-        registerCommand(new NowPlayingSlashCommand());
-        registerCommand(new SkipSlashCommand());
-        registerCommand(new SkipToSlashCommand());
-        registerCommand(new ShuffleSlashCommand());
-        registerCommand(new StopSlashCommand());
-
-        // misc commands
-        registerCommand(new PingSlashCommand());
-        registerCommand(new ShardsSlashCommand());
-
-        // moderation commands
-        registerCommand(new BanSlashCommand());
-        registerCommand(new KickSlashCommand());
-        registerCommand(new ConfigSlashCommand());
-
-        // context commands
-        registerCommand(new BookmarkContextCommand());
+    public void registerAllCommands(@NotNull ApplicationContext context) {
+        context.getBeansOfType(GenericCommand.class).values().forEach(this::registerCommand);
     }
 
     public void updateCommands(Consumer<List<Command>> success, Consumer<Throwable> failure) {
@@ -92,9 +81,9 @@ public class InteractionCommandHandler {
                 if (slashCommands.size() > 0) guildCommandUpdateAction.queue();
             }
         } else {
-            List<GenericCommand> commands = registeredGuildCommands.get(propertiesManager.getGuildId());
+            List<GenericCommand> commands = registeredGuildCommands.get(config.getGuildId());
             if (commands != null && !commands.isEmpty()) {
-                Guild guild = Taboo.getInstance().getShardManager().getGuildById(propertiesManager.getGuildId());
+                Guild guild = Taboo.getInstance().getShardManager().getGuildById(config.getGuildId());
                 if (guild == null) return;
                 CommandListUpdateAction commandListUpdateAction = guild.updateCommands();
                 for (GenericCommand command : commands)
@@ -104,7 +93,7 @@ public class InteractionCommandHandler {
         }
     }
 
-    private void registerCommand(GenericCommand command) {
+    private void registerCommand(@NotNull GenericCommand command) {
         if (!command.isGlobal() && !Taboo.getInstance().isDebug()) {
             if (command.getEnabledGuilds() == null || command.getEnabledGuilds().isEmpty()) return;
             for (Long guildId : command.getEnabledGuilds()) {
@@ -118,12 +107,12 @@ public class InteractionCommandHandler {
             return;
         }
         if (Taboo.getInstance().isDebug()) {
-            Guild guild = Taboo.getInstance().getShardManager().getGuildById(propertiesManager.getGuildId());
+            Guild guild = Taboo.getInstance().getShardManager().getGuildById(config.getGuildId());
             if (guild != null) {
-                List<GenericCommand> alreadyRegistered = registeredGuildCommands.containsKey(propertiesManager.getGuildId()) ?
-                        registeredGuildCommands.get(propertiesManager.getGuildId()) : new ArrayList<>();
+                List<GenericCommand> alreadyRegistered = registeredGuildCommands.containsKey(config.getGuildId()) ?
+                        registeredGuildCommands.get(config.getGuildId()) : new ArrayList<>();
                 alreadyRegistered.add(command);
-                registeredGuildCommands.put(propertiesManager.getGuildId(), alreadyRegistered);
+                registeredGuildCommands.put(config.getGuildId(), alreadyRegistered);
             }
             return;
         }
@@ -131,7 +120,7 @@ public class InteractionCommandHandler {
         registeredCommands.add(command);
     }
 
-    public void handleAutoComplete(CommandAutoCompleteInteractionEvent event) {
+    public void handleAutoComplete(@NotNull CommandAutoCompleteInteractionEvent event) {
         if (event.getGuild() == null) return;
         Runnable r = () -> {
             try {
@@ -172,7 +161,7 @@ public class InteractionCommandHandler {
         Taboo.getInstance().getCommandExecutor().execute(r);
     }
 
-    public void handleMessageContextCommand(MessageContextInteractionEvent event) {
+    public void handleMessageContextCommand(@NotNull MessageContextInteractionEvent event) {
         if (!event.isFromGuild()) return;
         Guild guild = event.getGuild();
         Member member = event.getMember();
@@ -214,7 +203,7 @@ public class InteractionCommandHandler {
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
-            Long musicChannelId = DatabaseHelperKt.getMusicChannelId(guild);
+            Long musicChannelId = configRepository.findById(guild.getIdLong()).map(Config::getMusicChannelId).orElse(null);
             if (musicChannelId == null) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
                         Color.RED, null);
@@ -247,7 +236,7 @@ public class InteractionCommandHandler {
         }
         if (command.getCommandFlags().contains(CommandFlag.DEVELOPER_ONLY)) {
             long idLong = event.getUser().getIdLong();
-            if (idLong != propertiesManager.getOwnerId()) {
+            if (idLong != config.getOwnerId()) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is only available for the developer.",
                         Color.RED, null);
                 event.replyEmbeds(embed.build()).setEphemeral(true).queue();
@@ -275,19 +264,21 @@ public class InteractionCommandHandler {
                 finalCommand.executeCommand(event);
             } catch (Exception e) {
                 LOGGER.warn("Error while executing command", e);
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command.",
-                        Color.RED, null);
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command. " +
+                                "This has automatically been reported to the developer.", Color.RED, null);
+                ActionRow row = ActionRow.of(Button.link(SUPPORT_SERVER_URL, "Support Server"));
+                Sentry.captureException(e, scope -> scope.addBreadcrumb(Breadcrumb.user("MessageContextCommand", "handleMessageContextCommand")));
                 if (event.isAcknowledged()) {
-                    event.getHook().sendMessageEmbeds(embed.build()).setEphemeral(true).queue();
+                    event.getHook().sendMessageEmbeds(embed.build()).addActionRows(row).setEphemeral(true).queue();
                 } else {
-                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+                    event.replyEmbeds(embed.build()).addActionRows(row).setEphemeral(true).queue();
                 }
             }
         };
         Taboo.getInstance().getCommandExecutor().submit(r);
     }
 
-    public void handleUserContextCommand(UserContextInteractionEvent event) {
+    public void handleUserContextCommand(@NotNull UserContextInteractionEvent event) {
         if (!event.isFromGuild()) return;
         Guild guild = event.getGuild();
         Member member = event.getMember();
@@ -332,7 +323,7 @@ public class InteractionCommandHandler {
             return;
         }
         if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
-            Long musicChannelId = DatabaseHelperKt.getMusicChannelId(guild);
+            Long musicChannelId = configRepository.findById(guild.getIdLong()).map(Config::getMusicChannelId).orElse(null);
             if (musicChannelId == null) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
                         Color.RED, null);
@@ -365,7 +356,7 @@ public class InteractionCommandHandler {
         }
         if (command.getCommandFlags().contains(CommandFlag.DEVELOPER_ONLY)) {
             long idLong = event.getUser().getIdLong();
-            if (idLong != propertiesManager.getOwnerId()) {
+            if (idLong != config.getOwnerId()) {
                 EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is only available for the developer.",
                         Color.RED, null);
                 event.replyEmbeds(embed.build()).setEphemeral(true).queue();
@@ -393,12 +384,14 @@ public class InteractionCommandHandler {
                 finalCommand.executeCommand(event);
             } catch (Exception e) {
                 LOGGER.warn("An error occurred while executing a user context command.", e);
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command.",
-                        Color.RED, null);
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command. " +
+                        "This has automatically been reported to the developer.", Color.RED, null);
+                ActionRow row = ActionRow.of(Button.link(SUPPORT_SERVER_URL, "Support Server"));
+                Sentry.captureException(e, scope -> scope.addBreadcrumb(Breadcrumb.user("UserContextCommand", "handleUserContextCommand")));
                 if (event.isAcknowledged()) {
-                    event.getHook().sendMessageEmbeds(embed.build()).setEphemeral(true).queue();
+                    event.getHook().sendMessageEmbeds(embed.build()).addActionRows(row).setEphemeral(true).queue();
                 } else {
-                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+                    event.replyEmbeds(embed.build()).addActionRows(row).setEphemeral(true).queue();
                 }
             }
         };
@@ -451,7 +444,7 @@ public class InteractionCommandHandler {
                         return;
                     }
                     if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
-                        Long musicChannelId = DatabaseHelperKt.getMusicChannelId(guild);
+                        Long musicChannelId = configRepository.findById(guild.getIdLong()).map(Config::getMusicChannelId).orElse(null);
                         if (musicChannelId == null) {
                             EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
                                     Color.RED, null);
@@ -484,7 +477,7 @@ public class InteractionCommandHandler {
                     }
                     if (command.getCommandFlags().contains(CommandFlag.DEVELOPER_ONLY)) {
                         long idLong = event.getUser().getIdLong();
-                        if (idLong != propertiesManager.getOwnerId()) {
+                        if (idLong != config.getOwnerId()) {
                             EmbedBuilder embed = ResponseHelper.createEmbed(null, "This command is only available for the developer.",
                                     Color.RED, null);
                             event.replyEmbeds(embed.build()).setEphemeral(true).queue();
@@ -510,12 +503,14 @@ public class InteractionCommandHandler {
                 }
             } catch (Exception e) {
                 LOGGER.warn("Error while executing slash command", e);
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command.",
-                        Color.RED, null);
+                EmbedBuilder embed = ResponseHelper.createEmbed(null, "An error occurred while executing this command. " +
+                        "This has automatically been reported to the developer.", Color.RED, null);
+                ActionRow row = ActionRow.of(Button.link(SUPPORT_SERVER_URL, "Support Server"));
+                Sentry.captureException(e, scope -> scope.addBreadcrumb(Breadcrumb.user("SlashCommand", "handleSlashCommand")));
                 if (event.isAcknowledged()) {
-                    event.getHook().sendMessageEmbeds(embed.build()).setEphemeral(true).queue();
+                    event.getHook().sendMessageEmbeds(embed.build()).addActionRows(row).setEphemeral(true).queue();
                 } else {
-                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+                    event.replyEmbeds(embed.build()).addActionRows(row).setEphemeral(true).queue();
                 }
             }
         };

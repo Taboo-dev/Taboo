@@ -6,10 +6,12 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.core.SlashCommand;
 
 import java.time.Instant;
 
+@Component
 public class ShardsSlashCommand extends SlashCommand {
 
     public ShardsSlashCommand() {

@@ -1,7 +1,10 @@
 package xyz.chalky.taboo.music;
 
+import com.github.topislavalinkplugins.topissourcemanagers.ISRCAudioTrack;
+import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import lavalink.client.io.jda.JdaLink;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavalinkPlayer;
@@ -9,30 +12,29 @@ import lavalink.client.player.event.PlayerEventListenerAdapter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
-import xyz.chalky.taboo.Taboo;
-import xyz.chalky.taboo.util.ExtensionsKt;
+import xyz.chalky.taboo.central.Taboo;
 
 import java.awt.*;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+
+import static xyz.chalky.taboo.util.MiscUtil.toMinutesAndSeconds;
 
 public class AudioScheduler extends PlayerEventListenerAdapter {
 
     private final LavalinkPlayer player;
     private final JdaLink link;
     private final BlockingQueue<AudioTrack> queue;
-    private final GuildAudioPlayer guildAudioPlayer;
     private final long guildId;
     private long channelId;
     private boolean repeat = false;
 
-    public AudioScheduler(@NotNull LavalinkPlayer player, GuildAudioPlayer guildAudioPlayer, long guildId) {
+    public AudioScheduler(@NotNull LavalinkPlayer player, long guildId) {
         this.guildId = guildId;
-        this.guildAudioPlayer = guildAudioPlayer;
         this.queue = new LinkedBlockingQueue<>();
         this.link = Taboo.getInstance().getLavalink().getLink(String.valueOf(guildId));
         this.player = link.getPlayer();
@@ -67,7 +69,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     public void skipTo(int index) {
         AudioTrack[] tracks = queue.toArray(new AudioTrack[0]);
         AudioTrack track = tracks[index];
-        for (int i = -1; i < index; i++) { // send help
+        for (int i = 0; i < (index + 1); i++) {
             queue.poll();
         }
         if (track != null) {
@@ -103,7 +105,6 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
         return player;
     }
 
-    // Cursed - someone please fix this
     public void setChannelId(long channelId) {
         this.channelId = channelId;
     }
@@ -119,20 +120,30 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     @Override
     public void onTrackStart(IPlayer player, @NotNull AudioTrack track) {
         TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
-        long length = track.getInfo().length;
-        String duration = ExtensionsKt.toMinutesAndSeconds(length);
+        AudioTrackInfo info = track.getInfo();
+        long length = info.length;
+        String duration = toMinutesAndSeconds(length);
         if (!repeat) {
-            MessageEmbed embed = new EmbedBuilder()
+            EmbedBuilder embed = new EmbedBuilder()
                     .setTitle("Now Playing:")
-                    .setDescription(String.format("[%s](%s) by %s", track.getInfo().title,
-                            track.getInfo().uri, track.getInfo().author))
-                    .addField("Duration:", duration, false)
+                    .setDescription(String.format("[%s](%s) by %s", info.title, info.uri, info.author))
+                    .addField("Duration:", duration, true)
                     .setColor(0x9F90CF)
-                    .setTimestamp(Instant.now())
-                    .build();
-            channel.sendMessageEmbeds(embed).queue(message -> {
-                message.delete().queueAfter(length, TimeUnit.MILLISECONDS);
-            });
+                    .setTimestamp(Instant.now());
+            if (track instanceof YoutubeAudioTrack) {
+                embed.setThumbnail(String.format("https://img.youtube.com/vi/%s/mqdefault.jpg", info.identifier));
+            } else if (track instanceof ISRCAudioTrack isrcAudioTrack) {
+                embed.setThumbnail(isrcAudioTrack.getArtworkURL());
+            }
+            String identifier = track.getIdentifier();
+            String id = String.format("music:[]:%s:%s", channelId, identifier);
+            channel.sendMessageEmbeds(embed.build()).setActionRow(
+                        Button.secondary(id.replace("[]", "pause"), "Play/Pause"),
+                        Button.secondary(id.replace("[]", "save"), "Save to library"),
+                        Button.secondary(id.replace("[]", "skip"), "Skip"),
+                        Button.secondary(id.replace("[]", "loop"), "Loop"),
+                        Button.secondary(id.replace("[]", "shuffle"), "Shuffle")
+            ).queue();
         }
     }
 
@@ -140,12 +151,13 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     public void onTrackEnd(IPlayer player, AudioTrack track, @NotNull AudioTrackEndReason endReason) {
         TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
         if (endReason.mayStartNext) {
+            AudioTrackInfo info = track.getInfo();
+            String description = String.format("[%s](%s) by %s", info.title, info.uri, info.author);
             if (repeat) {
                 player.playTrack(track);
                 MessageEmbed embed = new EmbedBuilder()
                         .setTitle("Looping:")
-                        .setDescription(String.format("[%s](%s) by %s", track.getInfo().title,
-                                track.getInfo().uri, track.getInfo().author))
+                        .setDescription(description)
                         .setColor(0x9F90CF)
                         .setTimestamp(Instant.now())
                         .build();
@@ -153,14 +165,11 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
             } else {
                 MessageEmbed embed = new EmbedBuilder()
                         .setTitle("Track Ended:")
-                        .setDescription(String.format("[%s](%s) by %s", track.getInfo().title,
-                                track.getInfo().uri, track.getInfo().author))
+                        .setDescription(description)
                         .setColor(0x9F90CF)
                         .setTimestamp(Instant.now())
                         .build();
-                channel.sendMessageEmbeds(embed).queue(message -> {
-                    message.delete().queueAfter(10, TimeUnit.SECONDS);
-                });
+                channel.sendMessageEmbeds(embed).queue();
                 nextTrack();
             }
         }
@@ -169,9 +178,10 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     @Override
     public void onTrackException(IPlayer player, @NotNull AudioTrack track, Exception exception) {
         TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
+        AudioTrackInfo info = track.getInfo();
         MessageEmbed embed = new EmbedBuilder()
                 .setTitle("An error occurred while playing the track:")
-                .setDescription(track.getInfo().title)
+                .setDescription(info.title)
                 .setColor(Color.RED)
                 .setTimestamp(Instant.now())
                 .build();
