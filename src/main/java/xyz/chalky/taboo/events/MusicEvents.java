@@ -6,6 +6,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import lavalink.client.player.LavalinkPlayer;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -13,7 +14,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.central.Taboo;
-import xyz.chalky.taboo.database.model.SearchHistory;
 import xyz.chalky.taboo.database.repository.SearchHistoryRepository;
 import xyz.chalky.taboo.music.AudioScheduler;
 import xyz.chalky.taboo.music.GuildAudioPlayer;
@@ -33,6 +33,7 @@ public class MusicEvents extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
+        JDA jda = event.getJDA();
         String componentId = event.getComponentId();
         if (componentId.startsWith("music:")) {
             event.deferEdit().queue();
@@ -77,16 +78,22 @@ public class MusicEvents extends ListenerAdapter {
                     event.getHook().editOriginalEmbeds(embed.build()).queue();
                 }
             }
-            case "save" -> {
-                // componentId = music:save:<channelId>:<trackIdentifier>
-                SearchHistory history = new SearchHistory(event.getUser().getIdLong(), info.title, info.uri, track.getIdentifier());
-                searchHistoryRepository.save(history);
-            }
             case "skip" -> {
                 // componentId = music:skip:<channelId>:<trackIdentifier>
                 scheduler.nextTrack();
                 MessageEmbed embed = new EmbedBuilder()
                         .setTitle("Skipped the current song.")
+                        .setColor(0x9F90CF)
+                        .setTimestamp(Instant.now())
+                        .build();
+                event.getHook().sendMessageEmbeds(embed).queue();
+            }
+            case "stop" -> {
+                // componentId = music:stop:<channelId>:<trackIdentifier>
+                scheduler.destroy();
+                jda.getDirectAudioController().disconnect(guild);
+                MessageEmbed embed = new EmbedBuilder()
+                        .setTitle("Stopped the music player.")
                         .setColor(0x9F90CF)
                         .setTimestamp(Instant.now())
                         .build();

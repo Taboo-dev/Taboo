@@ -139,8 +139,8 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
             String id = String.format("music:[]:%s:%s", channelId, identifier);
             channel.sendMessageEmbeds(embed.build()).setActionRow(
                         Button.secondary(id.replace("[]", "pause"), "Play/Pause"),
-                        Button.secondary(id.replace("[]", "save"), "Save to library"),
                         Button.secondary(id.replace("[]", "skip"), "Skip"),
+                        Button.secondary(id.replace("[]", "stop"), "Stop"),
                         Button.secondary(id.replace("[]", "loop"), "Loop"),
                         Button.secondary(id.replace("[]", "shuffle"), "Shuffle")
             ).queue();
