@@ -20,15 +20,12 @@ import java.awt.*;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
 
 import static xyz.chalky.taboo.util.MiscUtil.toMinutesAndSeconds;
 
 public class AudioScheduler extends PlayerEventListenerAdapter {
 
-    private final ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
     private final LavalinkPlayer player;
     private final JdaLink link;
     private final BlockingQueue<AudioTrack> queue;
