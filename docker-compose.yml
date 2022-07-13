@@ -23,6 +23,10 @@ services:
     depends_on:
       - postgres
       - lavalink
+    volumes:
+      - type: bind
+        source: ./application.yml
+        target: /taboo/application.yml
 volumes:
   postgres:
     driver: local
