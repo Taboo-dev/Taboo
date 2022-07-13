@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.central.Application;
 import xyz.chalky.taboo.central.Taboo;
 import xyz.chalky.taboo.config.TabooConfigProperties;
-import xyz.chalky.taboo.database.model.Config;
 import xyz.chalky.taboo.database.repository.ConfigRepository;
 import xyz.chalky.taboo.util.ResponseHelper;
 
@@ -202,38 +201,6 @@ public class InteractionCommandHandler {
             event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
         }
-        if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
-            Long musicChannelId = configRepository.findById(guild.getIdLong()).map(Config::getMusicChannelId).orElse(null);
-            if (musicChannelId == null) {
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
-                        Color.RED, null);
-                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                return;
-            }
-            TextChannel musicChannel = guild.getTextChannelById(musicChannelId);
-            if (event.getChannel().getIdLong() != musicChannelId) {
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, String.format("You can only execute this command in the music channel %s.", musicChannel.getAsMention()),
-                        Color.RED, null);
-                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                return;
-            }
-            GuildVoiceState guildVoiceState = member.getVoiceState();
-            if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in a voice channel to execute this command.",
-                        Color.RED, null);
-                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                return;
-            }
-            AudioManager manager = event.getGuild().getAudioManager();
-            if (manager.isConnected()) {
-                if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
-                    EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in the same voice channel as me to execute this command.",
-                            Color.RED, null);
-                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                    return;
-                }
-            }
-        }
         if (command.getCommandFlags().contains(CommandFlag.DEVELOPER_ONLY)) {
             long idLong = event.getUser().getIdLong();
             if (idLong != config.getOwnerId()) {
@@ -248,14 +215,6 @@ public class InteractionCommandHandler {
                     Color.RED, null);
             event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
-        }
-        if (command.getCommandFlags().contains(CommandFlag.MODERATOR_ONLY)) {
-            if (!member.hasPermission(List.of(Permission.KICK_MEMBERS, Permission.MANAGE_ROLES, Permission.MANAGE_SERVER))) {
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
-                        Color.RED, null);
-                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                return;
-            }
         }
         MessageContextCommand finalCommand = command;
         Runnable r = () -> {
@@ -322,38 +281,6 @@ public class InteractionCommandHandler {
             event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
         }
-        if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
-            Long musicChannelId = configRepository.findById(guild.getIdLong()).map(Config::getMusicChannelId).orElse(null);
-            if (musicChannelId == null) {
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
-                        Color.RED, null);
-                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                return;
-            }
-            TextChannel musicChannel = guild.getTextChannelById(musicChannelId);
-            if (event.getChannel().getIdLong() != musicChannelId) {
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, String.format("You can only execute this command in the music channel %s.", musicChannel.getAsMention()),
-                        Color.RED, null);
-                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                return;
-            }
-            GuildVoiceState guildVoiceState = member.getVoiceState();
-            if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in a voice channel to execute this command.",
-                        Color.RED, null);
-                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                return;
-            }
-            AudioManager manager = event.getGuild().getAudioManager();
-            if (manager.isConnected()) {
-                if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
-                    EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in the same voice channel as me to execute this command.",
-                            Color.RED, null);
-                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                    return;
-                }
-            }
-        }
         if (command.getCommandFlags().contains(CommandFlag.DEVELOPER_ONLY)) {
             long idLong = event.getUser().getIdLong();
             if (idLong != config.getOwnerId()) {
@@ -368,14 +295,6 @@ public class InteractionCommandHandler {
                     Color.RED, null);
             event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
-        }
-        if (command.getCommandFlags().contains(CommandFlag.MODERATOR_ONLY)) {
-            if (!member.hasPermission(List.of(Permission.KICK_MEMBERS, Permission.MANAGE_ROLES, Permission.MANAGE_SERVER))) {
-                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
-                        Color.RED, null);
-                event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                return;
-            }
         }
         UserContextCommand finalCommand = command;
         Runnable r = () -> {
@@ -444,35 +363,28 @@ public class InteractionCommandHandler {
                         return;
                     }
                     if (command.getCommandFlags().contains(CommandFlag.MUSIC)) {
-                        Long musicChannelId = configRepository.findById(guild.getIdLong()).map(Config::getMusicChannelId).orElse(null);
-                        if (musicChannelId == null) {
-                            EmbedBuilder embed = ResponseHelper.createEmbed(null, "There is no music channel set for this guild.",
-                                    Color.RED, null);
-                            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                            return;
-                        }
-                        TextChannel musicChannel = guild.getTextChannelById(musicChannelId);
-                        if (event.getChannel().getIdLong() != musicChannelId) {
-                            EmbedBuilder embed = ResponseHelper.createEmbed(null, String.format("You can only execute this command in the music channel %s.", musicChannel.getAsMention()),
-                                    Color.RED, null);
-                            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                            return;
-                        }
-                        GuildVoiceState guildVoiceState = member.getVoiceState();
-                        if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
-                            EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in a voice channel to execute this command.",
-                                    Color.RED, null);
-                            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                            return;
-                        }
-                        AudioManager manager = event.getGuild().getAudioManager();
-                        if (manager.isConnected()) {
-                            if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
-                                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in the same voice channel as me to execute this command.",
+                        if (event.getChannelType().equals(ChannelType.VOICE)) {
+                            GuildVoiceState guildVoiceState = member.getVoiceState();
+                            if (guildVoiceState == null || !guildVoiceState.inAudioChannel()) {
+                                EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in a voice channel to execute this command.",
                                         Color.RED, null);
                                 event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                                 return;
                             }
+                            AudioManager manager = event.getGuild().getAudioManager();
+                            if (manager.isConnected()) {
+                                if (!manager.getConnectedChannel().equals(guildVoiceState.getChannel())) {
+                                    EmbedBuilder embed = ResponseHelper.createEmbed(null, "You must be in the same voice channel as me to execute this command.",
+                                            Color.RED, null);
+                                    event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+                                    return;
+                                }
+                            }
+                        } else {
+                            EmbedBuilder embed = ResponseHelper.createEmbed(null, "You can only execute this command in voice channels.",
+                                    Color.RED, null);
+                            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+                            return;
                         }
                     }
                     if (command.getCommandFlags().contains(CommandFlag.DEVELOPER_ONLY)) {
@@ -489,14 +401,6 @@ public class InteractionCommandHandler {
                                 Color.RED, null);
                         event.replyEmbeds(embed.build()).setEphemeral(true).queue();
                         return;
-                    }
-                    if (command.getCommandFlags().contains(CommandFlag.MODERATOR_ONLY)) {
-                        if (!member.hasPermission(List.of(Permission.KICK_MEMBERS, Permission.MANAGE_ROLES, Permission.MANAGE_SERVER))) {
-                            EmbedBuilder embed = ResponseHelper.createEmbed(null, "You don't have the required permissions to execute this command.",
-                                    Color.RED, null);
-                            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
-                            return;
-                        }
                     }
                     event.deferReply(command.isEphemeral()).queue();
                     command.executeCommand(event);

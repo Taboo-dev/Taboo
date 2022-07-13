@@ -11,14 +11,12 @@ public class Config {
     @Id
     private Long guildId;
     private Long logChannelId;
-    private Long musicChannelId;
 
     public Config() {}
 
-    public Config(long guildId, long logChannelId, long musicChannelId) {
+    public Config(long guildId, long logChannelId) {
         this.guildId = guildId;
         this.logChannelId = logChannelId;
-        this.musicChannelId = musicChannelId;
     }
 
     public Long getGuildId() {
@@ -35,14 +33,6 @@ public class Config {
 
     public void setLogChannelId(long logChannelId) {
         this.logChannelId = logChannelId;
-    }
-
-    public Long getMusicChannelId() {
-        return musicChannelId;
-    }
-
-    public void setMusicChannelId(long musicChannelId) {
-        this.musicChannelId = musicChannelId;
     }
 
 }

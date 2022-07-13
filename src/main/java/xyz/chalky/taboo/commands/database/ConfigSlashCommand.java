@@ -1,16 +1,17 @@
 package xyz.chalky.taboo.commands.database;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import xyz.chalky.taboo.core.CommandFlag;
 import xyz.chalky.taboo.core.SlashCommand;
 import xyz.chalky.taboo.database.model.Config;
 import xyz.chalky.taboo.database.repository.ConfigRepository;
@@ -28,13 +29,11 @@ public class ConfigSlashCommand extends SlashCommand {
                 Commands.slash("config", "Server config")
                         .addSubcommands(
                                 new SubcommandData("set", "Sets this server's config.").addOptions(
-                                        new OptionData(OptionType.CHANNEL, "log", "Set the channel to log actions to.", true),
-                                        new OptionData(OptionType.CHANNEL, "music", "Sets the music channel.", true)
+                                        new OptionData(OptionType.CHANNEL, "log", "Set the channel to log actions to.", true)
                                 ), new SubcommandData("clear", "Clear this server's config."),
                                 new SubcommandData("view", "View this server's config.")
-                        )
+                        ).setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
         );
-        addCommandFlags(CommandFlag.MODERATOR_ONLY);
         setEphemeral(true);
         this.configRepository = configRepository;
     }
@@ -45,15 +44,11 @@ public class ConfigSlashCommand extends SlashCommand {
         long guildId = event.getGuild().getIdLong();
         switch (subcommandName) {
             case "set" -> {
-                TextChannel logChannel = event.getOption("log").getAsTextChannel();
-                TextChannel musicChannel = event.getOption("music").getAsTextChannel();
-                configRepository.save(new Config(guildId, logChannel.getIdLong(), musicChannel.getIdLong()));
+                TextChannel logChannel = event.getOption("log").getAsChannel().asTextChannel();
+                configRepository.save(new Config(guildId, logChannel.getIdLong()));
                 MessageEmbed embed = new EmbedBuilder()
                         .setTitle("Config set!")
-                        .setDescription(String.format("""
-                                Log Channel set to %s
-                                Music Channel set to %s
-                                """, logChannel.getAsMention(), musicChannel.getAsMention())
+                        .setDescription(String.format("Log Channel set to %s", logChannel.getAsMention())
                         ).setColor(0x9F90CF)
                         .setTimestamp(Instant.now())
                         .build();
@@ -71,8 +66,7 @@ public class ConfigSlashCommand extends SlashCommand {
             case "view" -> {
                 Optional<Config> config = configRepository.findById(guildId);
                 Long log = config.map(Config::getLogChannelId).orElse(null);
-                Long music = config.map(Config::getMusicChannelId).orElse(null);
-                if (log == null || music == null) {
+                if (log == null) {
                     MessageEmbed embed = new EmbedBuilder()
                             .setTitle(String.format("Config for %s", event.getGuild().getName()))
                             .setDescription("You have no config set for this server.")
@@ -84,12 +78,7 @@ public class ConfigSlashCommand extends SlashCommand {
                 }
                 MessageEmbed embed = new EmbedBuilder()
                         .setTitle(String.format("Config for %s", event.getGuild().getName()))
-                        .setDescription(String.format(
-                                """
-                                Log Channel: %s
-                                Music Channel: %s
-                                """, event.getGuild().getTextChannelById(log).getAsMention(),
-                                     event.getGuild().getTextChannelById(music).getAsMention()))
+                        .setDescription(String.format("Log Channel: %s", event.getGuild().getTextChannelById(log).getAsMention()))
                         .setColor(0x9F90CF)
                         .setTimestamp(Instant.now())
                         .build();

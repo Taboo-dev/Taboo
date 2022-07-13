@@ -2,7 +2,6 @@ package xyz.chalky.taboo.events;
 
 import com.vdurmont.emoji.EmojiParser;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.BaseGuildMessageChannel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -46,7 +45,7 @@ public class GuildJoinLeaveListener extends ListenerAdapter {
     @Override
     public void onGuildJoin(@NotNull GuildJoinEvent event) {
         Guild guild = event.getGuild();
-        BaseGuildMessageChannel defaultChannel = guild.getDefaultChannel();
+        TextChannel defaultChannel = guild.getDefaultChannel().asTextChannel();
         String description = String.format("""
                 Thanks for inviting me to your server! %s
                 I can play music, moderate your server, and more!
@@ -103,6 +102,7 @@ public class GuildJoinLeaveListener extends ListenerAdapter {
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
         if (!event.isFromGuild()) return;
         Guild guild = event.getGuild();
+        TextChannel defaultChannel = guild.getDefaultChannel().asTextChannel();
         String id = guild.getId();
         boolean logFilled, musicFilled;
         String logInput = event.getValue(String.format("%s:configure:modal:log", id)).getAsString();
@@ -122,7 +122,7 @@ public class GuildJoinLeaveListener extends ListenerAdapter {
         }
         Long messageId = guildSettingsRepository.findById(guild.getIdLong()).map(GuildSettings::getMessageId).orElse(null);
         if (messageId != null) {
-            guild.getDefaultChannel().retrieveMessageById(messageId).queue(message -> {
+            defaultChannel.retrieveMessageById(messageId).queue(message -> {
                 MessageEmbed embed = new EmbedBuilder()
                         .setTitle("Configure Your Server")
                         .setColor(0x9F90CF)
@@ -135,7 +135,7 @@ public class GuildJoinLeaveListener extends ListenerAdapter {
             });
         }
         guildSettingsRepository.save(new GuildSettings(guild.getIdLong(), logFilled, musicFilled, messageId));
-        configRepository.save(new Config(guild.getIdLong(), log, music));
+        configRepository.save(new Config(guild.getIdLong(), log));
         String content = String.format("%s Your server has been configured!", TICK_EMOJI);
         event.replyEmbeds(
                 ResponseHelper.createEmbed(null, EmojiParser.parseToUnicode(content), "0x9F90CF", null).build()

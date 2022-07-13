@@ -11,7 +11,7 @@ import lavalink.client.player.LavalinkPlayer;
 import lavalink.client.player.event.PlayerEventListenerAdapter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import xyz.chalky.taboo.central.Taboo;
@@ -20,12 +20,15 @@ import java.awt.*;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static xyz.chalky.taboo.util.MiscUtil.toMinutesAndSeconds;
 
 public class AudioScheduler extends PlayerEventListenerAdapter {
 
+    private final ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
     private final LavalinkPlayer player;
     private final JdaLink link;
     private final BlockingQueue<AudioTrack> queue;
@@ -55,7 +58,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
             player.playTrack(track);
         } else {
             if (queue.size() == 0) {
-                TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
+                VoiceChannel channel = Taboo.getInstance().getShardManager().getVoiceChannelById(channelId);
                 MessageEmbed embed = new EmbedBuilder()
                         .setDescription("There are no more tracks in the queue.")
                         .setColor(Color.RED)
@@ -119,7 +122,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
 
     @Override
     public void onTrackStart(IPlayer player, @NotNull AudioTrack track) {
-        TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
+        VoiceChannel channel = Taboo.getInstance().getShardManager().getVoiceChannelById(channelId);
         AudioTrackInfo info = track.getInfo();
         long length = info.length;
         String duration = toMinutesAndSeconds(length);
@@ -149,7 +152,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
 
     @Override
     public void onTrackEnd(IPlayer player, AudioTrack track, @NotNull AudioTrackEndReason endReason) {
-        TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
+        VoiceChannel channel = Taboo.getInstance().getShardManager().getVoiceChannelById(channelId);
         if (endReason.mayStartNext) {
             AudioTrackInfo info = track.getInfo();
             String description = String.format("[%s](%s) by %s", info.title, info.uri, info.author);
@@ -177,7 +180,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
 
     @Override
     public void onTrackException(IPlayer player, @NotNull AudioTrack track, Exception exception) {
-        TextChannel channel = Taboo.getInstance().getShardManager().getTextChannelById(channelId);
+        VoiceChannel channel = Taboo.getInstance().getShardManager().getVoiceChannelById(channelId);
         AudioTrackInfo info = track.getInfo();
         MessageEmbed embed = new EmbedBuilder()
                 .setTitle("An error occurred while playing the track:")

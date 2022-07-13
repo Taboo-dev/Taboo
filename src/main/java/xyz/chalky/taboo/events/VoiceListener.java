@@ -51,7 +51,7 @@ public class VoiceListener extends ListenerAdapter {
                     return; // Abort the SES
                 }
                 long channelId = scheduler.getChannelId();
-                TextChannel channel = guild.getTextChannelById(channelId);
+                VoiceChannel channel = guild.getVoiceChannelById(channelId);
                 scheduler.destroy();
                 jda.getDirectAudioController().disconnect(guild);
                 channel.sendMessageEmbeds(embed).queue();

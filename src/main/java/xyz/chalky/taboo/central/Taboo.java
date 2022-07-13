@@ -92,7 +92,7 @@ public class Taboo implements CommandLineRunner {
         this.audioManager = new AudioManager();
         this.eventManager = new EventManager();
         this.shardManager = DefaultShardManagerBuilder.createDefault(config.getToken())
-                .enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.GUILD_MEMBERS)
+                .enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_EMOJIS_AND_STICKERS, GatewayIntent.GUILD_MEMBERS)
                 .enableCache(CacheFlag.VOICE_STATE)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .setChunkingFilter(ChunkingFilter.ALL)
