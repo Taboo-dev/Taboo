@@ -37,7 +37,7 @@ public class EventManager implements IEventManager {
         register(context.getBean(GuildJoinLeaveListener.class));
         register(context.getBean(GuildEvents.class));
         register(new VoiceListener());
-        register(context.getBean(MusicEvents.class));
+        register(new MusicEvents());
         register(Taboo.getInstance().getEventWaiter());
     }
 

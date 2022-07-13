@@ -12,9 +12,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
 import xyz.chalky.taboo.central.Taboo;
-import xyz.chalky.taboo.database.repository.SearchHistoryRepository;
 import xyz.chalky.taboo.music.AudioScheduler;
 import xyz.chalky.taboo.music.GuildAudioPlayer;
 
@@ -22,14 +20,7 @@ import java.time.Instant;
 
 import static xyz.chalky.taboo.util.MiscUtil.toMinutesAndSeconds;
 
-@Component
 public class MusicEvents extends ListenerAdapter {
-
-    private final SearchHistoryRepository searchHistoryRepository;
-
-    public MusicEvents(SearchHistoryRepository searchHistoryRepository) {
-        this.searchHistoryRepository = searchHistoryRepository;
-    }
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
