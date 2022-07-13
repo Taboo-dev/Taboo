@@ -1,5 +1,6 @@
 *.yml
 !application-example.yml
+!docker-compose.yml
 .idea/
 build/
 /.gradle
