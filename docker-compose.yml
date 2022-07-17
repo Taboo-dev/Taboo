@@ -11,10 +11,14 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
   lavalink:
-    image: lavalink:latest
+    image: fredboat/lavalink:dev
     restart: always
     ports:
       - "2333:2333"
+    volumes:
+      - type: bind
+        source: ./lavalink.yml
+        target: /opt/Lavalink/application.yml
   taboo:
     image: taboo:latest
     restart: always
