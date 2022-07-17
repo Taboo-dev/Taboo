@@ -20,7 +20,7 @@ services:
         source: ./lavalink.yml
         target: /opt/Lavalink/application.yml
   taboo:
-    image: taboo:latest
+    image: chalkyjeans/taboo:latest
     restart: always
     ports:
       - "8080:8080"
