@@ -5,6 +5,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.0"
     id("org.springframework.boot") version "2.7.0"
     id("com.google.cloud.tools.jib") version "3.2.1"
+    id("com.sedmelluq.jdaction") version "1.0.99-beta3"
     kotlin("jvm") version "1.6.20"
 }
 
@@ -21,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    implementation("net.dv8tion:JDA:5.0.0-alpha.14")
+    implementation("net.dv8tion:JDA:5.0.0-alpha.15")
     implementation("club.minnced:discord-webhooks:0.8.0")
     implementation("pw.chew:jda-chewtils:2.0-SNAPSHOT")
     implementation("com.github.Xirado:Lavalink-Client:041082f")
