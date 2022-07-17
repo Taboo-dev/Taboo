@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.DV8FromTheWorld:JDA:07e8166fc5")
+    implementation("net.dv8tion:JDA:5.0.0-alpha.14")
     implementation("club.minnced:discord-webhooks:0.8.0")
     implementation("pw.chew:jda-chewtils:2.0-SNAPSHOT")
     implementation("com.github.Xirado:Lavalink-Client:041082f")
