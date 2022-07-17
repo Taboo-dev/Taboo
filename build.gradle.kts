@@ -4,6 +4,7 @@ plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.1.0"
     id("org.springframework.boot") version "2.7.0"
+    id("com.google.cloud.tools.jib") version "3.2.1"
     kotlin("jvm") version "1.6.20"
 }
 
@@ -27,7 +28,7 @@ dependencies {
     implementation("com.github.Topis-Lavalink-Plugins:Topis-Source-Managers:2.0.6")
     implementation("com.dunctebot:sourcemanagers:1.8.0")
     implementation("ch.qos.logback:logback-classic:1.2.11")
-    implementation("org.postgresql:postgresql:42.3.4")
+    implementation("org.postgresql:postgresql:42.3.6")
     implementation("com.google.guava:guava:31.1-jre")
     implementation("com.github.minndevelopment:emoji-java:master-SNAPSHOT")
     implementation("io.sentry:sentry-spring-boot-starter:6.1.2")
@@ -42,6 +43,29 @@ dependencies {
 tasks {
     build {
         dependsOn(shadowJar)
+    }
+}
+
+jib {
+    val user = System.getenv("DOCKER_USERNAME")
+    val pass = System.getenv("DOCKER_PASSWORD")
+    from {
+        image = "openjdk:18"
+        auth {
+            username = user
+            password = pass
+        }
+    }
+    to {
+        image = "chalkyjeans/taboo:latest"
+        auth {
+            username = user
+            password = pass
+        }
+    }
+    container {
+        ports = listOf("8080")
+        workingDirectory = "/taboo"
     }
 }
 
