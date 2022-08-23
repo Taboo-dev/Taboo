@@ -1,11 +1,11 @@
 package xyz.chalky.taboo.commands.music;
 
-import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
-import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
-import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
+import lavalink.client.io.FriendlyException;
+import lavalink.client.io.LoadResultHandler;
 import lavalink.client.io.jda.JdaLink;
+import lavalink.client.player.track.AudioPlaylist;
+import lavalink.client.player.track.AudioTrack;
+import lavalink.client.player.track.AudioTrackInfo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
@@ -49,8 +49,8 @@ public class PlaySlashCommand extends SlashCommand {
         setCommandData(Commands.slash("play", "Plays a song.").addOptions(
                 new OptionData(OptionType.STRING, "song", "The song to play.", true, true),
                 new OptionData(OptionType.STRING, "provider", "Provider to search in. (Ignore if link)", false)
-                        .addChoice("YouTube (Default)", "ytsearch")
-                        .addChoice("Spotify", "spsearch")
+                        .addChoice("Spotify (Default)", "spsearch")
+                        .addChoice("YouTube", "ytsearch")
                         .addChoice("SoundCloud", "scsearch")
                         .addChoice("YouTube Music", "ytmsearch")));
         addCommandFlags(CommandFlag.MUSIC);
@@ -71,7 +71,7 @@ public class PlaySlashCommand extends SlashCommand {
         String query;
         String provider;
         if (providerOption == null) {
-            provider = "ytsearch";
+            provider = "spsearch";
         } else {
             provider = providerOption.getAsString();
         }
@@ -83,27 +83,28 @@ public class PlaySlashCommand extends SlashCommand {
         if (manager.getConnectedChannel() == null) {
             scheduler.setChannelId(event.getChannel().getIdLong());
             link.connect(voiceState.getChannel());
-            link.getRestClient().loadItem(query, new AudioLoadResultHandler() {
-                private static final Logger LOGGER = LoggerFactory.getLogger(AudioLoadResultHandler.class);
+            link.getRestClient().loadItem(query, new LoadResultHandler() {
+                private static final Logger LOGGER = LoggerFactory.getLogger(LoadResultHandler.class);
                 @Override
                 public void trackLoaded(AudioTrack track) {
                     scheduler.queue(track);
                     handle(track);
-                    LOGGER.debug("Track loaded: {}", track.getInfo().title);
+                    LOGGER.debug("Track loaded: {}", track.getInfo().getTitle());
                 }
 
                 @Override
                 public void playlistLoaded(@NotNull AudioPlaylist playlist) {
-                    if (playlist.isSearchResult()) {
-                        AudioTrack track = playlist.getTracks().get(0);
-                        scheduler.queue(track);
-                        handle(track);
-                        LOGGER.debug("Track loaded: {}", track.getInfo().title);
-                    } else {
-                        playlist.getTracks().forEach(scheduler::queue);
-                        handlePlaylist(playlist);
-                        LOGGER.debug("Playlist loaded: {}", playlist.getName());
-                    }
+                    playlist.getTracks().forEach(scheduler::queue);
+                    handlePlaylist(playlist);
+                    LOGGER.debug("Playlist loaded: {}", playlist.getName());
+                }
+
+                @Override
+                public void searchResultLoaded(List<AudioTrack> list) {
+                    AudioTrack track = list.get(0);
+                    scheduler.queue(track);
+                    handle(track);
+                    LOGGER.debug("Track loaded: {}", track.getInfo().getTitle());
                 }
 
                 @Override
@@ -132,12 +133,12 @@ public class PlaySlashCommand extends SlashCommand {
                     AudioTrackInfo info = track.getInfo();
                     MessageEmbed embed = new EmbedBuilder()
                             .setTitle("Added to queue:")
-                            .setDescription(String.format("[%s](%s) by %s", info.title, info.uri, info.author))
+                            .setDescription(String.format("[%s](%s) by %s", info.getTitle(), info.getUri(), info.getAuthor()))
                             .setColor(0x9F90CF)
                             .setTimestamp(Instant.now())
                             .build();
                     event.getHook().sendMessageEmbeds(embed).queue();
-                    SearchHistory history = new SearchHistory(event.getUser().getIdLong(), info.title, info.uri, track.getIdentifier());
+                    SearchHistory history = new SearchHistory(event.getUser().getIdLong(), info.getTitle(), info.getUri(), info.getIdentifier());
                     searchHistoryRepository.save(history);
                 }
 
@@ -151,11 +152,11 @@ public class PlaySlashCommand extends SlashCommand {
                         description.append("`#")
                                 .append(i + 1)
                                 .append("` [")
-                                .append(info.title)
+                                .append(info.getTitle())
                                 .append("](")
-                                .append(info.uri)
+                                .append(info.getUri())
                                 .append(") by ")
-                                .append(info.author)
+                                .append(info.getAuthor())
                                 .append("\n");
                     }
                     if (trackList > trackCount) {
@@ -179,7 +180,7 @@ public class PlaySlashCommand extends SlashCommand {
                     List<SearchHistory> histories = new ArrayList<>();
                     playlist.getTracks().forEach(audioTrack -> {
                         AudioTrackInfo info = audioTrack.getInfo();
-                        histories.add(new SearchHistory(event.getUser().getIdLong(), info.title, info.uri, audioTrack.getIdentifier()));
+                        histories.add(new SearchHistory(event.getUser().getIdLong(), info.getTitle(), info.getUri(), info.getIdentifier()));
                         searchHistoryRepository.saveAll(histories);
                     });
                 }

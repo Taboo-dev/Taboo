@@ -2,7 +2,7 @@ version: "3.9"
 services:
   postgres:
     image: postgres:latest
-    restart: always
+    restart: on-failure
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -12,7 +12,7 @@ services:
       - postgres:/var/lib/postgresql/data
   lavalink:
     image: fredboat/lavalink:dev
-    restart: always
+    restart: on-failure
     ports:
       - "2333:2333"
     volumes:
@@ -21,7 +21,7 @@ services:
         target: /opt/Lavalink/application.yml
   taboo:
     image: chalkyjeans/taboo:latest
-    restart: always
+    restart: on-failure
     ports:
       - "8080:8080"
     depends_on:

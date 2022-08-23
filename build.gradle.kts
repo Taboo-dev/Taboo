@@ -25,9 +25,9 @@ dependencies {
     implementation("net.dv8tion:JDA:5.0.0-alpha.15")
     implementation("club.minnced:discord-webhooks:0.8.0")
     implementation("pw.chew:jda-chewtils:2.0-SNAPSHOT")
-    implementation("com.github.Xirado:Lavalink-Client:041082f")
-    implementation("com.github.Topis-Lavalink-Plugins:Topis-Source-Managers:2.0.6")
-    implementation("com.dunctebot:sourcemanagers:1.8.0")
+    implementation("com.github.chalkyjeans:Lavalink-Client:1.0-artworkurl") {
+        exclude("net.dv8tion", "JDA")
+    }
     implementation("ch.qos.logback:logback-classic:1.2.11")
     implementation("org.postgresql:postgresql:42.3.6")
     implementation("com.google.guava:guava:31.1-jre")

@@ -1,14 +1,12 @@
 package xyz.chalky.taboo.music;
 
-import com.github.topislavalinkplugins.topissourcemanagers.ISRCAudioTrack;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import lavalink.client.io.jda.JdaLink;
 import lavalink.client.player.IPlayer;
 import lavalink.client.player.LavalinkPlayer;
 import lavalink.client.player.event.PlayerEventListenerAdapter;
+import lavalink.client.player.track.AudioTrack;
+import lavalink.client.player.track.AudioTrackEndReason;
+import lavalink.client.player.track.AudioTrackInfo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.VoiceChannel;
@@ -22,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static xyz.chalky.taboo.util.MiscUtil.getArtworkUrl;
 import static xyz.chalky.taboo.util.MiscUtil.toMinutesAndSeconds;
 
 public class AudioScheduler extends PlayerEventListenerAdapter {
@@ -36,7 +35,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     public AudioScheduler(@NotNull LavalinkPlayer player, long guildId) {
         this.guildId = guildId;
         this.queue = new LinkedBlockingQueue<>();
-        this.link = Taboo.getInstance().getLavalink().getLink(String.valueOf(guildId));
+        this.link = Taboo.getInstance().getLavalink().getLink(guildId);
         this.player = link.getPlayer();
         player.addListener(this);
     }
@@ -121,21 +120,17 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
     public void onTrackStart(IPlayer player, @NotNull AudioTrack track) {
         VoiceChannel channel = Taboo.getInstance().getShardManager().getVoiceChannelById(channelId);
         AudioTrackInfo info = track.getInfo();
-        long length = info.length;
+        long length = info.getLength();
         String duration = toMinutesAndSeconds(length);
         if (!repeat) {
             EmbedBuilder embed = new EmbedBuilder()
                     .setTitle("Now Playing:")
-                    .setDescription(String.format("[%s](%s) by %s", info.title, info.uri, info.author))
+                    .setDescription(String.format("[%s](%s) by %s", info.getTitle(), info.getUri(), info.getAuthor()))
                     .addField("Duration:", duration, true)
+                    .setThumbnail(getArtworkUrl(track))
                     .setColor(0x9F90CF)
                     .setTimestamp(Instant.now());
-            if (track instanceof YoutubeAudioTrack) {
-                embed.setThumbnail(String.format("https://img.youtube.com/vi/%s/mqdefault.jpg", info.identifier));
-            } else if (track instanceof ISRCAudioTrack isrcAudioTrack) {
-                embed.setThumbnail(isrcAudioTrack.getArtworkURL());
-            }
-            String identifier = track.getIdentifier();
+            String identifier = info.getIdentifier();
             String id = String.format("music:[]:%s:%s", channelId, identifier);
             channel.sendMessageEmbeds(embed.build()).setActionRow(
                         Button.secondary(id.replace("[]", "pause"), "Play/Pause"),
@@ -152,7 +147,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
         VoiceChannel channel = Taboo.getInstance().getShardManager().getVoiceChannelById(channelId);
         if (endReason.mayStartNext) {
             AudioTrackInfo info = track.getInfo();
-            String description = String.format("[%s](%s) by %s", info.title, info.uri, info.author);
+            String description = String.format("[%s](%s) by %s", info.getTitle(), info.getUri(), info.getAuthor());
             if (repeat) {
                 player.playTrack(track);
                 MessageEmbed embed = new EmbedBuilder()
@@ -181,7 +176,7 @@ public class AudioScheduler extends PlayerEventListenerAdapter {
         AudioTrackInfo info = track.getInfo();
         MessageEmbed embed = new EmbedBuilder()
                 .setTitle("An error occurred while playing the track:")
-                .setDescription(info.title)
+                .setDescription(info.getTitle())
                 .setColor(Color.RED)
                 .setTimestamp(Instant.now())
                 .build();

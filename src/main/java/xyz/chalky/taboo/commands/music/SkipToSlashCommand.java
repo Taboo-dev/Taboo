@@ -1,6 +1,7 @@
 package xyz.chalky.taboo.commands.music;
 
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import lavalink.client.player.track.AudioTrack;
+import lavalink.client.player.track.AudioTrackInfo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -46,8 +47,9 @@ public class SkipToSlashCommand extends SlashCommand {
         }
         scheduler.skipTo(index);
         AudioTrack playingTrack = scheduler.getPlayer().getPlayingTrack();
+        AudioTrackInfo info = playingTrack.getInfo();
         MessageEmbed embed = new EmbedBuilder()
-                .setDescription(String.format("Skipped to %s: [%s](%s)", number, playingTrack.getInfo().title, playingTrack.getInfo().uri))
+                .setDescription(String.format("Skipped to %s: [%s](%s)", number, info.getTitle(), info.getUri()))
                 .setColor(0x9F90CF)
                 .setTimestamp(Instant.now())
                 .build();

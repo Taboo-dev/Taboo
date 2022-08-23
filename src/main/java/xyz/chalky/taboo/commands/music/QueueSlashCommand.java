@@ -1,7 +1,7 @@
 package xyz.chalky.taboo.commands.music;
 
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
+import lavalink.client.player.track.AudioTrack;
+import lavalink.client.player.track.AudioTrackInfo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -49,11 +49,11 @@ public class QueueSlashCommand extends SlashCommand {
                     description.append("`#")
                             .append(i + 1)
                             .append("` [")
-                            .append(info.title)
+                            .append(info.getTitle())
                             .append("](")
-                            .append(info.uri)
+                            .append(info.getUri())
                             .append(") by ")
-                            .append(info.author)
+                            .append(info.getAuthor())
                             .append("\n");
                 }
                 if (trackSize > trackCount) {

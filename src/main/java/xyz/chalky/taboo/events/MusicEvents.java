@@ -1,10 +1,8 @@
 package xyz.chalky.taboo.events;
 
-import com.github.topislavalinkplugins.topissourcemanagers.ISRCAudioTrack;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import lavalink.client.player.LavalinkPlayer;
+import lavalink.client.player.track.AudioTrack;
+import lavalink.client.player.track.AudioTrackInfo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -18,6 +16,7 @@ import xyz.chalky.taboo.music.GuildAudioPlayer;
 
 import java.time.Instant;
 
+import static xyz.chalky.taboo.util.MiscUtil.getArtworkUrl;
 import static xyz.chalky.taboo.util.MiscUtil.toMinutesAndSeconds;
 
 public class MusicEvents extends ListenerAdapter {
@@ -42,20 +41,16 @@ public class MusicEvents extends ListenerAdapter {
         switch (split[1]) {
             case "pause" -> {
                 // componentId = music:pause:<channelId>:<trackIdentifier>
-                String duration = toMinutesAndSeconds(info.length);
+                String duration = toMinutesAndSeconds(info.getLength());
                 EmbedBuilder embed = new EmbedBuilder()
                         .setTitle("Now Playing:")
-                        .setDescription(String.format("[%s](%s) by %s", info.title,
-                                info.uri, info.author))
+                        .setDescription(String.format("[%s](%s) by %s", info.getTitle(),
+                                info.getUri(), info.getAuthor()))
                         .addField("Duration:", duration, true)
+                        .setThumbnail(getArtworkUrl(track))
                         .setColor(0x9F90CF)
                         .setTimestamp(Instant.now());
-                if (track instanceof YoutubeAudioTrack) {
-                    embed.setThumbnail(String.format("https://img.youtube.com/vi/%s/mqdefault.jpg", info.identifier));
-                } else if (track instanceof ISRCAudioTrack isrcAudioTrack) {
-                    embed.setThumbnail(isrcAudioTrack.getArtworkURL());
-                }
-                if (!info.identifier.equals(trackIdentifier)) {
+                if (!info.getIdentifier().equals(trackIdentifier)) {
                     event.getHook().sendMessage("That track is currently not playing!").setEphemeral(true).queue();
                     return;
                 }
